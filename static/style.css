@@ -1,0 +1,276 @@
+/*
+This file is part of owo-dusk.
+
+Copyright (c) 2024-present EchoQuill
+
+Portions of this file are based on code by EchoQuill, licensed under the
+GNU General Public License v3.0 (GPL-3.0).
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+*/
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #2d3748 0%, #1a202c 50%, #171923 100%);
+    color: #ffffff;
+    font-family: 'Segoe UI', 'Arial', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Navigation */
+nav {
+    width: 100%;
+}
+
+.nav-area {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    display: flex;
+    color: #4fd1c7;
+    background-color: rgba(26, 32, 44, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(79, 209, 199, 0.2);
+}
+
+.nav-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1600px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 12px 20px;
+}
+
+.support {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.support-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: #4fd1c7;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.support-link:hover {
+    background-color: rgba(79, 209, 199, 0.1);
+    border: 1px solid rgba(79, 209, 199, 0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 209, 199, 0.2);
+}
+
+.support-icon {
+    width: 20px;
+    height: 20px;
+    transition: all 0.3s ease;
+    filter: brightness(1.2) contrast(1.1);
+    /* Styling untuk PNG icons */
+    object-fit: contain;
+}
+
+.support-link:hover .support-icon {
+    transform: scale(1.1);
+}
+
+.support-text {
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.icon {
+    height: 40px;
+    margin-right: 10px;
+    filter: brightness(1.2);
+    transition: all 0.3s ease;
+}
+
+/* Welcome Container */
+.welcome-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 80px);
+    padding: 20px;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(79, 209, 199, 0.1) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(56, 178, 172, 0.08) 0%, transparent 50%),
+        linear-gradient(135deg, #2d3748 0%, #1a202c 50%, #171923 100%);
+}
+
+.welcome-content {
+    text-align: center;
+    max-width: 800px;
+    animation: fadeInUp 1.5s ease-out;
+}
+
+.welcome-title {
+    font-size: 3.5rem;
+    font-weight: 300;
+    color: #e2e8f0;
+    margin: 0;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+    opacity: 0.9;
+}
+
+.welcome-brand {
+    font-size: 5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #4fd1c7 0%, #38b2ac 50%, #319795 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+    margin-bottom: 30px;
+    letter-spacing: 4px;
+    text-shadow: 0 0 30px rgba(79, 209, 199, 0.3);
+    animation: glow 3s ease-in-out infinite alternate;
+}
+
+.welcome-subtitle {
+    font-size: 1.3rem;
+    color: #a0aec0;
+    font-weight: 300;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    margin-top: 20px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes glow {
+    from {
+        filter: drop-shadow(0 0 20px rgba(79, 209, 199, 0.3));
+    }
+    to {
+        filter: drop-shadow(0 0 30px rgba(79, 209, 199, 0.6));
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .nav-area {
+        position: static;
+    }
+    
+    .nav-wrapper {
+        padding: 10px 15px;
+    }
+    
+    .support {
+        gap: 10px;
+    }
+    
+    .support-text {
+        display: none;
+    }
+    
+    .support-icon {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .welcome-title {
+        font-size: 2.5rem;
+    }
+    
+    .welcome-brand {
+        font-size: 3.5rem;
+        letter-spacing: 2px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1.1rem;
+    }
+    
+    .welcome-container {
+        min-height: calc(100vh - 70px);
+        padding: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .welcome-title {
+        font-size: 2rem;
+    }
+    
+    .welcome-brand {
+        font-size: 2.8rem;
+        letter-spacing: 1px;
+    }
+    
+    .welcome-subtitle {
+        font-size: 1rem;
+    }
+    
+    .nav-wrapper {
+        padding: 8px 10px;
+    }
+    
+    .icon {
+        height: 35px;
+    }
+    
+    .support-icon {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .support-link {
+        padding: 6px 8px;
+    }
+}
+
+/* Additional styling for better visual appeal */
+.nav-wrapper p {
+    margin: 0;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* Additional hover effects */
+.nav-wrapper .icon:hover {
+    filter: brightness(1.4) drop-shadow(0 0 8px rgba(79, 209, 199, 0.4));
+    transform: scale(1.05);
+}
+
+/* Subtle background pattern */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        radial-gradient(circle at 25% 25%, rgba(79, 209, 199, 0.03) 0%, transparent 70%),
+        radial-gradient(circle at 75% 75%, rgba(56, 178, 172, 0.02) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: -1;
+}

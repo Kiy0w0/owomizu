@@ -1,0 +1,267 @@
+{
+    "setprefix": "owo ",
+    "useSlashCommands": false,
+    "commands": {
+        "hunt": {
+            "enabled": true,
+            "cooldown": [
+                15,
+                17
+            ],
+            "useShortForm": true
+        },
+        "battle": {
+            "enabled": true,
+            "cooldown": [
+                15,
+                17
+            ],
+            "useShortForm": true
+        },
+        "sell": {
+            "enabled": false,
+            "cooldown": [
+                410,
+                500
+            ],
+            "rarity": [
+                "c",
+                "u",
+                "r",
+                "e",
+                "m",
+                "l",
+                "g"
+            ]
+        },
+        "sac": {
+            "enabled": false,
+            "cooldown": [
+                410,
+                500
+            ],
+            "rarity": [
+                "c",
+                "u",
+                "r",
+                "e",
+                "m",
+                "l",
+                "g"
+            ]
+        },
+        "pray": {
+            "enabled": false,
+            "cooldown": [
+                310,
+                400
+            ],
+            "userid": [],
+            "pingUser": false
+        },
+        "curse": {
+            "enabled": false,
+            "cooldown": [
+                310,
+                400
+            ],
+            "userid": [],
+            "pingUser": false
+        },
+        "lottery": {
+            "enabled": false,
+            "amount": 1
+        },
+        "lvlGrind": {
+            "enabled": false,
+            "cooldown": [
+                10,
+                15
+            ],
+            "useQuoteInstead": false,
+            "minLengthForRandomString": 5,
+            "maxLengthForRandomString": 20
+        },
+        "cookie": {
+            "enabled": false,
+            "userid": 408785106942164992,
+            "pingUser": true
+        },
+        "shop": {
+            "enabled": false,
+            "itemsToBuy": [
+                1
+            ],
+            "cooldown": [
+                10,
+                16
+            ]
+        },
+        "owo": {
+            "enabled": true,
+            "cooldown": [
+                10,
+                13
+            ]
+        },
+        "autoHuntBot": {
+            "enabled": true,
+            "cashToSpend": 10000,
+            "upgrader": {
+                "enabled": true,
+                "traits": {
+                    "efficiency": true,
+                    "duration": true,
+                    "cost": true,
+                    "gain": true,
+                    "exp": true,
+                    "radar": true
+                },
+                "sleeptime": [
+                    10,
+                    15
+                ],
+                "priorities": {
+                    "efficiency": 4,
+                    "duration": 2,
+                    "cost": 5,
+                    "gain": 4,
+                    "exp": 3,
+                    "radar": 1
+                }
+            }
+        }
+    },
+    "gamble": {
+        "allottedAmount": 30000,
+        "goalSystem": {
+            "enabled": false,
+            "amount": 300
+        },
+        "coinflip": {
+            "enabled": false,
+            "startValue": 200,
+            "multiplierOnLose": 2,
+            "cooldown": [
+                16,
+                18
+            ],
+            "options": [
+                "t"
+            ]
+        },
+        "slots": {
+            "enabled": false,
+            "startValue": 200,
+            "multiplierOnLose": 2,
+            "cooldown": [
+                16,
+                18
+            ]
+        },
+        "blackjack": {}
+    },
+    "giveawayJoiner": {
+        "enabled": false,
+        "channelsToJoin": [
+            1099453684691243098,
+            1168797748343099444,
+            1168797827464429618
+        ],
+        "cooldown": [
+            40,
+            100
+        ],
+        "messageRangeToCheck": 6
+    },
+    "sleep": {
+        "enabled": false,
+        "frequencyPercentage": 50,
+        "checkTime": [
+            10,
+            20
+        ],
+        "sleeptime": [
+            1,
+            10
+        ]
+    },
+    "misspell": {
+        "enabled": false,
+        "frequencyPercentage": 1,
+        "baseDelay": [
+            0.03,
+            0.07
+        ],
+        "errorRectificationTimePerLetter": [
+            0.04,
+            0.09
+        ]
+    },
+    "autoDaily": true,
+    "cashCheck": true,
+    "defaultCooldowns": {
+        "longCooldown": [
+            400,
+            600
+        ],
+        "moderateCooldown": [
+            70,
+            200
+        ],
+        "shortCooldown": [
+            10,
+            60
+        ],
+        "briefCooldown": [
+            0.7,
+            2.7
+        ],
+        "captchaRestart": [
+            3.7,
+            5.6
+        ],
+        "commandHandler": {
+            "betweenCommands": [
+                1.7,
+                2.7
+            ],
+            "beforeReaddingToQueue": 7
+        },
+        "reactionBot": {
+            "hunt_and_battle": false,
+            "owo": false,
+            "pray_and_curse": false,
+            "cooldown": [
+                0.5,
+                1
+            ]
+        }
+    },
+    
+    "autoUse": {
+        "gems": {
+            "enabled": false,
+            "order": {
+                "lowestToHighest": true
+            },
+            "tiers": {
+                "common": true,
+                "uncommon": true,
+                "rare": true,
+                "epic": true,
+                "mythical": true,
+                "legendary": false,
+                "fabled": false
+            },
+            "gemsToUse": {
+                "huntGem": true,
+                "empoweredGem": true,
+                "luckyGem": true,
+                "specialGem": false
+            }
+        },
+        "autoLootbox": false,
+        "autoCrate": false
+    }
+}
