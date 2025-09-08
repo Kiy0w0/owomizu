@@ -1396,7 +1396,7 @@ if __name__ == "__main__":
     tokens_and_channels = [line.strip().split() for line in open("tokens.txt", "r")]
     token_len = len(tokens_and_channels)
 
-    printBox(f'-Recieved {token_len} tokens.'.center(console_width - 2 ),'bold magenta' )
+    printBox(f'-Recieved {token_len} tokens.'.center(console_width - 2 ),'bold cyan' )
 
     # Create database or modify if required
     create_database()
@@ -1410,7 +1410,7 @@ if __name__ == "__main__":
         web_thread.start()
         # get ip
         ip = get_local_ip()
-        printBox(f'Website Dashboard: http://{ip}:{global_settings_dict["website"]["port"]}'.center(console_width - 2 ), 'dark_magenta')
+        printBox(f'Website Dashboard: http://{ip}:{global_settings_dict["website"]["port"]}'.center(console_width - 2 ), 'bold cyan')
     try:
         if misc_dict["news"]:
             # Fetch news from API
