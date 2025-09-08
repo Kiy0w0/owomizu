@@ -1,15 +1,3 @@
-# This file is part of owo-dusk.
-#
-# Copyright (c) 2024-present EchoQuill
-#
-# Portions of this file are based on code by EchoQuill, licensed under the
-# GNU General Public License v3.0 (GPL-3.0).
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-
 # Standard Library
 import asyncio
 import itertools
@@ -95,13 +83,16 @@ listUserIds = []
 
 owo_dusk_api = "https://echoquill.github.io/owo-dusk-api"
 
-owoArt = r"""
-  __   _  _   __       ____  _  _  ____  __ _ 
- /  \ / )( \ /  \  ___(    \/ )( \/ ___)(  / )
-(  O )\ /\ /(  O )(___)) D () \/ (\___ \ )  ( 
- \__/ (_/\_) \__/     (____/\____/(____/(__\_)
+mizuArt = r"""
+ ███╗   ███╗██╗███████╗██╗   ██╗    ██╗  ██╗
+ ████╗ ████║██║╚══███╔╝██║   ██║    ╚██╗██╔╝
+ ██╔████╔██║██║  ███╔╝ ██║   ██║     ╚███╔╝ 
+ ██║╚██╔╝██║██║ ███╔╝  ██║   ██║     ██╔██╗ 
+ ██║ ╚═╝ ██║██║███████╗╚██████╔╝    ██╔╝ ██╗
+ ╚═╝     ╚═╝╚═╝╚══════╝ ╚═════╝     ╚═╝  ╚═╝
+        M I Z U   N E T W O R K   水
 """
-owoPanel = Panel(Align.center(owoArt), style="purple ", highlight=False)
+mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
 version = "2.1.1"
 debug_print = True
 
@@ -1346,7 +1337,7 @@ if __name__ == "__main__":
         print(e)
 
     if not misc_dict["console"]["compactMode"]:
-        console.print(owoPanel)
+        console.print(mizuPanel)
         console.rule(f"[bold blue1]version - {version}", style="navy_blue")
     version_json = fetch_json(f"{owo_dusk_api}/version.json", "version info")
 
