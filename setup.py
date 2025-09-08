@@ -20,7 +20,7 @@ try:
 except:
     pass
 print(
-    "\033[1;32mwelcome to OwO-Dusk\nThis setup will guide you through with the setup of OwO-Dusk\nThankyou for your trust in OwO-Dusk\033[m"
+    "\033[1;32mwelcome to Mizu Network\nThis setup will guide you through with the setup of Mizu Network\nThankyou for your trust in Mizu Network\033[m"
 )
 
 def is_termux():
@@ -307,20 +307,20 @@ if scratchSetup:
                     print()
                     print()
                     print('\033[1;36m[0]Finished editing tokens.txt successfully!\033[m')
-                    print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config.json` file then\ntype `python uwu.py` to start the code\033[m')
+                    print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config.json` file then\ntype `python mizu.py` to start the code\033[m')
                     break
                 except Exception as e:
                     print(
                         f"\033[1;31m[x]error when attempting to edit tokens.txt - {e}\033[m"
                     )
             else:
-                print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config.json` file and `tokens.txt` file then\ntype `python uwu.py` to start the code\033[m')
+                print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config.json` file and `tokens.txt` file then\ntype `python mizu.py` to start the code\033[m')
                 break
         else:
             print("\033[1;33m[!]Please enter 1,2 only..\033[m")
             
 print()
-print('\033[1;35mEchoQuill - Thank you for using owo-dusk, I hope you have a great day ahead!\nif there is any error then letme know through https://discord.gg/pyvKUh5mMU\033[m')
+print('\033[1;35mMizu Network - Thank you for using Mizu Network, I hope you have a great day ahead!\nif there is any error then letme know through Discord\033[m')
 sys.exit(0)
 
 

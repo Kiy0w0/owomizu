@@ -1,7 +1,7 @@
 <div align="center">
   <center><img src="static/imgs/logo.png" width="150"></center>
   <br>
-  <a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.herokuapp.com?font=Pacifico&size=40&pause=1000&color=802DF7&center=true&vCenter=true&random=false&width=425&lines=Owo+Dusk" alt="Typing SVG" />
+  <a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.herokuapp.com?font=Pacifico&size=40&pause=1000&color=4fd1c7&center=true&vCenter=true&random=false&width=425&lines=Mizu+Network" alt="Typing SVG" />
   <br/>
   <a href="https://discord.gg/hDDrKhWPqr"><img src="https://invidget.switchblade.xyz/hDDrKhWPqr" alt="Discord Invite"/> </a>
   <br/>
@@ -23,21 +23,21 @@ Supports BOTH MOBILE AND DESKTOP with captcha Notifiers for both. And we also su
 ---
 * Computer
   ```
-  git clone https://github.com/echoquill/owo-dusk.git
-  cd owo-dusk
+  git clone https://github.com/kiy0w0/mizu-network.git
+  cd mizu-network
   python setup.py
-  python uwu.py
+  python mizu.py
   ```
   > make sure git and python is installed and that terminal is open in `Desktop` for easier access
   > Run in order
 * Termux
   ```
-  pkg update && pkg upgrade -y && termux-setup-storage && pkg install python -y && pkg install git -y && pkg install termux-api -y && cd storage/downloads && git clone https://github.com/echoquill/owo-dusk.git && cd owo-dusk && python setup.py && python uwu.py
+  pkg update && pkg upgrade -y && termux-setup-storage && pkg install python -y && pkg install git -y && pkg install termux-api -y && cd storage/downloads && git clone https://github.com/kiy0w0/mizu-network.git && cd mizu-network && python setup.py && python mizu.py
   ```
   > Make sure to install termux and termux:api app from fdroid or github.
   > after the above is done, do the steps setup.py asks you to.
   > 
-  > simpily run `cd storage/downloads/owo-dusk && python uwu.py` next time to re-run code
+  > simpily run `cd storage/downloads/mizu-network && python mizu.py` next time to re-run code
   
   
 
