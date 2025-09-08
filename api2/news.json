@@ -1,0 +1,9 @@
+{
+  "available": true,
+  "title": "🌊 Welcome to Mizu Network!",
+  "content": "Mizu Network v1.0 is now live! Experience the new cyan-themed interface, enhanced website dashboard, and improved performance. Thank you for choosing Mizu Network for your automation needs!",
+  "color": "#4fd1c7",
+  "priority": "info",
+  "expires": "2025-02-08T00:00:00Z",
+  "show_once": false
+}

@@ -81,19 +81,19 @@ console.rule("[bold blue1]:>", style="navy_blue")
 console_width = console.size.width
 listUserIds = []
 
-owo_dusk_api = "https://echoquill.github.io/owo-dusk-api"
+mizu_network_api = "https://kiy0w0.github.io/mizuowoapi"
 
 mizuArt = r"""
- ███╗   ███╗██╗███████╗██╗   ██╗    ██╗  ██╗
- ████╗ ████║██║╚══███╔╝██║   ██║    ╚██╗██╔╝
- ██╔████╔██║██║  ███╔╝ ██║   ██║     ╚███╔╝ 
- ██║╚██╔╝██║██║ ███╔╝  ██║   ██║     ██╔██╗ 
- ██║ ╚═╝ ██║██║███████╗╚██████╔╝    ██╔╝ ██╗
- ╚═╝     ╚═╝╚═╝╚══════╝ ╚═════╝     ╚═╝  ╚═╝
-        M I Z U   N E T W O R K   水
+ ███╗   ███╗██╗███████╗██╗   ██╗
+ ████╗ ████║██║╚══███╔╝██║   ██║
+ ██╔████╔██║██║  ███╔╝ ██║   ██║  
+ ██║╚██╔╝██║██║ ███╔╝  ██║   ██║ 
+ ██║ ╚═╝ ██║██║███████╗╚██████╔╝ 
+ ╚═╝     ╚═╝╚═╝╚══════╝ ╚═════╝ 
+M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "2.1.1"
+version = "1.0.0"
 debug_print = True
 
 
@@ -555,14 +555,17 @@ class MyClient(commands.Bot):
 
     @tasks.loop(seconds=7)
     async def safety_check_loop(self):
-        safety_check = requests.get(f"{owo_dusk_api}/safety_check.json").json()
-        latest_version = requests.get(f"{owo_dusk_api}/safety_check.json").json()
+        try:
+            safety_check = requests.get(f"{mizu_network_api}/safety_check.json", timeout=10).json()
+            latest_version = requests.get(f"{mizu_network_api}/version.json", timeout=10).json()
 
-        if compare_versions(version, safety_check["version"]):
-            self.command_handler_status["captcha"] = True
-            await self.log(f"There seems to be something wrong...\nStopping code for reason: {safety_check['reason']}\n(This was triggered by {safety_check['author']})", "#5c0018")
-            if compare_versions(latest_version["version"], safety_check["version"]):
-                await self.log(f"please update to: v{latest_version['version']}", "#33245e")
+            if safety_check.get("enabled", False) and compare_versions(version, safety_check.get("version", "0.0.0")):
+                self.command_handler_status["captcha"] = True
+                await self.log(f"🛑 Safety Check Alert!\nReason: {safety_check.get('reason', 'Unknown')}\n(Triggered by {safety_check.get('author', 'System')})", "#5c0018")
+                if compare_versions(latest_version.get("version", "0.0.0"), safety_check.get("version", "0.0.0")):
+                    await self.log(f"Please update to: v{latest_version.get('version', 'latest')}", "#33245e")
+        except Exception as e:
+            await self.log(f"Failed to perform safety check: {e}", "#c25560")
 
     async def start_cogs(self):
         files = os.listdir(resource_path("./cogs"))  # Get the list of files
@@ -1258,6 +1261,41 @@ def fetch_json(url, description="data"):
         printBox(f"Failed to fetch {description}: {e}", "bold red")
         return {}
 
+def fetch_mizu_api(endpoint):
+    """Fetch data from Mizu OwO API endpoints"""
+    try:
+        url = f"{mizu_network_api}/{endpoint}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        return response.json()
+    except requests.RequestException as e:
+        printBox(f"Failed to fetch from Mizu API ({endpoint}): {e}", "bold red")
+        return {}
+
+def check_api_status():
+    """Check if Mizu OwO API is accessible"""
+    try:
+        response = requests.get(mizu_network_api, timeout=5)
+        return response.status_code == 200
+    except:
+        return False
+
+def get_api_announcements():
+    """Get current announcements from API"""
+    return fetch_mizu_api("announcements.json")
+
+def get_api_features():
+    """Get available features from API"""
+    return fetch_mizu_api("features.json")
+
+def get_api_themes():
+    """Get available themes from API"""
+    return fetch_mizu_api("themes.json")
+
+def get_api_status():
+    """Get system status from API"""
+    return fetch_mizu_api("status.json")
+
 def run_bots(tokens_and_channels):
     threads = []
     for token, channel_id in tokens_and_channels:
@@ -1339,7 +1377,14 @@ if __name__ == "__main__":
     if not misc_dict["console"]["compactMode"]:
         console.print(mizuPanel)
         console.rule(f"[bold blue1]version - {version}", style="navy_blue")
-    version_json = fetch_json(f"{owo_dusk_api}/version.json", "version info")
+    
+    # Check API connectivity
+    if check_api_status():
+        printBox("🌊 Mizu OwO API - Connected", "bold cyan")
+    else:
+        printBox("⚠️ Mizu OwO API - Connection Failed", "bold yellow")
+    
+    version_json = fetch_mizu_api("version.json")
 
     if compare_versions(version, version_json["version"]):
         printBox(f"""Update Detected - {version_json["version"]}
@@ -1368,15 +1413,27 @@ if __name__ == "__main__":
         printBox(f'Website Dashboard: http://{ip}:{global_settings_dict["website"]["port"]}'.center(console_width - 2 ), 'dark_magenta')
     try:
         if misc_dict["news"]:
-            news_json = fetch_json(f"{owo_dusk_api}/news.json", "news")
+            # Fetch news from API
+            news_json = fetch_mizu_api("news.json")
             if news_json.get("available"):
                 printBox(
                     f'{news_json.get("content", "no content found..? this is an error! should be safe to ignore")}'.center(console_width - 2),
                     f"bold {news_json.get('color', 'white')}",
-                    title=news_json.get("title", "???")
+                    title=news_json.get("title", "📢 News")
                 )
+            
+            # Fetch and display announcements from API
+            announcements_json = get_api_announcements()
+            if announcements_json.get("current_announcements"):
+                for announcement in announcements_json["current_announcements"]:
+                    if announcement.get("show_on_startup", True):
+                        printBox(
+                            f'{announcement.get("message", "")}'.center(console_width - 2),
+                            f"bold {announcement.get('color', '#4fd1c7')}",
+                            title=announcement.get("title", "📢 Announcement")
+                        )
     except Exception as e:
-        print(f"Error - {e}, while attempting to fetch news")
+        print(f"Error - {e}, while attempting to fetch news and announcements")
 
     if not misc_dict["console"]["hideStarRepoMessage"]:
         console.print("Star the repo in our github page if you want us to continue maintaining this proj :>.", style = "thistle1")

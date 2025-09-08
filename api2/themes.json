@@ -1,0 +1,48 @@
+{
+  "current_theme": {
+    "name": "Cyan Flow",
+    "version": "1.0.0",
+    "primary_color": "#4fd1c7",
+    "secondary_color": "#38b2ac",
+    "accent_color": "#319795",
+    "background_gradient": [
+      "#2d3748",
+      "#1a202c",
+      "#171923"
+    ]
+  },
+  "available_themes": {
+    "cyan_flow": {
+      "name": "Cyan Flow",
+      "description": "Default Mizu Network theme with water-inspired colors",
+      "colors": {
+        "primary": "#4fd1c7",
+        "secondary": "#38b2ac",
+        "accent": "#319795"
+      }
+    },
+    "ocean_depth": {
+      "name": "Ocean Depth",
+      "description": "Deep ocean blue theme",
+      "colors": {
+        "primary": "#0ea5e9",
+        "secondary": "#0284c7",
+        "accent": "#0369a1"
+      }
+    },
+    "aqua_mint": {
+      "name": "Aqua Mint",
+      "description": "Fresh aqua and mint color combination",
+      "colors": {
+        "primary": "#14b8a6",
+        "secondary": "#0d9488",
+        "accent": "#0f766e"
+      }
+    }
+  },
+  "customization": {
+    "allow_custom_themes": true,
+    "theme_switching": true,
+    "dark_mode_only": true
+  }
+}

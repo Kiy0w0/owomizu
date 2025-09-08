@@ -1,0 +1,28 @@
+{
+  "api_info": {
+    "name": "Mizu Network API",
+    "version": "1.0.0",
+    "description": "Official API for Mizu Network bot automation system",
+    "base_url": "https://api.mizunetwork.com",
+    "documentation": "https://docs.mizunetwork.com"
+  },
+  "endpoints": {
+    "version": "/api2/version.json",
+    "safety_check": "/api2/safety_check.json",
+    "news": "/api2/news.json",
+    "captcha": "/api2/captcha.json",
+    "events": "/api2/events.json",
+    "stats": "/api2/stats.json"
+  },
+  "rate_limits": {
+    "requests_per_minute": 60,
+    "requests_per_hour": 1000,
+    "burst_limit": 10
+  },
+  "features": {
+    "real_time_updates": true,
+    "webhook_support": true,
+    "analytics": true,
+    "caching": true
+  }
+}

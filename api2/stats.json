@@ -1,0 +1,37 @@
+{
+  "global_stats": {
+    "total_users": 0,
+    "active_instances": 0,
+    "total_commands_executed": 0,
+    "uptime_percentage": 99.9,
+    "last_updated": "2025-01-08T00:00:00Z"
+  },
+  "performance_metrics": {
+    "average_response_time": "150ms",
+    "success_rate": 99.5,
+    "error_rate": 0.5,
+    "peak_concurrent_users": 0
+  },
+  "feature_usage": {
+    "auto_farming": {
+      "enabled_users": 0,
+      "total_farms": 0,
+      "success_rate": 0
+    },
+    "captcha_solver": {
+      "total_solved": 0,
+      "success_rate": 0,
+      "average_solve_time": "0s"
+    },
+    "website_dashboard": {
+      "active_sessions": 0,
+      "page_views": 0
+    }
+  },
+  "system_health": {
+    "status": "healthy",
+    "cpu_usage": "low",
+    "memory_usage": "optimal",
+    "network_latency": "good"
+  }
+}

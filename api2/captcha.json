@@ -1,0 +1,27 @@
+{
+  "keywords": {
+    "common_patterns": [
+      "verify",
+      "human",
+      "robot",
+      "captcha",
+      "verification"
+    ],
+    "mizu_specific": {
+      "water_related": ["water", "mizu", "aqua", "flow", "stream"],
+      "network_related": ["network", "connection", "link", "node"]
+    }
+  },
+  "detection_settings": {
+    "sensitivity": "medium",
+    "auto_retry": true,
+    "max_retries": 3,
+    "retry_delay": 5
+  },
+  "notification_config": {
+    "enabled": true,
+    "sound": true,
+    "popup": true,
+    "webhook": false
+  }
+}

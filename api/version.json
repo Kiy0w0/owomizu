@@ -1,0 +1,5 @@
+{
+  "version": "2.1.1",
+  "changelog": "Fixes bugs + fixes 404 error for termux users",
+  "important_update": true
+}

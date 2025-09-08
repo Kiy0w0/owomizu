@@ -1,0 +1,41 @@
+{
+  "latest_update": {
+    "version": "1.0.0",
+    "release_date": "2025-01-08T00:00:00Z",
+    "type": "major",
+    "title": "🌊 Mizu Network Launch",
+    "description": "Complete rebranding and modernization of the automation system"
+  },
+  "update_history": [
+    {
+      "version": "1.0.0",
+      "date": "2025-01-08T00:00:00Z",
+      "changes": [
+        "Complete rebranding to Mizu Network",
+        "New cyan color theme throughout",
+        "Updated ASCII art with MIZU 水 branding",
+        "Modern responsive website dashboard",
+        "MIT License implementation",
+        "Enhanced API system",
+        "Improved performance and stability"
+      ],
+      "breaking_changes": [
+        "Renamed main file from uwu.py to mizu.py",
+        "Updated API endpoints to api2/",
+        "Changed color scheme from purple to cyan"
+      ]
+    }
+  ],
+  "update_settings": {
+    "auto_check": true,
+    "check_interval_hours": 24,
+    "notify_major_updates": true,
+    "notify_minor_updates": false,
+    "notify_patches": false
+  },
+  "download_info": {
+    "github_releases": "https://github.com/kiy0w0/mizu-network/releases",
+    "direct_download": "https://github.com/kiy0w0/mizu-network/archive/refs/heads/main.zip",
+    "installation_guide": "https://github.com/kiy0w0/mizu-network#basic-installation"
+  }
+}

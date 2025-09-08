@@ -1,0 +1,13 @@
+{
+  "version": "1.0.0",
+  "changelog": "🎉 Initial release of Mizu Network - Complete rebranding with cyan theme, new MIZU ASCII art, and enhanced website dashboard",
+  "important_update": false,
+  "release_date": "2025-01-08",
+  "features": [
+    "Complete rebranding to Mizu Network",
+    "New cyan color theme",
+    "Updated ASCII art with MIZU 水",
+    "Modern website dashboard",
+    "MIT License implementation"
+  ]
+}
