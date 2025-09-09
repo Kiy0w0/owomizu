@@ -1,14 +1,18 @@
-# This file is part of owo-dusk.
+# This file is part of Mizu Network.
 #
-# Copyright (c) 2024-present EchoQuill
+# Copyright (c) 2025-present Mizu Network
 #
-# Portions of this file are based on code by EchoQuill, licensed under the
-# GNU General Public License v3.0 (GPL-3.0).
+# This program is licensed under the MIT License.
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
 #
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
 
 import os
 import sys
@@ -137,41 +141,73 @@ if scratchSetup:
         
         return False
 
-    # ---CHECK VERSIONS---#
+    # ---CHECK VERSIONS AND API STATUS---#
 
-    """print("\033[1;36m[0]attempting to check versions\033[m")
+    print("\033[1;36m[0]attempting to check versions and API status\033[m")
     try:
         import requests
         print('\033[1;36m[0]--imported requests module\033[m')
-        ver_check = requests.get("https://echoquill.github.io/owo-dusk-api/version.json").json()["version"]
-        print(f'\033[1;36m[0]--recieved current latest version for owo-dusk on github - v{ver_check}\033[m')
-        version = "2.0.0"
-        print(f'\033[1;36m[0]current version of owo-dusk - {version}')
+        
+        # Check API status
+        try:
+            api_status = requests.get("https://kiy0w0.github.io/mizuowoapi/status.json", timeout=10).json()
+            print(f'\033[1;36m[0]--API Status: {api_status.get("status", "Unknown")}\033[m')
+            
+            if api_status.get("status") == "online":
+                print('\033[1;32m[✓]Mizu Network API is online and ready!\033[m')
+            else:
+                print(f'\033[1;33m[!]API Status: {api_status.get("message", "Unknown status")}\033[m')
+        except Exception as e:
+            print(f'\033[1;33m[!]Could not check API status: {e}\033[m')
+        
+        # Check version
+        try:
+            ver_check_response = requests.get("https://kiy0w0.github.io/mizuowoapi/version.json", timeout=10)
+            ver_check = ver_check_response.json()["version"]
+            print(f'\033[1;36m[0]--received current latest version for Mizu Network - v{ver_check}\033[m')
+            version = "1.0.0"
+            print(f'\033[1;36m[0]current version of Mizu Network - v{version}\033[m')
 
-        if compare_versions(version, ver_check):
-            print(
-                "[0]seems like there is a new version for OwO-dusk available in GitHub\033[m"
-            )
-            while True:
-                o = input(
-                    "\033[1;34mWould you like to stop the installation process or continue?\n(continue = c / stop = s):\n\033[m"
-                ).lower()
+            if compare_versions(version, ver_check):
+                print(
+                    "\033[1;33m[0]seems like there is a new version for Mizu Network available!\033[m"
+                )
+                while True:
+                    o = input(
+                        "\033[1;34mWould you like to stop the installation process or continue?\n(continue = c / stop = s):\n\033[m"
+                    ).lower()
 
-                if o in ["c", "s"]:
-                    if o == "s":
-                        print("\033[1;36m[0]Stopping the installation process...\033[m")
-                        sys.exit(0)
+                    if o in ["c", "s"]:
+                        if o == "s":
+                            print("\033[1;36m[0]Stopping the installation process...\033[m")
+                            sys.exit(0)
+                        else:
+                            print(
+                                "\033[1;36m[0]Continuing the installation process...\033[m"
+                            )
+                            break
                     else:
                         print(
-                            "\033[1;36m[0]Continuing the installation process...\033[m"
+                            "\033[1;33m[!]Please enter 'c' for continue or 's' for stop.\033[m"
                         )
-                        break
-                else:
-                    print(
-                        "\033[1;33m[!]Please enter 'c' for continue or 's' for stop.\033[m"
-                    )
+            else:
+                print('\033[1;32m[✓]You have the latest version of Mizu Network!\033[m')
+                
+        except Exception as e:
+            print(f'\033[1;33m[!]Could not check version: {e}\033[m')
+            
+        # Check for announcements
+        try:
+            announcements = requests.get("https://kiy0w0.github.io/mizuowoapi/announcements.json", timeout=10).json()
+            if announcements.get("announcements"):
+                print('\033[1;36m[0]--Fetching latest announcements...\033[m')
+                for announcement in announcements["announcements"][:3]:  # Show only first 3
+                    print(f'\033[1;96m[📢] {announcement.get("title", "Announcement")}: {announcement.get("message", "No message")}\033[m')
+        except Exception as e:
+            print(f'\033[1;33m[!]Could not fetch announcements: {e}\033[m')
+            
     except Exception as e:
-        print(f"\033[1;31m[x]error when trying to check versions:-\n {e}\033[m")"""
+        print(f"\033[1;31m[x]error when trying to check API status and versions:-\n {e}\033[m")
 
     # ---EDIT TOKENS.TXT---#
     while True:
@@ -242,7 +278,7 @@ if scratchSetup:
 
                     while True:
                         token_count = input(
-                            "\033[1;34m[0]how many accounts do you want run with owo-dusk? :\n\033[m"
+                            "\033[1;34m[0]how many accounts do you want run with Mizu Network? :\n\033[m"
                         )
                         try:
                             token_count = int(token_count)
