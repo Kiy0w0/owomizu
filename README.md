@@ -107,13 +107,10 @@ Choose your platform:
 <div align="center">
 
 ### 🖥️ Desktop CLI
-![Desktop CLI](static/imgs/desktop_cli.png)
-
-### 📱 Mobile CLI (Termux)
-![Mobile CLI](static/imgs/mobile_cli.jpg)
+![Desktop CLI](static/imgs/desktop_cli.jpg)
 
 ### 🌐 Web Dashboard
-![Web Dashboard](static/imgs/website.png)
+![Web Dashboard](static/imgs/web.png)
 
 </div>
 
