@@ -25,13 +25,12 @@
 - 💎 **Economy** - Auto sell, shop, daily rewards
 - 🏆 **Leveling System** - XP tracking and progression
 - 🎁 **Giveaway Participation** - Auto join giveaways
-- 🔐 **Captcha Solver** - Intelligent captcha handling
+- 🔐 **Captcha Solver** -  captcha handling
 
 🌐 **Web Dashboard:**
 - 📊 Real-time statistics
 - ⚙️ Configuration management
 - 📈 Performance monitoring
-- 🎨 Beautiful UI with dark theme
 
 🛡️ **Safety & Security:**
 - 🔒 Token encryption
