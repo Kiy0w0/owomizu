@@ -4,9 +4,10 @@
 
 *Auto Farming Bot for OwO Discord Game*
 
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/ekBrzPpYcw)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
-[![Discord](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
+[![Discord Bot](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android-brightgreen.svg)]()
 [![Version](https://img.shields.io/badge/Version-1.0.0-cyan.svg)]()
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
@@ -25,12 +26,13 @@
 - 💎 **Economy** - Auto sell, shop, daily rewards
 - 🏆 **Leveling System** - XP tracking and progression
 - 🎁 **Giveaway Participation** - Auto join giveaways
-- 🔐 **Captcha Solver** -  captcha handling
+- 🔐 **Captcha Solver** - Intelligent captcha handling
 
 🌐 **Web Dashboard:**
 - 📊 Real-time statistics
 - ⚙️ Configuration management
 - 📈 Performance monitoring
+- 🎨 Beautiful UI with dark theme
 
 🛡️ **Safety & Security:**
 - 🔒 Token encryption
@@ -163,7 +165,7 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 
 **Made with 💙 by Mizu Network Team**
 
-*Stay Mizu, stay Sigma* 🌊
+*Stay hydrated, stay automated* 🌊
 
 </div>
 
