@@ -165,7 +165,7 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 
 **Made with 💙 by Mizu Network Team**
 
-*Stay hydrated, stay automated* 🌊
+*Stay Mizu Stay Water* 🌊
 
 </div>
 
