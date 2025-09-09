@@ -98,7 +98,7 @@ please enter channel id for account #1 :
 
 **📱 Getting Discord Token on Mobile:**
 1. Open Discord in browser (desktop mode)
-2. Press F12 → Console
+2. Console
 3. Type: `window.webpackChunkdiscord_app.push([[''],{},e=>{m=[];for(let c in e.c)m.push(e.c[c])}]);m.find(m=>m?.exports?.default?.getToken!==void 0).exports.default.getToken()`
 4. Copy the token (without quotes)
 
