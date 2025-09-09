@@ -1,62 +1,434 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <title>Mizu Network - Welcome</title>
-        <meta name="description" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="{{ url_for('static', filename='script.js') }}"></script>
-        <script src="../static/test.js"></script>
-        <link rel="stylesheet" href="../static/style.css">
-        
-    </head>
-    <body>
-        <!--https://www.w3schools.com/tags/tag_header.asp
-        Same as div tag, but for better readability it seems.-->
-        <header class="nav-area">
-            <!--Nav Bar area.-->
-            <nav>
-                <div class="nav-wrapper">
-                    <div>
-                        <p><b>水NetWork</b></p>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Mizu Network - Dashboard</title>
+    <meta name="description" content="Mizu Network Dashboard - Advanced OwO Selfbot Control Panel">
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">
+                <i class="fas fa-water"></i>
+                <span>水 Network</span>
+            </div>
+            <div class="loading-spinner"></div>
+            <p>Loading Dashboard...</p>
+        </div>
+    </div>
+
+    <!-- Navigation Header -->
+    <header class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-water brand-icon"></i>
+                <span class="brand-text">Mizu Network</span>
+                <span class="brand-subtitle">Dashboard</span>
+            </div>
+            
+            <div class="navbar-center">
+                <div class="status-indicator" id="bot-status-indicator">
+                    <div class="status-dot" id="status-dot"></div>
+                    <span class="status-text" id="status-text">Connecting...</span>
+                </div>
+            </div>
+
+            <div class="navbar-right">
+                <div class="navbar-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-coins"></i>
+                        <span id="navbar-balance">0</span>
                     </div>
-                    <div>
-                        <p><b>Mizu Network 1.0</b></p>
-                    </div>
-                    <div class="support">
-                        <a href="https://github.com/kiy0w0" target="_blank" rel="noopener noreferrer" class="support-link">
-                            <span class="support-text">GitHub</span>
-                        </a>
-                        <a href="https://discord.gg/" target="_blank" rel="noopener noreferrer" class="support-link">
-                            <span class="support-text">Discord</span>
-                        </a>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span id="navbar-uptime">00:00:00</span>
                     </div>
                 </div>
+                
+                <div class="navbar-actions">
+                    <button class="navbar-btn" id="notifications-btn" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span class="notification-badge" id="notification-count">0</span>
+                    </button>
+                    <button class="navbar-btn" id="settings-btn" title="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h3>
+                    <i class="fas fa-tachometer-alt"></i>
+                    Control Panel
+                </h3>
+            </div>
+
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item active" data-section="overview">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span>Overview</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="commands">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-terminal"></i>
+                            <span>Commands</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="gambling">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-dice"></i>
+                            <span>Gambling</span>
+                            <span class="nav-badge">Risk</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="automation">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-robot"></i>
+                            <span>Automation</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="security">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="analytics">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Analytics</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-section="logs">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-file-alt"></i>
+                            <span>Logs</span>
+                            <span class="nav-indicator" id="logs-indicator"></span>
+                        </a>
+                    </li>
+                </ul>
             </nav>
-        </header>
-        
-    <div class="welcome-container">
-        <div class="welcome-content">
-            <h1 class="welcome-title">Welcome to</h1>
-            <h1 class="welcome-brand">水 OwO</h1>
-            <div class="welcome-subtitle">Auto Farming For OwO</div>
-        </div>
-    </div>
-    
-    <footer class="footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <p class="footer-text">© 2025 Mizu Network. All rights reserved.</p>
-                <p class="footer-license">Licensed under <a href="https://opensource.org/licenses/MIT" target="_blank" class="license-link">MIT License</a></p>
+
+            <div class="sidebar-footer">
+                <div class="quick-actions">
+                    <button class="quick-btn start-btn" id="quick-start" title="Start Bot">
+                        <i class="fas fa-play"></i>
+                    </button>
+                    <button class="quick-btn stop-btn" id="quick-stop" title="Stop Bot">
+                        <i class="fas fa-stop"></i>
+                    </button>
+                    <button class="quick-btn restart-btn" id="quick-restart" title="Restart Bot">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                </div>
             </div>
-            <div class="footer-section">
-                <p class="footer-disclaimer">⚠️ This software is for educational purposes only. Use at your own risk.</p>
-            </div>
-        </div>
-    </footer>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="content-area">
+            <!-- Overview Section -->
+            <section id="overview" class="content-section active">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-home"></i>
+                        Dashboard Overview
+                    </h1>
+                    <div class="section-actions">
+                        <button class="btn btn-primary" id="refresh-stats">
+                            <i class="fas fa-sync-alt"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-card primary">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-coins"></i>
+                            </div>
+                            <div class="stat-trend positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>+12.5%</span>
+                            </div>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="total-cowoncy">0</h3>
+                            <p class="stat-label">Total Cowoncy</p>
+                            <small class="stat-subtitle">Current balance</small>
+                        </div>
+                    </div>
+
+                    <div class="stat-card success">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-paw"></i>
+                            </div>
+                            <div class="stat-trend positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>+8</span>
+                            </div>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="hunts-today">0</h3>
+                            <p class="stat-label">Hunts Today</p>
+                            <small class="stat-subtitle">Successful hunts</small>
+                        </div>
+                    </div>
+
+                    <div class="stat-card warning">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-sword"></i>
+                            </div>
+                            <div class="stat-trend positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>+5</span>
+                            </div>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="battles-today">0</h3>
+                            <p class="stat-label">Battles Today</p>
+                            <small class="stat-subtitle">Battle victories</small>
+                        </div>
+                    </div>
+
+                    <div class="stat-card info">
+                        <div class="stat-header">
+                            <div class="stat-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div class="stat-trend neutral">
+                                <i class="fas fa-minus"></i>
+                                <span>Live</span>
+                            </div>
+                        </div>
+                        <div class="stat-content">
+                            <h3 class="stat-value" id="uptime-display">00:00:00</h3>
+                            <p class="stat-label">Uptime</p>
+                            <small class="stat-subtitle">Current session</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Cards -->
+                <div class="action-grid">
+                    <div class="action-card">
+                        <div class="action-header">
+                            <h3>Bot Control</h3>
+                            <p>Manage bot operations</p>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-success" id="start-bot">
+                                <i class="fas fa-play"></i>
+                                Start Bot
+                            </button>
+                            <button class="btn btn-danger" id="stop-bot">
+                                <i class="fas fa-stop"></i>
+                                Stop Bot
+                            </button>
+                            <button class="btn btn-warning" id="restart-bot">
+                                <i class="fas fa-redo"></i>
+                                Restart Bot
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="action-card">
+                        <div class="action-header">
+                            <h3>Quick Settings</h3>
+                            <p>Toggle main features</p>
+                        </div>
+                        <div class="toggle-grid">
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="hunt-toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Hunt</span>
+                            </div>
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="battle-toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Battle</span>
+                            </div>
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="daily-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Daily</span>
+                            </div>
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="owo-toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">OwO</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-section">
+                    <div class="section-header">
+                        <h2>Recent Activity</h2>
+                        <button class="btn btn-outline" id="view-all-logs">
+                            <i class="fas fa-external-link-alt"></i>
+                            View All
+                        </button>
+                    </div>
+                    <div class="activity-feed" id="recent-activity">
+                        <!-- Activities will be loaded here -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Commands Section -->
+            <section id="commands" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-terminal"></i>
+                        Command Settings
+                    </h1>
+                    <div class="section-actions">
+                        <button class="btn btn-success" id="save-commands">
+                            <i class="fas fa-save"></i>
+                            Save Settings
+                        </button>
+                        <button class="btn btn-outline" id="reset-commands">
+                            <i class="fas fa-undo"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <div class="settings-container">
+                    <!-- Command categories will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Other sections will be added similarly -->
+            <section id="gambling" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-dice"></i>
+                        Gambling Settings
+                    </h1>
+                    <div class="warning-banner">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>High Risk Feature - Use with caution</span>
+                    </div>
+                </div>
+                <!-- Gambling settings content -->
+            </section>
+
+            <section id="automation" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-robot"></i>
+                        Automation Settings
+                    </h1>
+                </div>
+                <!-- Automation settings content -->
+            </section>
+
+            <section id="security" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Settings
+                    </h1>
+                </div>
+                <!-- Security settings content -->
+            </section>
+
+            <section id="analytics" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-chart-line"></i>
+                        Analytics
+                    </h1>
+                </div>
+                <!-- Analytics content -->
+            </section>
+
+            <section id="logs" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-file-alt"></i>
+                        Live Logs
+                    </h1>
+                    <div class="section-actions">
+                        <button class="btn btn-outline" id="clear-logs">
+                            <i class="fas fa-trash"></i>
+                            Clear
+                        </button>
+                        <button class="btn btn-outline" id="export-logs">
+                            <i class="fas fa-download"></i>
+                            Export
+                        </button>
+                    </div>
+                </div>
+
+                <div class="logs-container">
+                    <div class="logs-controls">
+                        <div class="log-filters">
+                            <select id="log-level-filter" class="form-select">
+                                <option value="all">All Levels</option>
+                                <option value="info">Info</option>
+                                <option value="success">Success</option>
+                                <option value="warning">Warning</option>
+                                <option value="error">Error</option>
+                            </select>
+                        </div>
+                        <div class="log-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="auto-scroll" checked>
+                                <span class="checkmark"></span>
+                                Auto Scroll
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="logs-output" id="logs-output">
+                        <!-- Logs will be displayed here -->
+                    </div>
+                </div>
+            </section>
+        </main>
     </div>
-    </body>
+
+    <!-- Notifications Container -->
+    <div id="notifications-container" class="notifications-container"></div>
+
+    <!-- Modal Container -->
+    <div id="modal-container" class="modal-container"></div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+</body>
 </html>

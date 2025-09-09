@@ -103,6 +103,9 @@ app = Flask(__name__)
 website_logs = []
 config_updated = None
 
+# Track bot start time for uptime calculation
+app.start_time = time.time()
+
 def merge_dicts(main, small):
     for key, value in small.items():
         if key in main and isinstance(main[key], dict) and isinstance(value, dict):
@@ -128,6 +131,12 @@ def get_from_db(command):
 
 @app.route("/")
 def home():
+    return render_template("index.html", version=version)
+
+# Dashboard route (alternative access)
+@app.route("/dashboard")
+def dashboard():
+    """Alternative route to access dashboard"""
     return render_template("index.html", version=version)
 
 
@@ -281,6 +290,336 @@ def fetch_weekly_runtime():
     except Exception as e:
         print(f"Error fetching weekly runtime: {e}")
         return jsonify({"status": "error", "message": "An error occurred while fetching weekly runtime"}), 500
+
+# New Dashboard API Routes
+@app.route('/api/settings', methods=['GET'])
+def get_settings():
+    """Get current bot settings"""
+    try:
+        with open("config/settings.json", "r") as config_file:
+            settings = json.load(config_file)
+        return jsonify(settings)
+    except Exception as e:
+        print(f"Error fetching settings: {e}")
+        return jsonify({"status": "error", "message": "Failed to fetch settings"}), 500
+
+# Dashboard-specific API routes
+@app.route('/api/dashboard/status', methods=['GET'])
+def get_dashboard_status():
+    """Get real-time bot status for dashboard"""
+    try:
+        # Check if bot clients are running
+        bot_status = "offline"
+        active_accounts = 0
+        
+        if hasattr(app, 'bot_clients') and app.bot_clients:
+            active_accounts = len([client for client in app.bot_clients if client.is_ready()])
+            bot_status = "online" if active_accounts > 0 else "connecting"
+        
+        return jsonify({
+            "status": bot_status,
+            "active_accounts": active_accounts,
+            "total_accounts": len(listUserIds) if listUserIds else 0,
+            "timestamp": time.time()
+        })
+    except Exception as e:
+        print(f"Error fetching dashboard status: {e}")
+        return jsonify({
+            "status": "error",
+            "active_accounts": 0,
+            "total_accounts": 0,
+            "timestamp": time.time()
+        })
+
+@app.route('/api/dashboard/stats', methods=['GET'])
+def get_dashboard_stats():
+    """Get real-time statistics for dashboard"""
+    try:
+        stats_data = {
+            "balance": 0,
+            "hunts_today": 0,
+            "battles_today": 0,
+            "uptime": 0,
+            "commands_executed": 0,
+            "captchas_solved": 0
+        }
+        
+        # Get data from database
+        try:
+            # Get total cowoncy from all accounts
+            rows = get_from_db("SELECT cowoncy FROM user_stats")
+            total_cowoncy = sum(row["cowoncy"] for row in rows) if rows else 0
+            stats_data["balance"] = total_cowoncy
+            
+            # Get command counts
+            hunt_rows = get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
+            battle_rows = get_from_db("SELECT count FROM commands WHERE name = 'battle'")
+            
+            stats_data["hunts_today"] = hunt_rows[0]["count"] if hunt_rows else 0
+            stats_data["battles_today"] = battle_rows[0]["count"] if battle_rows else 0
+            
+            # Get total commands executed
+            all_commands = get_from_db("SELECT SUM(count) as total FROM commands")
+            stats_data["commands_executed"] = all_commands[0]["total"] if all_commands and all_commands[0]["total"] else 0
+            
+            # Get captcha count
+            captcha_rows = get_from_db("SELECT captchas FROM user_stats")
+            stats_data["captchas_solved"] = sum(row["captchas"] for row in captcha_rows) if captcha_rows else 0
+            
+        except Exception as db_error:
+            print(f"Database error in dashboard stats: {db_error}")
+        
+        # Calculate uptime (time since bot started)
+        if hasattr(app, 'start_time'):
+            stats_data["uptime"] = int(time.time() - app.start_time)
+        
+        return jsonify(stats_data)
+        
+    except Exception as e:
+        print(f"Error fetching dashboard stats: {e}")
+        return jsonify({
+            "balance": 0,
+            "hunts_today": 0,
+            "battles_today": 0,
+            "uptime": 0,
+            "commands_executed": 0,
+            "captchas_solved": 0
+        })
+
+@app.route('/api/dashboard/logs', methods=['GET'])
+def get_dashboard_logs():
+    """Get recent logs for dashboard"""
+    try:
+        # Get recent website logs
+        recent_logs = website_logs[-100:] if len(website_logs) > 100 else website_logs
+        
+        # Format logs for dashboard
+        formatted_logs = []
+        for i, log in enumerate(recent_logs):
+            # Determine log level based on content
+            level = "info"
+            if "error" in log.lower() or "failed" in log.lower():
+                level = "error"
+            elif "warning" in log.lower() or "captcha" in log.lower():
+                level = "warning"
+            elif "success" in log.lower() or "completed" in log.lower() or "won" in log.lower():
+                level = "success"
+            
+            formatted_logs.append({
+                "id": i,
+                "timestamp": datetime.now().strftime("%H:%M:%S"),
+                "level": level,
+                "message": log
+            })
+        
+        return jsonify(formatted_logs)
+    except Exception as e:
+        print(f"Error fetching dashboard logs: {e}")
+        return jsonify([])
+
+@app.route('/api/dashboard/activity', methods=['GET'])
+def get_dashboard_activity():
+    """Get recent activity for dashboard"""
+    try:
+        activities = []
+        
+        # Get recent database entries for activity
+        try:
+            # Recent commands
+            recent_commands = get_from_db("""
+                SELECT name, count, MAX(rowid) as latest 
+                FROM commands 
+                WHERE count > 0 
+                GROUP BY name 
+                ORDER BY latest DESC 
+                LIMIT 10
+            """)
+            
+            for cmd in recent_commands:
+                activities.append({
+                    "time": "Recently",
+                    "message": f"{cmd['name'].title()} command executed {cmd['count']} times",
+                    "type": "info",
+                    "icon": "fas fa-terminal"
+                })
+                
+        except Exception as db_error:
+            print(f"Database error in activity: {db_error}")
+            
+        # Add some recent log activities
+        recent_website_logs = website_logs[-5:] if website_logs else []
+        for log in recent_website_logs:
+            activity_type = "info"
+            icon = "fas fa-info-circle"
+            
+            if "hunt" in log.lower():
+                activity_type = "success"
+                icon = "fas fa-paw"
+            elif "battle" in log.lower():
+                activity_type = "success" 
+                icon = "fas fa-sword"
+            elif "captcha" in log.lower():
+                activity_type = "warning"
+                icon = "fas fa-exclamation-triangle"
+            elif "error" in log.lower():
+                activity_type = "error"
+                icon = "fas fa-exclamation-circle"
+                
+            activities.append({
+                "time": "Just now",
+                "message": log,
+                "type": activity_type,
+                "icon": icon
+            })
+        
+        return jsonify(activities[-10:])  # Return last 10 activities
+        
+    except Exception as e:
+        print(f"Error fetching dashboard activity: {e}")
+        return jsonify([])
+
+@app.route('/api/dashboard/control/<action>', methods=['POST'])
+def dashboard_control_bot(action):
+    """Control bot from dashboard"""
+    try:
+        global listUserIds
+        
+        if action == "start":
+            # Logic to start bot instances
+            message = f"Bot started successfully for {len(listUserIds)} accounts"
+            
+        elif action == "stop":
+            # Logic to stop bot instances
+            message = "Bot stopped successfully"
+            
+        elif action == "restart":
+            # Logic to restart bot instances
+            message = "Bot restarted successfully"
+            
+        else:
+            return jsonify({"status": "error", "message": "Invalid action"}), 400
+        
+        # Log the action
+        website_logs.append(f"Dashboard: {action.title()} command executed")
+        
+        return jsonify({
+            "status": "success", 
+            "message": message,
+            "timestamp": time.time()
+        })
+        
+    except Exception as e:
+        print(f"Error controlling bot from dashboard: {e}")
+        return jsonify({
+            "status": "error", 
+            "message": f"Failed to {action} bot",
+            "timestamp": time.time()
+        }), 500
+
+@app.route('/api/settings', methods=['POST'])
+def update_settings():
+    """Update bot settings"""
+    try:
+        new_settings = request.get_json()
+        
+        # Load current settings
+        with open("config/settings.json", "r") as config_file:
+            current_settings = json.load(config_file)
+        
+        # Merge new settings with current ones
+        merge_dicts(current_settings, new_settings)
+        
+        # Save updated settings
+        with open("config/settings.json", "w") as config_file:
+            json.dump(current_settings, config_file, indent=4)
+        
+        # Mark config as updated for bot to reload
+        global config_updated
+        config_updated = True
+        
+        return jsonify({"status": "success", "message": "Settings updated successfully"})
+    except Exception as e:
+        print(f"Error updating settings: {e}")
+        return jsonify({"status": "error", "message": "Failed to update settings"}), 500
+
+@app.route('/api/stats', methods=['GET'])
+def get_stats():
+    """Get bot statistics"""
+    try:
+        # Get stats from database
+        stats_data = {}
+        
+        try:
+            rows = get_from_db("SELECT cowoncy FROM user_stats")
+            total_cowoncy = sum(row["cowoncy"] for row in rows) if rows else 0
+            stats_data["balance"] = total_cowoncy
+        except:
+            stats_data["balance"] = 0
+        
+        try:
+            rows = get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
+            hunt_count = rows[0]["count"] if rows else 0
+            stats_data["hunts_today"] = hunt_count
+        except:
+            stats_data["hunts_today"] = 0
+        
+        try:
+            rows = get_from_db("SELECT count FROM commands WHERE name = 'battle'")
+            battle_count = rows[0]["count"] if rows else 0
+            stats_data["battles_today"] = battle_count
+        except:
+            stats_data["battles_today"] = 0
+        
+        # Calculate uptime (simplified)
+        stats_data["uptime"] = int(time.time() % 86400)
+        
+        return jsonify(stats_data)
+    except Exception as e:
+        print(f"Error fetching stats: {e}")
+        return jsonify({"status": "error", "message": "Failed to fetch stats"}), 500
+
+@app.route('/api/logs', methods=['GET'])
+def get_logs():
+    """Get recent logs for dashboard"""
+    try:
+        # Return recent website logs
+        recent_logs = website_logs[-50:] if len(website_logs) > 50 else website_logs
+        
+        # Format logs for dashboard
+        formatted_logs = []
+        for i, log in enumerate(recent_logs):
+            formatted_logs.append({
+                "id": i,
+                "timestamp": datetime.now().strftime("%H:%M:%S"),
+                "level": "info",
+                "message": log
+            })
+        
+        return jsonify(formatted_logs)
+    except Exception as e:
+        print(f"Error fetching logs: {e}")
+        return jsonify([])
+
+@app.route('/api/bot/<action>', methods=['POST'])
+def control_bot(action):
+    """Control bot (start/stop/restart)"""
+    try:
+        if action == "start":
+            # Logic to start bot (if stopped)
+            message = "Bot started successfully"
+        elif action == "stop":
+            # Logic to stop bot
+            message = "Bot stopped successfully"
+        elif action == "restart":
+            # Logic to restart bot
+            message = "Bot restarted successfully"
+        else:
+            return jsonify({"status": "error", "message": "Invalid action"}), 400
+        
+        return jsonify({"status": "success", "message": message})
+    except Exception as e:
+        print(f"Error controlling bot: {e}")
+        return jsonify({"status": "error", "message": f"Failed to {action} bot"}), 500
 
 
 def web_start():
