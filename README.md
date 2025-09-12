@@ -161,7 +161,7 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 <div align="center">
 
 [![GitHub](https://img.shields.io/badge/GitHub-Issues-black?logo=github)](https://github.com/kiy0w0/owomizu/issues)
-[![Discord](https://img.shields.io/badge/Discord-Support-7289da?logo=discord)](https://discord.gg/your-server)
+[![Discord](https://img.shields.io/badge/Discord-Support-7289da?logo=discord)](https://discord.gg/bkvMhwjSPG)
 
 **Made with 💙 by Mizu Network Team**
 
