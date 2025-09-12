@@ -79,15 +79,6 @@ class MizuDashboard {
             });
         });
 
-        // Bot control buttons
-        document.getElementById('start-bot')?.addEventListener('click', () => this.controlBot('start'));
-        document.getElementById('stop-bot')?.addEventListener('click', () => this.controlBot('stop'));
-        document.getElementById('restart-bot')?.addEventListener('click', () => this.controlBot('restart'));
-        
-        // Quick action buttons
-        document.getElementById('quick-start')?.addEventListener('click', () => this.controlBot('start'));
-        document.getElementById('quick-stop')?.addEventListener('click', () => this.controlBot('stop'));
-        document.getElementById('quick-restart')?.addEventListener('click', () => this.controlBot('restart'));
 
         // Settings buttons
         document.getElementById('save-commands')?.addEventListener('click', () => this.saveSettings());
@@ -96,6 +87,20 @@ class MizuDashboard {
         // Logs controls
         document.getElementById('clear-logs')?.addEventListener('click', () => this.clearLogs());
         document.getElementById('export-logs')?.addEventListener('click', () => this.exportLogs());
+        
+        // Log filters
+        document.getElementById('log-type-filter')?.addEventListener('change', () => this.loadCommandLogs());
+        document.getElementById('account-filter')?.addEventListener('change', () => this.loadCommandLogs());
+        document.getElementById('show-timestamps')?.addEventListener('change', () => this.loadCommandLogs());
+        document.getElementById('auto-scroll')?.addEventListener('change', () => {
+            // Auto-scroll to bottom if enabled
+            if (document.getElementById('auto-scroll')?.checked) {
+                const logsOutput = document.getElementById('logs-output');
+                if (logsOutput) {
+                    logsOutput.scrollTop = logsOutput.scrollHeight;
+                }
+            }
+        });
 
         // Stats refresh
         document.getElementById('refresh-stats')?.addEventListener('click', () => this.refreshStats());
@@ -155,8 +160,8 @@ class MizuDashboard {
             // Load stats
             await this.loadStats();
             
-            // Load recent activity
-            await this.loadRecentActivity();
+            // Load command logs
+            await this.loadCommandLogs();
             
             // Update UI
             this.updateUI();
@@ -201,6 +206,7 @@ class MizuDashboard {
                 break;
             case 'logs':
                 this.startLogUpdates();
+                this.loadCommandLogs();
                 break;
             case 'analytics':
                 this.loadAnalytics();
@@ -212,38 +218,6 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Control bot operations via real API
-     */
-    async controlBot(action) {
-        try {
-            this.showNotification(`${action.charAt(0).toUpperCase() + action.slice(1)}ing bot...`, 'info');
-            
-            const response = await fetch(`/api/dashboard/control/${action}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok && result.status === 'success') {
-                this.showNotification(result.message, 'success');
-                
-                // Update status and refresh data
-                await this.loadBotStatus();
-                await this.loadStats();
-                
-            } else {
-                throw new Error(result.message || `Failed to ${action} bot`);
-            }
-            
-        } catch (error) {
-            console.error(`Failed to ${action} bot:`, error);
-            this.showNotification(`Failed to ${action} bot: ${error.message}`, 'error');
-        }
-    }
 
     /**
      * Update bot status indicator
@@ -396,7 +370,7 @@ class MizuDashboard {
      */
     updateStatsUI() {
         // Update main stats
-        this.updateElement('total-cowoncy', this.formatNumber(this.stats.balance));
+        this.updateElement('total-cowoncy', this.stats.balance_formatted || this.formatNumber(this.stats.balance));
         this.updateElement('hunts-today', this.stats.hunts_today);
         this.updateElement('battles-today', this.stats.battles_today);
         this.updateElement('uptime-display', this.formatUptime(this.stats.uptime));
@@ -404,6 +378,84 @@ class MizuDashboard {
         // Update navbar stats
         this.updateElement('navbar-balance', this.formatNumber(this.stats.balance));
         this.updateElement('navbar-uptime', this.formatUptime(this.stats.uptime));
+        
+        // Update accounts breakdown
+        this.updateAccountsBreakdown();
+    }
+    
+    /**
+     * Update accounts breakdown section
+     */
+    updateAccountsBreakdown() {
+        const accountsContainer = document.getElementById('accounts-breakdown');
+        if (!accountsContainer || !this.stats.accounts) return;
+        
+        // Show refresh indicator
+        const refreshIndicator = document.getElementById('accounts-refresh');
+        if (refreshIndicator) {
+            refreshIndicator.classList.add('spinning');
+            setTimeout(() => refreshIndicator.classList.remove('spinning'), 1000);
+        }
+        
+        // Clear existing content
+        accountsContainer.innerHTML = '';
+        
+        if (this.stats.accounts.length === 0) {
+            accountsContainer.innerHTML = `
+                <div class="account-card">
+                    <div class="account-header">
+                        <span class="account-id">No Accounts</span>
+                    </div>
+                    <div class="account-stats">
+                        <p style="color: var(--text-secondary); text-align: center; margin: 0;">
+                            No active accounts found. Make sure your bot is running and has valid tokens.
+                        </p>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
+        // Create account cards
+        this.stats.accounts.forEach(account => {
+            const accountCard = document.createElement('div');
+            accountCard.className = 'account-card';
+            
+            accountCard.innerHTML = `
+                <div class="account-header">
+                    <span class="account-id">${account.user_display}</span>
+                    <div class="account-status">
+                        <div class="status-dot online"></div>
+                        <span>Online</span>
+                    </div>
+                </div>
+                <div class="account-stats">
+                    <div class="account-stat">
+                        <div class="account-stat-label">
+                            <i class="fas fa-coins"></i>
+                            <span>Cowoncy</span>
+                        </div>
+                        <div class="account-stat-value cowoncy">${account.cowoncy_formatted}</div>
+                    </div>
+                    <div class="account-stat">
+                        <div class="account-stat-label">
+                            <i class="fas fa-robot"></i>
+                            <span>Captchas</span>
+                        </div>
+                        <div class="account-stat-value">${account.captchas}</div>
+                    </div>
+                    <div class="account-stat">
+                        <div class="account-stat-label">
+                            <i class="fas fa-user"></i>
+                            <span>User ID</span>
+                        </div>
+                        <div class="account-stat-value" style="font-size: var(--font-size-xs); font-family: monospace;">${account.user_id}</div>
+                    </div>
+                </div>
+            `;
+            
+            accountsContainer.appendChild(accountCard);
+        });
     }
 
     /**
@@ -485,6 +537,156 @@ class MizuDashboard {
                 activityFeed.innerHTML = '<div class="error-message">Failed to load activity</div>';
             }
         }
+    }
+
+    /**
+     * Load command logs from real API
+     */
+    async loadCommandLogs() {
+        try {
+            const logType = document.getElementById('log-type-filter')?.value || 'all';
+            const accountFilter = document.getElementById('account-filter')?.value || 'all';
+            
+            const response = await fetch(`/api/dashboard/command-logs?type=${logType}&account=${accountFilter}&limit=100`);
+            if (response.ok) {
+                const data = await response.json();
+                this.updateCommandLogs(data.logs);
+                this.updateLogStats(data.total_count, data.filtered_count);
+                this.populateAccountFilter(data.logs);
+            }
+        } catch (error) {
+            console.error('Failed to load command logs:', error);
+            this.showLogError('Failed to load command logs');
+        }
+    }
+
+    /**
+     * Update command logs display
+     */
+    updateCommandLogs(logs) {
+        const logsOutput = document.getElementById('logs-output');
+        if (!logsOutput) return;
+
+        // Clear welcome message
+        logsOutput.innerHTML = '';
+
+        if (logs.length === 0) {
+            logsOutput.innerHTML = `
+                <div class="logs-welcome">
+                    <i class="fas fa-info-circle"></i>
+                    <h3>No Commands Found</h3>
+                    <p>No command activity to display with current filters</p>
+                </div>
+            `;
+            return;
+        }
+
+        // Add logs
+        logs.forEach(log => this.addLogEntry(log));
+        
+        // Auto scroll if enabled
+        if (document.getElementById('auto-scroll')?.checked) {
+            logsOutput.scrollTop = logsOutput.scrollHeight;
+        }
+    }
+
+    /**
+     * Add a single log entry
+     */
+    addLogEntry(log) {
+        const logsOutput = document.getElementById('logs-output');
+        if (!logsOutput) return;
+
+        const logEntry = document.createElement('div');
+        logEntry.className = 'log-entry';
+
+        const showTimestamps = document.getElementById('show-timestamps')?.checked;
+        
+        logEntry.innerHTML = `
+            ${showTimestamps ? `<div class="log-timestamp">${log.formatted_time}</div>` : ''}
+            <div class="log-account">${log.account_display}</div>
+            <div class="log-type ${log.command_type}">${log.command_type.toUpperCase()}</div>
+            <div class="log-message">${this.formatLogMessage(log.message, log.status)}</div>
+        `;
+
+        logsOutput.appendChild(logEntry);
+
+        // Remove old entries if too many (keep last 200)
+        const entries = logsOutput.querySelectorAll('.log-entry');
+        if (entries.length > 200) {
+            entries[0].remove();
+        }
+    }
+
+    /**
+     * Format log message based on status
+     */
+    formatLogMessage(message, status) {
+        if (status === 'success') {
+            return `<span class="success">${message}</span>`;
+        } else if (status === 'error') {
+            return `<span class="error">${message}</span>`;
+        } else if (message.includes('found:') || message.includes('caught')) {
+            return message.replace(/(found:|caught)/g, '<span class="success">$1</span>');
+        } else if (message.includes('cowoncy') || message.includes('💰')) {
+            return message.replace(/(\d+)/g, '<span class="highlight">$1</span>');
+        }
+        return message;
+    }
+
+    /**
+     * Update log statistics
+     */
+    updateLogStats(totalCount, filteredCount) {
+        this.updateElement('total-commands', totalCount);
+        
+        // Update session time (uptime)
+        if (this.stats && this.stats.uptime) {
+            this.updateElement('session-time', this.formatUptime(this.stats.uptime));
+        }
+    }
+
+    /**
+     * Populate account filter dropdown
+     */
+    populateAccountFilter(logs) {
+        const accountFilter = document.getElementById('account-filter');
+        if (!accountFilter) return;
+
+        // Get unique accounts
+        const accounts = [...new Set(logs.map(log => ({
+            id: log.account_id,
+            display: log.account_display
+        })))];
+
+        // Clear existing options except "All Accounts"
+        const allOption = accountFilter.querySelector('option[value="all"]');
+        accountFilter.innerHTML = '';
+        if (allOption) accountFilter.appendChild(allOption);
+
+        // Add account options
+        accounts.forEach(account => {
+            const option = document.createElement('option');
+            option.value = account.id;
+            option.textContent = account.display;
+            accountFilter.appendChild(option);
+        });
+    }
+
+    /**
+     * Show log error message
+     */
+    showLogError(message) {
+        const logsOutput = document.getElementById('logs-output');
+        if (!logsOutput) return;
+
+        logsOutput.innerHTML = `
+            <div class="logs-welcome">
+                <i class="fas fa-exclamation-triangle" style="color: var(--danger-color);"></i>
+                <h3>Error Loading Logs</h3>
+                <p>${message}</p>
+            </div>
+        `;
     }
 
     /**
@@ -660,6 +862,13 @@ class MizuDashboard {
                 await this.loadRecentActivity();
             }
         }, 15000);
+        
+        // Command logs update every 3 seconds for real-time feel
+        this.intervals.commandLogs = setInterval(async () => {
+            if (this.currentSection === 'logs') {
+                await this.loadCommandLogs();
+            }
+        }, 3000);
         
         // Navbar stats update every 3 seconds
         this.intervals.navbar = setInterval(async () => {

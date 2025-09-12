@@ -12,7 +12,7 @@
 [![Version](https://img.shields.io/badge/Version-1.0.0-cyan.svg)]()
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 
-![Mizu Network Banner](https://via.placeholder.com/800x200/1a1a2e/00FFFF?text=🌊+Mizu+Network+水)
+![Mizu Network Banner](static/imgs/mizu.png)
 
 </div>
 

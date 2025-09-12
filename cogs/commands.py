@@ -119,8 +119,13 @@ class Commands(commands.Cog):
             
             if self.bot.settings_dict["useSlashCommands"] and cmd.get("slash_cmd_name", False):
                 await self.bot.slashCommandSender(cmd["slash_cmd_name"], self.bot.misc["command_info"][cmd_id]["log_color"])
+                # Log slash command to dashboard
+                self.bot.add_dashboard_log(cmd["slash_cmd_name"], f"/{cmd['slash_cmd_name']}")
             else:
-                await self.bot.send(self.bot.construct_command(cmd), self.bot.misc["command_info"][cmd_id]["log_color"])
+                command_text = self.bot.construct_command(cmd)
+                await self.bot.send(command_text, self.bot.misc["command_info"][cmd_id]["log_color"])
+                # Log text command to dashboard
+                self.bot.add_dashboard_log(cmd_id, command_text)
 
             """add command to the deque"""
             self.command_times.append(time.time())

@@ -81,6 +81,7 @@ console.rule("[bold blue1]:>", style="navy_blue")
 console_width = console.size.width
 listUserIds = []
 
+
 mizu_network_api = "https://kiy0w0.github.io/mizuowoapi"
 
 mizuArt = r"""
@@ -93,7 +94,7 @@ mizuArt = r"""
 M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "1.0.0"
+version = "1.0.1"
 debug_print = True
 
 
@@ -308,18 +309,21 @@ def get_settings():
 def get_dashboard_status():
     """Get real-time bot status for dashboard"""
     try:
-        # Check if bot clients are running
-        bot_status = "offline"
-        active_accounts = 0
+        global listUserIds, tokens_and_channels
         
-        if hasattr(app, 'bot_clients') and app.bot_clients:
-            active_accounts = len([client for client in app.bot_clients if client.is_ready()])
-            bot_status = "online" if active_accounts > 0 else "connecting"
+        # Simple status based on active user IDs
+        active_accounts = len(listUserIds) if listUserIds else 0
+        
+        # Determine bot status based on active accounts
+        if active_accounts > 0:
+            bot_status = "online"
+        else:
+            bot_status = "offline"
         
         return jsonify({
             "status": bot_status,
             "active_accounts": active_accounts,
-            "total_accounts": len(listUserIds) if listUserIds else 0,
+            "total_accounts": len(tokens_and_channels) if 'tokens_and_channels' in globals() else 0,
             "timestamp": time.time()
         })
     except Exception as e:
@@ -341,15 +345,39 @@ def get_dashboard_stats():
             "battles_today": 0,
             "uptime": 0,
             "commands_executed": 0,
-            "captchas_solved": 0
+            "captchas_solved": 0,
+            "accounts": []
         }
         
         # Get data from database
         try:
-            # Get total cowoncy from all accounts
-            rows = get_from_db("SELECT cowoncy FROM user_stats")
-            total_cowoncy = sum(row["cowoncy"] for row in rows) if rows else 0
+            # Get account-specific data
+            account_rows = get_from_db("SELECT user_id, cowoncy, captchas FROM user_stats")
+            total_cowoncy = 0
+            total_captchas = 0
+            
+            for row in account_rows:
+                user_id = row["user_id"]
+                cowoncy = row["cowoncy"] or 0
+                captchas = row["captchas"] or 0
+                
+                total_cowoncy += cowoncy
+                total_captchas += captchas
+                
+                # Format user ID for display (show last 4 digits)
+                user_display = f"User-{str(user_id)[-4:]}"
+                
+                stats_data["accounts"].append({
+                    "user_id": user_id,
+                    "user_display": user_display,
+                    "cowoncy": cowoncy,
+                    "cowoncy_formatted": f"{cowoncy:,}",
+                    "captchas": captchas
+                })
+            
             stats_data["balance"] = total_cowoncy
+            stats_data["balance_formatted"] = f"{total_cowoncy:,}"
+            stats_data["captchas_solved"] = total_captchas
             
             # Get command counts
             hunt_rows = get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
@@ -361,10 +389,6 @@ def get_dashboard_stats():
             # Get total commands executed
             all_commands = get_from_db("SELECT SUM(count) as total FROM commands")
             stats_data["commands_executed"] = all_commands[0]["total"] if all_commands and all_commands[0]["total"] else 0
-            
-            # Get captcha count
-            captcha_rows = get_from_db("SELECT captchas FROM user_stats")
-            stats_data["captchas_solved"] = sum(row["captchas"] for row in captcha_rows) if captcha_rows else 0
             
         except Exception as db_error:
             print(f"Database error in dashboard stats: {db_error}")
@@ -478,43 +502,6 @@ def get_dashboard_activity():
         print(f"Error fetching dashboard activity: {e}")
         return jsonify([])
 
-@app.route('/api/dashboard/control/<action>', methods=['POST'])
-def dashboard_control_bot(action):
-    """Control bot from dashboard"""
-    try:
-        global listUserIds
-        
-        if action == "start":
-            # Logic to start bot instances
-            message = f"Bot started successfully for {len(listUserIds)} accounts"
-            
-        elif action == "stop":
-            # Logic to stop bot instances
-            message = "Bot stopped successfully"
-            
-        elif action == "restart":
-            # Logic to restart bot instances
-            message = "Bot restarted successfully"
-            
-        else:
-            return jsonify({"status": "error", "message": "Invalid action"}), 400
-        
-        # Log the action
-        website_logs.append(f"Dashboard: {action.title()} command executed")
-        
-        return jsonify({
-            "status": "success", 
-            "message": message,
-            "timestamp": time.time()
-        })
-        
-    except Exception as e:
-        print(f"Error controlling bot from dashboard: {e}")
-        return jsonify({
-            "status": "error", 
-            "message": f"Failed to {action} bot",
-            "timestamp": time.time()
-        }), 500
 
 @app.route('/api/settings', methods=['POST'])
 def update_settings():
@@ -599,6 +586,63 @@ def get_logs():
     except Exception as e:
         print(f"Error fetching logs: {e}")
         return jsonify([])
+
+# Global list to store real-time command logs
+command_logs = []
+max_command_logs = 500  # Keep only the last 500 commands
+
+def add_command_log(account_id, command_type, message, status="info"):
+    """Add a command log entry"""
+    global command_logs
+    
+    log_entry = {
+        "timestamp": time.time(),
+        "account_id": str(account_id),
+        "account_display": f"User-{str(account_id)[-4:]}",
+        "command_type": command_type,
+        "message": message,
+        "status": status
+    }
+    
+    command_logs.append(log_entry)
+    
+    # Keep only the last max_command_logs entries
+    if len(command_logs) > max_command_logs:
+        command_logs = command_logs[-max_command_logs:]
+
+@app.route('/api/dashboard/command-logs', methods=['GET'])
+def get_command_logs():
+    """Get real-time command logs for dashboard"""
+    try:
+        # Get query parameters for filtering
+        log_type = request.args.get('type', 'all')
+        account_id = request.args.get('account', 'all')
+        limit = int(request.args.get('limit', 100))
+        
+        # Filter logs
+        filtered_logs = command_logs
+        
+        if log_type != 'all':
+            filtered_logs = [log for log in filtered_logs if log['command_type'] == log_type]
+        
+        if account_id != 'all':
+            filtered_logs = [log for log in filtered_logs if log['account_id'] == account_id]
+        
+        # Get the most recent logs
+        recent_logs = filtered_logs[-limit:] if len(filtered_logs) > limit else filtered_logs
+        
+        # Format timestamps for display
+        for log in recent_logs:
+            log['formatted_time'] = time.strftime("%H:%M:%S", time.localtime(log['timestamp']))
+        
+        return jsonify({
+            "logs": recent_logs,
+            "total_count": len(command_logs),
+            "filtered_count": len(filtered_logs)
+        })
+    except Exception as e:
+        print(f"Error fetching command logs: {e}")
+        return jsonify({"logs": [], "total_count": 0, "filtered_count": 0})
 
 @app.route('/api/bot/<action>', methods=['POST'])
 def control_bot(action):
@@ -1124,6 +1168,26 @@ class MyClient(commands.Bot):
             "shop": commands_dict["shop"]["enabled"],
             "slots": self.settings_dict["gamble"]["slots"]["enabled"]
         }
+
+    def add_dashboard_log(self, command_type, message, status="info"):
+        """Add a command log entry to the dashboard"""
+        try:
+            global command_logs, max_command_logs
+            log_entry = {
+                "timestamp": time.time(),
+                "account_id": str(self.user.id),
+                "account_display": f"User-{str(self.user.id)[-4:]}",
+                "command_type": command_type,
+                "message": message,
+                "status": status
+            }
+            command_logs.append(log_entry)
+            
+            # Keep only the last max_command_logs entries
+            if len(command_logs) > max_command_logs:
+                command_logs = command_logs[-max_command_logs:]
+        except Exception as e:
+            print(f"Error adding dashboard log: {e}")
 
     """To make the code cleaner when accessing cooldowns from config."""
     def random_float(self, cooldown_list):
@@ -1665,7 +1729,9 @@ def run_bot(token, channel_id, global_settings_dict):
     except Exception as e:
         printBox(f"Error starting bot: {e}", "bold red")
 
+
 def run_bot(token, channel_id, global_settings_dict):
+    """Original run_bot function for backwards compatibility"""
     try:
         logging.getLogger("discord.client").setLevel(logging.ERROR)
 
@@ -1793,9 +1859,9 @@ if __name__ == "__main__":
             
         popup_queue = Queue()
 
-        bot_threads = threading.Thread(target=run_bots, args=(tokens_and_channels,))
-        bot_threads.daemon = True
-        bot_threads.start()
+        main_bot_thread = threading.Thread(target=run_bots, args=(tokens_and_channels,))
+        main_bot_thread.daemon = True
+        main_bot_thread.start()
 
         popup_main_loop()
     else:
