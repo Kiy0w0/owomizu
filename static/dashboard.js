@@ -101,6 +101,16 @@ class MizuDashboard {
                 }
             }
         });
+        
+        // Quick Settings toggles
+        document.getElementById('hunt-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('hunt', e.target.checked));
+        document.getElementById('battle-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('battle', e.target.checked));
+        document.getElementById('daily-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('daily', e.target.checked));
+        document.getElementById('owo-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('owo', e.target.checked));
+        
+        // Security Settings buttons
+        document.getElementById('save-security')?.addEventListener('click', () => this.saveSecuritySettings());
+        document.getElementById('reset-security')?.addEventListener('click', () => this.resetSecuritySettings());
 
         // Stats refresh
         document.getElementById('refresh-stats')?.addEventListener('click', () => this.refreshStats());
@@ -163,6 +173,9 @@ class MizuDashboard {
             // Load command logs
             await this.loadCommandLogs();
             
+            // Load quick settings
+            await this.loadQuickSettings();
+            
             // Update UI
             this.updateUI();
             
@@ -207,6 +220,14 @@ class MizuDashboard {
             case 'logs':
                 this.startLogUpdates();
                 this.loadCommandLogs();
+                break;
+            case 'commands':
+                this.loadSettings();
+                this.loadQuickSettings();
+                this.attachTerminateHandler();
+                break;
+            case 'security':
+                this.loadSecuritySettings();
                 break;
             case 'analytics':
                 this.loadAnalytics();
@@ -690,6 +711,208 @@ class MizuDashboard {
     }
 
     /**
+     * Toggle quick setting (hunt, battle, daily, owo)
+     */
+    async toggleQuickSetting(command, enabled) {
+        try {
+            // Show loading state
+            const toggle = document.getElementById(`${command}-toggle`);
+            if (toggle) {
+                toggle.disabled = true;
+            }
+
+            const response = await fetch('/api/dashboard/quick-toggle', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    command: command,
+                    enabled: enabled
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.showNotification(result.message, 'success');
+                
+                // Log the change in the logs if we're on the logs page
+                if (this.currentSection === 'logs') {
+                    setTimeout(() => this.loadCommandLogs(), 500);
+                }
+            } else {
+                const error = await response.json();
+                this.showNotification(error.error || 'Failed to update setting', 'error');
+                
+                // Revert toggle state on error
+                if (toggle) {
+                    toggle.checked = !enabled;
+                }
+            }
+        } catch (error) {
+            console.error('Error toggling quick setting:', error);
+            this.showNotification('Failed to update setting', 'error');
+            
+            // Revert toggle state on error
+            const toggle = document.getElementById(`${command}-toggle`);
+            if (toggle) {
+                toggle.checked = !enabled;
+            }
+        } finally {
+            // Re-enable toggle
+            const toggle = document.getElementById(`${command}-toggle`);
+            if (toggle) {
+                toggle.disabled = false;
+            }
+        }
+    }
+
+    /**
+     * Load current quick settings status
+     */
+    async loadQuickSettings() {
+        try {
+            const response = await fetch('/api/dashboard/quick-settings');
+            if (response.ok) {
+                const settings = await response.json();
+                
+                // Update toggle states
+                const huntToggle = document.getElementById('hunt-toggle');
+                const battleToggle = document.getElementById('battle-toggle');
+                const dailyToggle = document.getElementById('daily-toggle');
+                const owoToggle = document.getElementById('owo-toggle');
+                
+                if (huntToggle) huntToggle.checked = settings.hunt;
+                if (battleToggle) battleToggle.checked = settings.battle;
+                if (dailyToggle) dailyToggle.checked = settings.daily;
+                if (owoToggle) owoToggle.checked = settings.owo;
+            }
+        } catch (error) {
+            console.error('Failed to load quick settings:', error);
+        }
+    }
+
+    attachTerminateHandler() {
+        const btn = document.getElementById('terminate-bot');
+        if (!btn || btn.dataset.bound === '1') return;
+        btn.dataset.bound = '1';
+        btn.addEventListener('click', async () => {
+            if (!confirm('Terminate all running bot instances now?')) return;
+            try {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Terminating...';
+                const res = await fetch('/api/dashboard/terminate', { method: 'POST' });
+                const data = await res.json();
+                this.showNotification(data?.message || 'Terminate signal sent', 'success');
+            } catch (e) {
+                this.showNotification('Failed to terminate bot', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-power-off"></i> Terminate Bot';
+            }
+        });
+    }
+
+    /**
+     * Load security settings
+     */
+    async loadSecuritySettings() {
+        try {
+            const response = await fetch('/api/dashboard/security-settings');
+            if (response.ok) {
+                const settings = await response.json();
+                
+                // Update form fields
+                document.getElementById('delay-min').value = settings.delay_min;
+                document.getElementById('delay-max').value = settings.delay_max;
+                document.getElementById('captcha-restart-min').value = settings.captcha_restart_min;
+                document.getElementById('captcha-restart-max').value = settings.captcha_restart_max;
+            }
+        } catch (error) {
+            console.error('Failed to load security settings:', error);
+        }
+    }
+
+    /**
+     * Save security settings
+     */
+    async saveSecuritySettings() {
+        try {
+            const delayMin = parseFloat(document.getElementById('delay-min').value);
+            const delayMax = parseFloat(document.getElementById('delay-max').value);
+            
+            // Validate delay values
+            if (delayMin >= delayMax) {
+                this.showNotification('Minimum delay must be less than maximum delay', 'error');
+                return;
+            }
+            
+            if (delayMin < 1 || delayMax > 10) {
+                this.showNotification('Delay values must be between 1 and 10 seconds', 'error');
+                return;
+            }
+
+            const settings = {
+                delay_min: delayMin,
+                delay_max: delayMax,
+                captcha_restart_min: parseFloat(document.getElementById('captcha-restart-min').value),
+                captcha_restart_max: parseFloat(document.getElementById('captcha-restart-max').value),
+                typing_indicator: false,
+                random_delays: false,
+                silent_mode: false
+            };
+
+            const response = await fetch('/api/dashboard/security-settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(settings)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.showNotification(result.message, 'success');
+                
+                // Log the change in the logs if we're on the logs page
+                if (this.currentSection === 'logs') {
+                    setTimeout(() => this.loadCommandLogs(), 500);
+                }
+            } else {
+                const error = await response.json();
+                this.showNotification(error.error || 'Failed to save security settings', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving security settings:', error);
+            this.showNotification('Failed to save security settings', 'error');
+        }
+    }
+
+    /**
+     * Reset security settings to defaults
+     */
+    async resetSecuritySettings() {
+        if (!confirm('Are you sure you want to reset all security settings to defaults?')) {
+            return;
+        }
+
+        try {
+            // Reset to default values
+            document.getElementById('delay-min').value = 1.7;
+            document.getElementById('delay-max').value = 2.7;
+            document.getElementById('captcha-restart-min').value = 3.7;
+            document.getElementById('captcha-restart-max').value = 5.6;
+
+            // Save the reset settings
+            await this.saveSecuritySettings();
+            
+        } catch (error) {
+            console.error('Error resetting security settings:', error);
+            this.showNotification('Failed to reset security settings', 'error');
+        }
+    }
+
+    /**
      * Start log updates from real API
      */
     startLogUpdates() {
@@ -1020,8 +1243,45 @@ class MizuDashboard {
      * Load analytics data
      */
     loadAnalytics() {
-        // Placeholder for analytics functionality
-        console.log('Loading analytics...');
+        if (this.analyticsTimer) clearInterval(this.analyticsTimer);
+        this.fetchAnalytics();
+        this.analyticsTimer = setInterval(() => this.fetchAnalytics(), 3000);
+    }
+
+    fetchAnalytics() {
+        fetch(`/api/dashboard/analytics`)
+            .then(res => res.json())
+            .then(data => {
+                // Global cards
+                const fmt = new Intl.NumberFormat('en-US');
+                const fmtInt = x => fmt.format(Math.max(0, parseInt(x || 0)));
+                const byId = id => document.getElementById(id);
+                if (byId('global-cpm')) byId('global-cpm').textContent = fmtInt(data?.global?.cpm);
+                if (byId('global-active')) byId('global-active').textContent = fmtInt(data?.global?.active_accounts);
+                if (byId('global-session')) byId('global-session').textContent = fmtInt(data?.global?.session_total);
+                if (byId('global-net')) byId('global-net').textContent = fmtInt(data?.global?.net_earnings);
+
+                // Table
+                const tbody = document.querySelector('#analytics-table tbody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                (data?.accounts || []).forEach(acc => {
+                    const tr = document.createElement('tr');
+                    const last = acc.last_command_ts ? new Date(acc.last_command_ts * 1000).toLocaleTimeString() : '-';
+                    tr.innerHTML = `
+                        <td>${acc.account_display || acc.account_id}</td>
+                        <td>${fmtInt(acc.cpm)}</td>
+                        <td>${fmtInt(acc.hunt)}</td>
+                        <td>${fmtInt(acc.battle)}</td>
+                        <td>${fmtInt(acc.daily)}</td>
+                        <td>${fmtInt(acc.owo)}</td>
+                        <td>${fmtInt(acc.net_earnings)}</td>
+                        <td>${last}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(() => {});
     }
 }
 

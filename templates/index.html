@@ -93,6 +93,13 @@
                             <span>Commands</span>
                         </a>
                     </li>
+                    <li class="nav-item" data-section="security">
+                        <a href="#" class="nav-link">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security</span>
+                            <span class="nav-badge">Safe</span>
+                        </a>
+                    </li>
                     <li class="nav-item" data-section="gambling">
                         <a href="#" class="nav-link">
                             <i class="fas fa-dice"></i>
@@ -236,45 +243,6 @@
                     </div>
                 </div>
 
-                <!-- Action Cards -->
-                <div class="action-grid">
-                    <div class="action-card">
-                        <div class="action-header">
-                            <h3>Quick Settings</h3>
-                            <p>Toggle main features</p>
-                        </div>
-                        <div class="toggle-grid">
-                            <div class="toggle-item">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="hunt-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                                <span class="toggle-label">Hunt</span>
-                            </div>
-                            <div class="toggle-item">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="battle-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                                <span class="toggle-label">Battle</span>
-                            </div>
-                            <div class="toggle-item">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="daily-toggle">
-                                    <span class="toggle-slider"></span>
-                                </label>
-                                <span class="toggle-label">Daily</span>
-                            </div>
-                            <div class="toggle-item">
-                                <label class="toggle-switch">
-                                    <input type="checkbox" id="owo-toggle" checked>
-                                    <span class="toggle-slider"></span>
-                                </label>
-                                <span class="toggle-label">OwO</span>
-                            </div>
-                        </div>
-                    </div>
-        </div>
 
             </section>
 
@@ -297,8 +265,108 @@
                     </div>
             </div>
             
+                <!-- Quick Settings -->
+                <div class="action-grid" style="margin-bottom: var(--spacing-2xl);">
+                    <div class="action-card">
+                        <div class="action-header">
+                            <h3>Quick Settings</h3>
+                            <p>Toggle main features</p>
+                        </div>
+                        <div class="toggle-grid">
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="hunt-toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Hunt</span>
+                            </div>
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="battle-toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Battle</span>
+                    </div>
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="daily-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">Daily</span>
+                    </div>
+                            <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="owo-toggle" checked>
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">OwO</span>
+                    </div>
+                            <div class="toggle-item">
+                                <button class="btn btn-danger" id="terminate-bot">
+                                    <i class="fas fa-power-off"></i>
+                                    Terminate Bot
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="settings-container">
                     <!-- Command categories will be loaded here -->
+                </div>
+            </section>
+
+            <!-- Security Settings Section -->
+            <section id="security" class="content-section">
+                <div class="section-header">
+                    <h1 class="section-title">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Settings
+                    </h1>
+                    <div class="section-actions">
+                        <button class="btn btn-success" id="save-security">
+                            <i class="fas fa-save"></i>
+                            Save Settings
+                        </button>
+                        <button class="btn btn-outline" id="reset-security">
+                            <i class="fas fa-undo"></i>
+                            Reset
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="security-container">
+                    <!-- Command Delays -->
+                    <div class="security-card">
+                        <div class="security-header">
+                            <h3><i class="fas fa-clock"></i> Command Delays</h3>
+                            <p>Configure timing between commands to avoid detection</p>
+                        </div>
+                        <div class="security-content">
+                            <div class="form-group">
+                                <label for="delay-min">Minimum Delay (seconds)</label>
+                                <input type="number" id="delay-min" class="form-input" min="1" max="10" step="0.1" value="1.7">
+                                <small class="form-hint">Minimum time between commands</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="delay-max">Maximum Delay (seconds)</label>
+                                <input type="number" id="delay-max" class="form-input" min="1" max="10" step="0.1" value="2.7">
+                                <small class="form-hint">Maximum time between commands</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="captcha-restart-min">Captcha Restart Min (seconds)</label>
+                                <input type="number" id="captcha-restart-min" class="form-input" min="1" max="10" step="0.1" value="3.7">
+                                <small class="form-hint">Minimum delay after captcha solving</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="captcha-restart-max">Captcha Restart Max (seconds)</label>
+                                <input type="number" id="captcha-restart-max" class="form-input" min="1" max="10" step="0.1" value="5.6">
+                                <small class="form-hint">Maximum delay after captcha solving</small>
+                            </div>
+                        </div>
+        </div>
+
+                    
                 </div>
             </section>
 
@@ -345,6 +413,61 @@
                     </h1>
                 </div>
                 <!-- Analytics content -->
+                <div class="analytics-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-bolt"></i></div>
+                            <div class="stat-title">Commands / Min</div>
+                        </div>
+                        <div class="stat-value" id="global-cpm">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-users"></i></div>
+                            <div class="stat-title">Active Accounts</div>
+                        </div>
+                        <div class="stat-value" id="global-active">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-terminal"></i></div>
+                            <div class="stat-title">Session Commands</div>
+                        </div>
+                        <div class="stat-value" id="global-session">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                            <div class="stat-title">Net Earnings</div>
+                        </div>
+                        <div class="stat-value" id="global-net">0</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-user"></i> Per-Account Analytics</h3>
+                    </div>
+                    <div class="card-content">
+                        <div class="table-responsive">
+                            <table class="table" id="analytics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Account</th>
+                                        <th>CPM</th>
+                                        <th>Hunt</th>
+                                        <th>Battle</th>
+                                        <th>Daily</th>
+                                        <th>OwO</th>
+                                        <th>Net</th>
+                                        <th>Last</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section id="logs" class="content-section">
@@ -394,7 +517,7 @@
                                 <span class="checkmark"></span>
                                 Show Timestamps
                             </label>
-                        </div>
+        </div>
                         <div class="log-stats">
                             <span class="log-stat">
                                 <i class="fas fa-terminal"></i>
@@ -404,17 +527,17 @@
                                 <i class="fas fa-clock"></i>
                                 <span id="session-time">00:00:00</span>
                             </span>
-                        </div>
-                    </div>
-                    
+        </div>
+        </div>
+        
                     <div class="logs-output" id="logs-output">
                         <div class="logs-welcome">
                             <i class="fas fa-terminal"></i>
                             <h3>Real-time Command Activity</h3>
                             <p>Live feed of all OwO bot commands and activities</p>
                         </div>
-                    </div>
-                </div>
+    </div>
+    </div>
             </section>
         </main>
     </div>

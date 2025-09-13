@@ -104,6 +104,10 @@ app = Flask(__name__)
 website_logs = []
 config_updated = None
 
+# Global variables for bot management
+bot_instances = []
+command_logs = []
+
 # Track bot start time for uptime calculation
 app.start_time = time.time()
 
@@ -502,6 +506,96 @@ def get_dashboard_activity():
         print(f"Error fetching dashboard activity: {e}")
         return jsonify([])
 
+@app.route('/api/dashboard/analytics', methods=['GET'])
+def get_dashboard_analytics():
+    """Return real-time analytics per account and global aggregates."""
+    try:
+        # Time window for commands per minute
+        now_ts = time.time()
+        one_min_ago = now_ts - 60
+
+        # Build account base list from active clients
+        active_accounts = {}
+        try:
+            for client in bot_instances:
+                if hasattr(client, 'user') and client.user:
+                    acc_id = str(client.user.id)
+                    active_accounts[acc_id] = {
+                        "account_id": acc_id,
+                        "account_display": getattr(client, 'username', None) or getattr(getattr(client, 'user', None), 'name', None) or f"User-{acc_id[-4:]}",
+                        "active": True,
+                        "net_earnings": getattr(client, 'user_status', {}).get('net_earnings', 0)
+                    }
+        except Exception:
+            pass
+
+        # Also include accounts seen in logs
+        for log in command_logs:
+            acc_id = log.get('account_id')
+            if not acc_id:
+                continue
+            active_accounts.setdefault(acc_id, {
+                "account_id": acc_id,
+                "account_display": log.get('account_display') or f"User-{acc_id[-4:]}",
+                "active": False,
+                "net_earnings": 0
+            })
+
+        # Initialize per-account metrics
+        for acc in active_accounts.values():
+            acc.update({
+                "cpm": 0,
+                "session_total": 0,
+                "hunt": 0,
+                "battle": 0,
+                "daily": 0,
+                "owo": 0,
+                "last_command_ts": None
+            })
+
+        # Compute metrics from logs
+        global_cpm = 0
+        for log in command_logs:
+            ts = log.get('timestamp', 0)
+            if ts >= one_min_ago:
+                global_cpm += 1
+            acc_id = log.get('account_id')
+            if acc_id in active_accounts:
+                acc = active_accounts[acc_id]
+                acc['session_total'] += 1
+                if ts >= one_min_ago:
+                    acc['cpm'] += 1
+                ctype = (log.get('command_type') or '').lower()
+                if 'hunt' in ctype:
+                    acc['hunt'] += 1
+                elif 'battle' in ctype:
+                    acc['battle'] += 1
+                elif 'daily' in ctype:
+                    acc['daily'] += 1
+                elif ctype in {'owo', 'uwu'} or 'owo' in ctype:
+                    acc['owo'] += 1
+                # Update last timestamp
+                if ts and (not acc['last_command_ts'] or ts > acc['last_command_ts']):
+                    acc['last_command_ts'] = ts
+
+        # Global aggregates
+        global_session_total = sum(a['session_total'] for a in active_accounts.values())
+        global_net = sum(a.get('net_earnings', 0) for a in active_accounts.values())
+
+        return jsonify({
+            "global": {
+                "cpm": global_cpm,
+                "active_accounts": sum(1 for a in active_accounts.values() if a['active']),
+                "session_total": global_session_total,
+                "net_earnings": global_net,
+                "timestamp": now_ts
+            },
+            "accounts": list(active_accounts.values())
+        })
+    except Exception as e:
+        print(f"Error fetching analytics: {e}")
+        return jsonify({"global": {"cpm": 0, "active_accounts": 0, "session_total": 0, "net_earnings": 0}, "accounts": []})
+
 
 @app.route('/api/settings', methods=['POST'])
 def update_settings():
@@ -587,8 +681,7 @@ def get_logs():
         print(f"Error fetching logs: {e}")
         return jsonify([])
 
-# Global list to store real-time command logs
-command_logs = []
+# Global list to store real-time command logs (declared at top of file)
 max_command_logs = 500  # Keep only the last 500 commands
 
 def add_command_log(account_id, command_type, message, status="info"):
@@ -609,6 +702,226 @@ def add_command_log(account_id, command_type, message, status="info"):
     # Keep only the last max_command_logs entries
     if len(command_logs) > max_command_logs:
         command_logs = command_logs[-max_command_logs:]
+
+def refresh_bot_settings(changed_command=None, enabled=None):
+    """Refresh settings for all active bot instances and apply immediate toggle if provided."""
+    global bot_instances
+    try:
+        if not bot_instances:
+            print("No active bot instances to refresh")
+            return
+
+        active_clients = []
+        for client in bot_instances:
+            try:
+                if hasattr(client, 'refresh_settings') and hasattr(client, 'user') and client.user:
+                    client.refresh_settings()
+                    # Apply immediate toggle on the client's loop
+                    if changed_command is not None and enabled is not None and hasattr(client, 'apply_toggle'):
+                        asyncio.run_coroutine_threadsafe(client.apply_toggle(changed_command, enabled), client.loop)
+                    active_clients.append(client)
+                elif hasattr(client, 'refresh_commands_dict'):
+                    client.refresh_commands_dict()
+                    if changed_command is not None and enabled is not None and hasattr(client, 'apply_toggle'):
+                        asyncio.run_coroutine_threadsafe(client.apply_toggle(changed_command, enabled), client.loop)
+                    active_clients.append(client)
+            except Exception as client_error:
+                print(f"Error refreshing individual client: {client_error}")
+                continue
+
+        bot_instances = active_clients
+        print(f"Refreshed settings for {len(active_clients)} active bot instances")
+
+    except Exception as e:
+        print(f"Error refreshing bot settings: {e}")
+
+@app.route('/api/dashboard/quick-toggle', methods=['POST'])
+def toggle_quick_setting():
+    """Toggle quick settings (hunt, battle, daily, owo)"""
+    try:
+        data = request.get_json()
+        command = data.get('command')
+        enabled = data.get('enabled', False)
+        
+        if not command:
+            return jsonify({"error": "Command not specified"}), 400
+        
+        # Update settings for all active bot instances
+        for user_id in listUserIds:
+            settings_path = f"config/{user_id}/settings.json"
+            if os.path.exists(settings_path):
+                with open(settings_path, 'r') as f:
+                    settings = json.load(f)
+                
+                # Update the specific command setting
+                if command == "hunt":
+                    settings["commands"]["hunt"]["enabled"] = enabled
+                elif command == "battle":
+                    settings["commands"]["battle"]["enabled"] = enabled
+                elif command == "daily":
+                    settings["autoDaily"] = enabled
+                elif command == "owo":
+                    settings["commands"]["owo"]["enabled"] = enabled
+                
+                # Save updated settings
+                with open(settings_path, 'w') as f:
+                    json.dump(settings, f, indent=4)
+                
+                # Log the change
+                add_command_log(user_id, "system", f"{command.upper()} {'enabled' if enabled else 'disabled'}", "info")
+        
+        # Refresh bot settings for all active instances and apply immediately
+        refresh_bot_settings(command, enabled)
+        
+        return jsonify({
+            "success": True, 
+            "message": f"{command.upper()} {'enabled' if enabled else 'disabled'} for all accounts"
+        })
+        
+    except Exception as e:
+        print(f"Error toggling quick setting: {e}")
+        return jsonify({"error": "Failed to toggle setting"}), 500
+
+@app.route('/api/dashboard/quick-settings', methods=['GET'])
+def get_quick_settings():
+    """Get current quick settings status"""
+    try:
+        # Get settings from first available user (they should all be the same)
+        if not listUserIds:
+            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False})
+        
+        user_id = listUserIds[0]
+        settings_path = f"config/{user_id}/settings.json"
+        
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            return jsonify({
+                "hunt": settings.get("commands", {}).get("hunt", {}).get("enabled", False),
+                "battle": settings.get("commands", {}).get("battle", {}).get("enabled", False), 
+                "daily": settings.get("autoDaily", False),
+                "owo": settings.get("commands", {}).get("owo", {}).get("enabled", False)
+            })
+        else:
+            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False})
+            
+    except Exception as e:
+        print(f"Error getting quick settings: {e}")
+        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False})
+
+@app.route('/api/dashboard/security-settings', methods=['GET'])
+def get_security_settings():
+    """Get current security settings"""
+    try:
+        # Get settings from first available user
+        if not listUserIds:
+            return jsonify({
+                "delay_min": 1.7,
+                "delay_max": 2.7,
+                "captcha_restart_min": 3.7,
+                "captcha_restart_max": 5.6,
+                "typing_indicator": False,
+                "random_delays": False,
+                "silent_mode": False
+            })
+        
+        user_id = listUserIds[0]
+        settings_path = f"config/{user_id}/settings.json"
+        
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            default_cooldowns = settings.get("defaultCooldowns", {})
+            command_handler = default_cooldowns.get("commandHandler", {})
+            between_commands = command_handler.get("betweenCommands", [1.7, 2.7])
+            captcha_restart = default_cooldowns.get("captchaRestart", [3.7, 5.6])
+            
+            return jsonify({
+                "delay_min": between_commands[0],
+                "delay_max": between_commands[1],
+                "captcha_restart_min": captcha_restart[0],
+                "captcha_restart_max": captcha_restart[1],
+                "typing_indicator": False,
+                "random_delays": False,
+                "silent_mode": settings.get("silentMode", False)
+            })
+        else:
+            return jsonify({
+                "delay_min": 1.7,
+                "delay_max": 2.7,
+                "captcha_restart_min": 3.7,
+                "captcha_restart_max": 5.6,
+                "typing_indicator": False,
+                "random_delays": False,
+                "silent_mode": False
+            })
+            
+    except Exception as e:
+        print(f"Error getting security settings: {e}")
+        return jsonify({
+            "delay_min": 1.7,
+            "delay_max": 2.7,
+            "captcha_restart_min": 3.7,
+            "captcha_restart_max": 5.6,
+            "typing_indicator": False,
+            "random_delays": False,
+            "silent_mode": False
+        })
+
+@app.route('/api/dashboard/security-settings', methods=['POST'])
+def save_security_settings():
+    """Save security settings"""
+    try:
+        data = request.get_json()
+        
+        # Update settings for all active bot instances
+        for user_id in listUserIds:
+            settings_path = f"config/{user_id}/settings.json"
+            if os.path.exists(settings_path):
+                with open(settings_path, 'r') as f:
+                    settings = json.load(f)
+                
+                # Update delay settings
+                if "defaultCooldowns" not in settings:
+                    settings["defaultCooldowns"] = {}
+                if "commandHandler" not in settings["defaultCooldowns"]:
+                    settings["defaultCooldowns"]["commandHandler"] = {}
+                
+                settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [
+                    float(data.get("delay_min", 1.7)),
+                    float(data.get("delay_max", 2.7))
+                ]
+                
+                settings["defaultCooldowns"]["captchaRestart"] = [
+                    float(data.get("captcha_restart_min", 3.7)),
+                    float(data.get("captcha_restart_max", 5.6))
+                ]
+                
+                # Anti-Detection removed from UI; enforce safe defaults
+                settings["typingIndicator"] = False
+                settings["randomDelays"] = False
+                settings["silentMode"] = data.get("silent_mode", False)
+                
+                # Save updated settings
+                with open(settings_path, 'w') as f:
+                    json.dump(settings, f, indent=4)
+                
+                # Log the change
+                add_command_log(user_id, "system", "Security settings updated", "info")
+        
+        # Refresh bot settings for all active instances
+        refresh_bot_settings()
+        
+        return jsonify({
+            "success": True,
+            "message": "Security settings saved successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error saving security settings: {e}")
+        return jsonify({"error": "Failed to save security settings"}), 500
 
 @app.route('/api/dashboard/command-logs', methods=['GET'])
 def get_command_logs():
@@ -643,6 +956,27 @@ def get_command_logs():
     except Exception as e:
         print(f"Error fetching command logs: {e}")
         return jsonify({"logs": [], "total_count": 0, "filtered_count": 0})
+
+@app.route('/api/dashboard/terminate', methods=['POST'])
+def dashboard_terminate():
+    """Terminate all bot instances and exit process (on purpose)."""
+    try:
+        # Close all discord clients gracefully
+        for client in list(bot_instances):
+            try:
+                if hasattr(client, 'close'):
+                    asyncio.run_coroutine_threadsafe(client.close(), client.loop)
+            except Exception:
+                pass
+        # Also try to stop the web server by signaling exit
+        def delayed_exit():
+            time.sleep(0.5)
+            os._exit(0)
+        Thread(target=delayed_exit, daemon=True).start()
+        return jsonify({"success": True, "message": "Termination signal sent. Shutting down..."})
+    except Exception as e:
+        print(f"Error terminating bot: {e}")
+        return jsonify({"success": False, "message": "Failed to terminate"}), 500
 
 @app.route('/api/bot/<action>', methods=['POST'])
 def control_bot(action):
@@ -1176,7 +1510,7 @@ class MyClient(commands.Bot):
             log_entry = {
                 "timestamp": time.time(),
                 "account_id": str(self.user.id),
-                "account_display": f"User-{str(self.user.id)[-4:]}",
+                "account_display": self.username or (self.user.name if hasattr(self.user, 'name') else f"User-{str(self.user.id)[-4:]}") ,
                 "command_type": command_type,
                 "message": message,
                 "status": status
@@ -1188,6 +1522,86 @@ class MyClient(commands.Bot):
                 command_logs = command_logs[-max_command_logs:]
         except Exception as e:
             print(f"Error adding dashboard log: {e}")
+    
+    def refresh_settings(self):
+        """Refresh bot settings from file"""
+        try:
+            settings_path = f"config/{self.user.id}/settings.json"
+            if os.path.exists(settings_path):
+                with open(settings_path, 'r') as f:
+                    new_settings = json.load(f)
+                self.settings_dict = new_settings
+                self.refresh_commands_dict()
+                # Ensure loaded cogs reflect new settings
+                asyncio.create_task(self.sync_cogs_with_settings())
+                print(f"Settings refreshed for user {self.user.id}")
+        except Exception as e:
+            print(f"Error refreshing settings for user {self.user.id}: {e}")
+
+    async def purge_from_queue(self, command_id):
+        """Remove all queued items for a given command id immediately."""
+        try:
+            async with self.lock:
+                items = []
+                while not self.queue.empty():
+                    items.append(await self.queue.get())
+                for item in items:
+                    priority, counter, cmd = item
+                    if cmd.get('id') != command_id:
+                        await self.queue.put(item)
+                if command_id in self.cmds_state:
+                    self.cmds_state[command_id]["in_queue"] = False
+        except Exception as e:
+            await self.log(f"Error - purge_from_queue({command_id}): {e}", "#c25560")
+
+    async def sync_cogs_with_settings(self):
+        """Load/unload cogs to match current settings_dict/commands_dict."""
+        try:
+            self.refresh_commands_dict()
+            files = os.listdir(resource_path("./cogs"))
+            for filename in files:
+                if not filename.endswith('.py'):
+                    continue
+                key = filename[:-3]
+                extension = f"cogs.{key}"
+                should_enable = self.commands_dict.get(key, False)
+                if extension in self.extensions and not should_enable:
+                    await self.unload_cog(extension)
+                elif extension not in self.extensions and should_enable:
+                    try:
+                        await self.load_extension(extension)
+                    except Exception as e:
+                        await self.log(f"Error - Failed to load extension {extension}: {e}", "#c25560")
+        except Exception as e:
+            await self.log(f"Error - sync_cogs_with_settings(): {e}", "#c25560")
+
+    async def apply_toggle(self, command, enabled):
+        """Apply a single command toggle immediately (load/unload + purge queue)."""
+        try:
+            # Ensure settings_dict is the latest
+            await asyncio.sleep(0)  # yield control
+            self.refresh_commands_dict()
+            ext_map = {
+                'hunt': 'cogs.hunt',
+                'battle': 'cogs.battle',
+                'daily': 'cogs.daily',
+                'owo': 'cogs.owo'
+            }
+            extension = ext_map.get(command)
+            if extension:
+                if not enabled and extension in self.extensions:
+                    await self.unload_cog(extension)
+                elif enabled and extension not in self.extensions and self.commands_dict.get(command, False):
+                    try:
+                        await self.load_extension(extension)
+                    except Exception as e:
+                        await self.log(f"Error - Failed to load extension {extension}: {e}", "#c25560")
+
+            # Purge queued items and checks for this command
+            await self.remove_queue(id=command)
+            await self.purge_from_queue(command)
+        except Exception as e:
+            await self.log(f"Error - apply_toggle({command}): {e}", "#c25560")
 
     """To make the code cleaner when accessing cooldowns from config."""
     def random_float(self, cooldown_list):
@@ -1709,9 +2123,13 @@ def run_bots(tokens_and_channels):
         thread.join()
 
 def run_bot(token, channel_id, global_settings_dict):
+    global bot_instances
     try:
         logging.getLogger("discord.client").setLevel(logging.ERROR)
         client = MyClient(token, channel_id, global_settings_dict)
+        
+        # Add client to global instances list
+        bot_instances.append(client)
 
         if not on_mobile:
             try:
@@ -1732,11 +2150,15 @@ def run_bot(token, channel_id, global_settings_dict):
 
 def run_bot(token, channel_id, global_settings_dict):
     """Original run_bot function for backwards compatibility"""
+    global bot_instances
     try:
         logging.getLogger("discord.client").setLevel(logging.ERROR)
 
         while True:
             client = MyClient(token, channel_id, global_settings_dict)
+            
+            # Add client to global instances list
+            bot_instances.append(client)
 
             if not on_mobile:
                 try:
