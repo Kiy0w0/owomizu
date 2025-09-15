@@ -3,7 +3,7 @@
     "useSlashCommands": false,
     "commands": {
         "hunt": {
-            "enabled": true,
+            "enabled": false,
             "cooldown": [
                 15,
                 17
@@ -11,7 +11,7 @@
             "useShortForm": true
         },
         "battle": {
-            "enabled": true,
+            "enabled": false,
             "cooldown": [
                 15,
                 17
@@ -98,7 +98,7 @@
             ]
         },
         "owo": {
-            "enabled": true,
+            "enabled": false,
             "cooldown": [
                 10,
                 13
@@ -198,7 +198,7 @@
             0.09
         ]
     },
-    "autoDaily": true,
+    "autoDaily": false,
     "cashCheck": true,
     "defaultCooldowns": {
         "longCooldown": [

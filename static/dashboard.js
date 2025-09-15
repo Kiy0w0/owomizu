@@ -705,9 +705,28 @@ class MizuDashboard {
         try {
             // Show loading state
             const toggle = document.getElementById(`${command}-toggle`);
+            const toggleItem = toggle?.closest('.toggle-item');
+            
             if (toggle) {
                 toggle.disabled = true;
             }
+            
+            // Add loading visual feedback
+            if (toggleItem) {
+                toggleItem.classList.add('loading');
+            }
+            
+            // Show immediate feedback notification
+            const commandNames = {
+                'hunt': 'Hunt',
+                'battle': 'Battle', 
+                'daily': 'Daily',
+                'owo': 'OwO',
+                'useSlashCommands': 'Slash Commands'
+            };
+            
+            const commandName = commandNames[command] || command.toUpperCase();
+            this.showNotification(`${enabled ? 'Enabling' : 'Disabling'} ${commandName}...`, 'info', 2000);
 
             const response = await fetch('/api/dashboard/quick-toggle', {
                 method: 'POST',
@@ -747,10 +766,16 @@ class MizuDashboard {
                 toggle.checked = !enabled;
             }
         } finally {
-            // Re-enable toggle
+            // Re-enable toggle and remove loading state
             const toggle = document.getElementById(`${command}-toggle`);
+            const toggleItem = toggle?.closest('.toggle-item');
+            
             if (toggle) {
                 toggle.disabled = false;
+            }
+            
+            if (toggleItem) {
+                toggleItem.classList.remove('loading');
             }
         }
     }

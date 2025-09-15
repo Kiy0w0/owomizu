@@ -747,30 +747,30 @@ def toggle_quick_setting():
         if not command:
             return jsonify({"error": "Command not specified"}), 400
         
-        # Update settings for all active bot instances
-        for user_id in listUserIds:
-            settings_path = f"config/{user_id}/settings.json"
-            if os.path.exists(settings_path):
-                with open(settings_path, 'r') as f:
-                    settings = json.load(f)
-                
-                # Update the specific command setting
-                if command == "hunt":
-                    settings["commands"]["hunt"]["enabled"] = enabled
-                elif command == "battle":
-                    settings["commands"]["battle"]["enabled"] = enabled
-                elif command == "daily":
-                    settings["autoDaily"] = enabled
-                elif command == "owo":
-                    settings["commands"]["owo"]["enabled"] = enabled
-                elif command == "useSlashCommands":
-                    settings["useSlashCommands"] = enabled
-                
-                # Save updated settings
-                with open(settings_path, 'w') as f:
-                    json.dump(settings, f, indent=4)
-                
-                # Log the change
+        # Update main settings file
+        settings_path = "config/settings.json"
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            # Update the specific command setting
+            if command == "hunt":
+                settings["commands"]["hunt"]["enabled"] = enabled
+            elif command == "battle":
+                settings["commands"]["battle"]["enabled"] = enabled
+            elif command == "daily":
+                settings["autoDaily"] = enabled
+            elif command == "owo":
+                settings["commands"]["owo"]["enabled"] = enabled
+            elif command == "useSlashCommands":
+                settings["useSlashCommands"] = enabled
+            
+            # Save updated settings
+            with open(settings_path, 'w') as f:
+                json.dump(settings, f, indent=4)
+            
+            # Log the change for all active bot instances
+            for user_id in listUserIds:
                 if command == "useSlashCommands":
                     add_command_log(user_id, "system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
                 else:
@@ -779,9 +779,21 @@ def toggle_quick_setting():
         # Refresh bot settings for all active instances and apply immediately
         refresh_bot_settings(command, enabled)
         
+        # Create specific success messages
+        command_names = {
+            "hunt": "Hunt",
+            "battle": "Battle", 
+            "daily": "Daily",
+            "owo": "OwO",
+            "useSlashCommands": "Slash Commands"
+        }
+        
+        command_display = command_names.get(command, command.upper())
+        status = "enabled" if enabled else "disabled"
+        
         return jsonify({
             "success": True, 
-            "message": f"{command.upper()} {'enabled' if enabled else 'disabled'} for all accounts"
+            "message": f"✅ {command_display} {status} successfully!"
         })
         
     except Exception as e:
@@ -792,12 +804,8 @@ def toggle_quick_setting():
 def get_quick_settings():
     """Get current quick settings status"""
     try:
-        # Get settings from first available user (they should all be the same)
-        if not listUserIds:
-            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False})
-        
-        user_id = listUserIds[0]
-        settings_path = f"config/{user_id}/settings.json"
+        # Read from main settings file
+        settings_path = "config/settings.json"
         
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
@@ -821,20 +829,8 @@ def get_quick_settings():
 def get_security_settings():
     """Get current security settings"""
     try:
-        # Get settings from first available user
-        if not listUserIds:
-            return jsonify({
-                "delay_min": 1.7,
-                "delay_max": 2.7,
-                "captcha_restart_min": 3.7,
-                "captcha_restart_max": 5.6,
-                "typing_indicator": False,
-                "random_delays": False,
-                "silent_mode": False
-            })
-        
-        user_id = listUserIds[0]
-        settings_path = f"config/{user_id}/settings.json"
+        # Read from main settings file
+        settings_path = "config/settings.json"
         
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
@@ -883,39 +879,39 @@ def save_security_settings():
     try:
         data = request.get_json()
         
-        # Update settings for all active bot instances
-        for user_id in listUserIds:
-            settings_path = f"config/{user_id}/settings.json"
-            if os.path.exists(settings_path):
-                with open(settings_path, 'r') as f:
-                    settings = json.load(f)
-                
-                # Update delay settings
-                if "defaultCooldowns" not in settings:
-                    settings["defaultCooldowns"] = {}
-                if "commandHandler" not in settings["defaultCooldowns"]:
-                    settings["defaultCooldowns"]["commandHandler"] = {}
-                
-                settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [
-                    float(data.get("delay_min", 1.7)),
-                    float(data.get("delay_max", 2.7))
-                ]
-                
-                settings["defaultCooldowns"]["captchaRestart"] = [
-                    float(data.get("captcha_restart_min", 3.7)),
-                    float(data.get("captcha_restart_max", 5.6))
-                ]
-                
-                # Anti-Detection removed from UI; enforce safe defaults
-                settings["typingIndicator"] = False
-                settings["randomDelays"] = False
-                settings["silentMode"] = data.get("silent_mode", False)
-                
-                # Save updated settings
-                with open(settings_path, 'w') as f:
-                    json.dump(settings, f, indent=4)
-                
-                # Log the change
+        # Update main settings file
+        settings_path = "config/settings.json"
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            # Update delay settings
+            if "defaultCooldowns" not in settings:
+                settings["defaultCooldowns"] = {}
+            if "commandHandler" not in settings["defaultCooldowns"]:
+                settings["defaultCooldowns"]["commandHandler"] = {}
+            
+            settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [
+                float(data.get("delay_min", 1.7)),
+                float(data.get("delay_max", 2.7))
+            ]
+            
+            settings["defaultCooldowns"]["captchaRestart"] = [
+                float(data.get("captcha_restart_min", 3.7)),
+                float(data.get("captcha_restart_max", 5.6))
+            ]
+            
+            # Anti-Detection removed from UI; enforce safe defaults
+            settings["typingIndicator"] = False
+            settings["randomDelays"] = False
+            settings["silentMode"] = data.get("silent_mode", False)
+            
+            # Save updated settings
+            with open(settings_path, 'w') as f:
+                json.dump(settings, f, indent=4)
+            
+            # Log the change for all active bot instances
+            for user_id in listUserIds:
                 add_command_log(user_id, "system", "Security settings updated", "info")
         
         # Refresh bot settings for all active instances
@@ -1609,17 +1605,27 @@ class MyClient(commands.Bot):
             if extension:
                 if not enabled and extension in self.extensions:
                     await self.unload_cog(extension)
+                    await self.log(f"{command.upper()} disabled", "#ff6b6b")
+                    # Add dashboard log
+                    self.add_dashboard_log("system", f"{command.upper()} disabled", "warning")
                 elif enabled and extension not in self.extensions and self.commands_dict.get(command, False):
                     try:
                         await self.load_extension(extension)
+                        await self.log(f"{command.upper()} enabled", "#51cf66")
+                        # Add dashboard log
+                        self.add_dashboard_log("system", f"{command.upper()} enabled", "success")
                     except Exception as e:
                         await self.log(f"Error - Failed to load extension {extension}: {e}", "#c25560")
+                        # Add dashboard log
+                        self.add_dashboard_log("system", f"Failed to enable {command.upper()}: {e}", "error")
 
             # Purge queued items and checks for this command
             await self.remove_queue(id=command)
             await self.purge_from_queue(command)
         except Exception as e:
             await self.log(f"Error - apply_toggle({command}): {e}", "#c25560")
+            # Add dashboard log
+            self.add_dashboard_log("system", f"Error toggling {command.upper()}: {e}", "error")
 
     """To make the code cleaner when accessing cooldowns from config."""
     def random_float(self, cooldown_list):
