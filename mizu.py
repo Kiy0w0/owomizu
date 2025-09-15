@@ -763,6 +763,8 @@ def toggle_quick_setting():
                     settings["autoDaily"] = enabled
                 elif command == "owo":
                     settings["commands"]["owo"]["enabled"] = enabled
+                elif command == "useSlashCommands":
+                    settings["useSlashCommands"] = enabled
                 
                 # Save updated settings
                 with open(settings_path, 'w') as f:
@@ -802,14 +804,15 @@ def get_quick_settings():
                 "hunt": settings.get("commands", {}).get("hunt", {}).get("enabled", False),
                 "battle": settings.get("commands", {}).get("battle", {}).get("enabled", False), 
                 "daily": settings.get("autoDaily", False),
-                "owo": settings.get("commands", {}).get("owo", {}).get("enabled", False)
+                "owo": settings.get("commands", {}).get("owo", {}).get("enabled", False),
+                "useSlashCommands": settings.get("useSlashCommands", False)
             })
         else:
-            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False})
+            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False})
             
     except Exception as e:
         print(f"Error getting quick settings: {e}")
-        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False})
+        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False})
 
 @app.route('/api/dashboard/security-settings', methods=['GET'])
 def get_security_settings():

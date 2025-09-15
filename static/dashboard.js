@@ -107,6 +107,7 @@ class MizuDashboard {
         document.getElementById('battle-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('battle', e.target.checked));
         document.getElementById('daily-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('daily', e.target.checked));
         document.getElementById('owo-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('owo', e.target.checked));
+        document.getElementById('slash-commands-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('useSlashCommands', e.target.checked));
         
         // Security Settings buttons
         document.getElementById('save-security')?.addEventListener('click', () => this.saveSecuritySettings());
@@ -115,19 +116,6 @@ class MizuDashboard {
         // Stats refresh
         document.getElementById('refresh-stats')?.addEventListener('click', () => this.refreshStats());
 
-        // Quick toggles
-        document.getElementById('hunt-toggle')?.addEventListener('change', (e) => {
-            this.updateQuickSetting('hunt', e.target.checked);
-        });
-        document.getElementById('battle-toggle')?.addEventListener('change', (e) => {
-            this.updateQuickSetting('battle', e.target.checked);
-        });
-        document.getElementById('daily-toggle')?.addEventListener('change', (e) => {
-            this.updateQuickSetting('daily', e.target.checked);
-        });
-        document.getElementById('owo-toggle')?.addEventListener('change', (e) => {
-            this.updateQuickSetting('owo', e.target.checked);
-        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
@@ -781,11 +769,13 @@ class MizuDashboard {
                 const battleToggle = document.getElementById('battle-toggle');
                 const dailyToggle = document.getElementById('daily-toggle');
                 const owoToggle = document.getElementById('owo-toggle');
+                const slashCommandsToggle = document.getElementById('slash-commands-toggle');
                 
                 if (huntToggle) huntToggle.checked = settings.hunt;
                 if (battleToggle) battleToggle.checked = settings.battle;
                 if (dailyToggle) dailyToggle.checked = settings.daily;
                 if (owoToggle) owoToggle.checked = settings.owo;
+                if (slashCommandsToggle) slashCommandsToggle.checked = settings.useSlashCommands;
             }
         } catch (error) {
             console.error('Failed to load quick settings:', error);
