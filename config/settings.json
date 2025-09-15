@@ -238,7 +238,6 @@
             ]
         }
     },
-    
     "autoUse": {
         "gems": {
             "enabled": false,
@@ -263,5 +262,10 @@
         },
         "autoLootbox": false,
         "autoCrate": false
+    },
+    "accountRotation": {
+        "enabled": false,
+        "cooldownSeconds": 300,
+        "maxCommandsPerAccount": 10
     }
 }

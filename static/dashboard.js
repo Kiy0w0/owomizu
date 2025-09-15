@@ -831,6 +831,7 @@ class MizuDashboard {
         } catch (error) {
             console.error('Failed to load security settings:', error);
         }
+        
     }
 
     /**
@@ -1283,6 +1284,7 @@ class MizuDashboard {
             })
             .catch(() => {});
     }
+
 }
 
 // Notification styles (injected dynamically)
@@ -1436,6 +1438,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize dashboard
     window.mizuDashboard = new MizuDashboard();
+    
 });
 
 // Export for global access

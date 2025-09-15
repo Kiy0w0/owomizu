@@ -1378,6 +1378,7 @@ input:checked + .toggle-slider:before {
   pointer-events: none;
 }
 
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .main-container {

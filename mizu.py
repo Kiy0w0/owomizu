@@ -108,6 +108,7 @@ config_updated = None
 bot_instances = []
 command_logs = []
 
+
 # Track bot start time for uptime calculation
 app.start_time = time.time()
 
@@ -978,6 +979,7 @@ def dashboard_terminate():
         print(f"Error terminating bot: {e}")
         return jsonify({"success": False, "message": "Failed to terminate"}), 500
 
+
 @app.route('/api/bot/<action>', methods=['POST'])
 def control_bot(action):
     """Control bot (start/stop/restart)"""
@@ -1523,6 +1525,7 @@ class MyClient(commands.Bot):
         except Exception as e:
             print(f"Error adding dashboard log: {e}")
     
+    
     def refresh_settings(self):
         """Refresh bot settings from file"""
         try:
@@ -1900,6 +1903,7 @@ class MyClient(commands.Bot):
 
         printBox(f'-Loaded {self.username}[*].'.center(console_width - 2), 'bold royal_blue1 ')
         listUserIds.append(self.user.id)
+        
 
         # Fetch the channel
         self.cm = self.get_channel(self.channel_id)
