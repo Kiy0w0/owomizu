@@ -771,7 +771,10 @@ def toggle_quick_setting():
                     json.dump(settings, f, indent=4)
                 
                 # Log the change
-                add_command_log(user_id, "system", f"{command.upper()} {'enabled' if enabled else 'disabled'}", "info")
+                if command == "useSlashCommands":
+                    add_command_log(user_id, "system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
+                else:
+                    add_command_log(user_id, "system", f"{command.upper()} {'enabled' if enabled else 'disabled'}", "info")
         
         # Refresh bot settings for all active instances and apply immediately
         refresh_bot_settings(command, enabled)
@@ -1587,6 +1590,15 @@ class MyClient(commands.Bot):
             # Ensure settings_dict is the latest
             await asyncio.sleep(0)  # yield control
             self.refresh_commands_dict()
+            
+            # Handle useSlashCommands setting
+            if command == "useSlashCommands":
+                self.settings_dict["useSlashCommands"] = enabled
+                await self.log(f"Slash commands {'enabled' if enabled else 'disabled'}", "#40e0d0")
+                # Add dashboard log
+                self.add_dashboard_log("system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
+                return
+            
             ext_map = {
                 'hunt': 'cogs.hunt',
                 'battle': 'cogs.battle',
