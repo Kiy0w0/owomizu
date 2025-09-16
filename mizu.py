@@ -319,9 +319,25 @@ def get_dashboard_status():
         # Simple status based on active user IDs
         active_accounts = len(listUserIds) if listUserIds else 0
         
-        # Determine bot status based on active accounts
+        # Check captcha status from active bot instances
+        captcha_status = False
+        sleep_status = False
+        
+        for bot_instance in bot_instances:
+            if hasattr(bot_instance, 'command_handler_status'):
+                if bot_instance.command_handler_status.get("captcha", False):
+                    captcha_status = True
+                if bot_instance.command_handler_status.get("sleep", False):
+                    sleep_status = True
+                    
+        # Determine bot status based on active accounts and captcha status
         if active_accounts > 0:
-            bot_status = "online"
+            if captcha_status:
+                bot_status = "captcha"
+            elif sleep_status:
+                bot_status = "paused"
+            else:
+                bot_status = "online"
         else:
             bot_status = "offline"
         
@@ -329,6 +345,8 @@ def get_dashboard_status():
             "status": bot_status,
             "active_accounts": active_accounts,
             "total_accounts": len(tokens_and_channels) if 'tokens_and_channels' in globals() else 0,
+            "captcha_detected": captcha_status,
+            "is_sleeping": sleep_status,
             "timestamp": time.time()
         })
     except Exception as e:
@@ -337,8 +355,10 @@ def get_dashboard_status():
             "status": "error",
             "active_accounts": 0,
             "total_accounts": 0,
+            "captcha_detected": False,
+            "is_sleeping": False,
             "timestamp": time.time()
-        })
+        }), 500
 
 @app.route('/api/dashboard/stats', methods=['GET'])
 def get_dashboard_stats():
@@ -1283,6 +1303,10 @@ class MyClient(commands.Bot):
             if safety_check.get("enabled", False) and compare_versions(version, safety_check.get("version", "0.0.0")):
                 self.command_handler_status["captcha"] = True
                 await self.log(f"🛑 Safety Check Alert!\nReason: {safety_check.get('reason', 'Unknown')}\n(Triggered by {safety_check.get('author', 'System')})", "#5c0018")
+                
+                # Add dashboard log for safety check
+                self.add_dashboard_log("system", f"Safety check triggered! Bot stopped: {safety_check.get('reason', 'Unknown')}", "error")
+                
                 if compare_versions(latest_version.get("version", "0.0.0"), safety_check.get("version", "0.0.0")):
                     await self.log(f"Please update to: v{latest_version.get('version', 'latest')}", "#33245e")
         except Exception as e:
@@ -1484,6 +1508,7 @@ class MyClient(commands.Bot):
         commands_dict = self.settings_dict["commands"]
         reaction_bot_dict = self.settings_dict["defaultCooldowns"]["reactionBot"]
         self.commands_dict = {
+            "autosell": self.settings_dict.get("autoSell", {}).get("enabled", False),
             "battle": commands_dict["battle"]["enabled"] and not reaction_bot_dict["hunt_and_battle"],
             "captcha": True,
             "channelswitcher": self.global_settings_dict["channelSwitcher"]["enabled"],
@@ -1501,6 +1526,7 @@ class MyClient(commands.Bot):
             "others": True,
             "owo": commands_dict["owo"]["enabled"] and not reaction_bot_dict["owo"],
             "pray": commands_dict["pray"]["enabled"] and not reaction_bot_dict["pray_and_curse"],
+            "rpp": self.settings_dict.get("autoRandomCommands", {}).get("enabled", False),
             "reactionbot": reaction_bot_dict["hunt_and_battle"] or reaction_bot_dict["owo"] or reaction_bot_dict["pray_and_curse"],
             "sell": commands_dict["sell"]["enabled"],
             "shop": commands_dict["shop"]["enabled"],
@@ -1903,7 +1929,17 @@ class MyClient(commands.Bot):
                 self.user_status["net_earnings"] -= amount
             else:
                 self.user_status["net_earnings"] += amount
+        
         await self.update_cash_db()
+        
+        # Check for auto-sell trigger after cash update
+        if self.settings_dict.get("autoSell", {}).get("enabled", False):
+            try:
+                autosell_cog = self.get_cog("AutoSell")
+                if autosell_cog:
+                    await autosell_cog.check_balance_and_auto_sell()
+            except Exception as e:
+                await self.log(f"Error checking auto-sell: {e}", "#c25560")
 
     async def setup_hook(self):
         # Randomise user

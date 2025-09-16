@@ -273,6 +273,96 @@ def fetch_mizu_announcements():
         pass
     return []
 
+def read_update_changelog():
+    """Read and parse update changelog from update.md"""
+    changelog_path = "update.md"
+    
+    if not os.path.exists(changelog_path):
+        return None
+    
+    try:
+        with open(changelog_path, 'r', encoding='utf-8') as file:
+            content = file.read()
+        
+        # Extract latest version section
+        lines = content.split('\n')
+        latest_updates = []
+        in_latest_section = False
+        section_depth = 0
+        
+        for line in lines:
+            # Check for version headers
+            if line.startswith('## 📅 Version') and 'Latest Updates' in line:
+                in_latest_section = True
+                latest_updates.append(line)
+                continue
+            elif line.startswith('## 📅 Version') and in_latest_section:
+                # Found next version section, stop here
+                break
+            elif line.startswith('---') and in_latest_section and len(latest_updates) > 10:
+                # Found separator after content, stop here
+                break
+            
+            if in_latest_section:
+                latest_updates.append(line)
+        
+        return latest_updates
+    except Exception as e:
+        console.print(f"[yellow]⚠️ Could not read changelog: {e}[/yellow]")
+        return None
+
+def display_changelog():
+    """Display formatted changelog"""
+    changelog = read_update_changelog()
+    
+    if not changelog:
+        return
+    
+    console.print("\n[bold cyan]📋 What's New in This Update:[/bold cyan]")
+    console.print()
+    
+    current_section = ""
+    for line in changelog[1:]:  # Skip the version header
+        line = line.strip()
+        
+        if not line:
+            continue
+            
+        # Handle different markdown elements
+        if line.startswith('### '):
+            # Section headers
+            section_title = line.replace('### ', '').strip()
+            console.print(f"\n[bold yellow]{section_title}[/bold yellow]")
+            current_section = section_title
+            
+        elif line.startswith('#### '):
+            # Subsection headers
+            subsection = line.replace('#### ', '').strip()
+            console.print(f"\n[bold cyan]{subsection}[/bold cyan]")
+            
+        elif line.startswith('- **'):
+            # Feature bullets with bold titles
+            feature = line.replace('- **', '').replace('**', '').strip()
+            if ' - ' in feature:
+                title, desc = feature.split(' - ', 1)
+                console.print(f"  [green]•[/green] [bold white]{title}[/bold white] - {desc}")
+            else:
+                console.print(f"  [green]•[/green] [bold white]{feature}[/bold white]")
+                
+        elif line.startswith('- ✅'):
+            # Checkmark bullets
+            item = line.replace('- ✅', '').strip()
+            console.print(f"  [green]✅[/green] {item}")
+            
+        elif line.startswith('- '):
+            # Regular bullets
+            item = line.replace('- ', '').strip()
+            console.print(f"  [cyan]•[/cyan] {item}")
+            
+        elif line.startswith('```'):
+            # Skip code blocks for now
+            continue
+
 
 
 def main():
@@ -307,7 +397,11 @@ def main():
             for announcement in announcements:
                 console.print(f"[yellow]• {announcement}[/yellow]")
         
+        # Ask if user wants to see changelog anyway
         console.print("\n[green]🎉 You're all set! No updates needed.[/green]")
+        if Confirm.ask("[cyan]Would you like to see what's new in the current version?[/cyan]", default=False):
+            display_changelog()
+        
         return True
     
     # Ask user if they want to update
@@ -339,6 +433,9 @@ def main():
     # Show success message
     console.print("\n[bold green]🎉 Update completed successfully![/bold green]")
     console.print(f"[green]✅ Updated from {current_version} to {latest_version}[/green]")
+    
+    # Display changelog
+    display_changelog()
     
     # Show announcements
     announcements = fetch_mizu_announcements()

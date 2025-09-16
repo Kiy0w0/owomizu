@@ -237,10 +237,28 @@ body {
 .status-dot.online { background: var(--success-color); }
 .status-dot.offline { background: var(--danger-color); }
 .status-dot.connecting { background: var(--warning-color); }
+.status-dot.captcha { 
+    background: #ff9500; 
+    animation: captchaPulse 2s infinite;
+}
+.status-dot.paused { background: #ffd43b; }
 
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.5; }
+}
+
+@keyframes captchaPulse {
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1);
+    box-shadow: 0 0 8px rgba(255, 149, 0, 0.4);
+  }
+  50% { 
+    opacity: 0.7; 
+    transform: scale(1.1);
+    box-shadow: 0 0 12px rgba(255, 149, 0, 0.6);
+  }
 }
 
 .navbar-right {

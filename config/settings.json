@@ -263,6 +263,21 @@
         "autoLootbox": false,
         "autoCrate": false
     },
+    "autoSell": {
+        "enabled": true,
+        "triggerWhenCashBelow": 50,
+        "sellCommand": "all",
+        "cooldownAfterSell": [300, 600],
+        "maxTriggersPerHour": 3
+    },
+    "autoRandomCommands": {
+        "enabled": true,
+        "commands": ["run", "pup", "piku"],
+        "intervalMinutes": [30, 120],
+        "randomizeOrder": true,
+        "maxCommandsPerHour": 8,
+        "onlyWhenActive": true
+    },
     "accountRotation": {
         "enabled": false,
         "cooldownSeconds": 300,

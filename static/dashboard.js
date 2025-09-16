@@ -231,16 +231,34 @@ class MizuDashboard {
     /**
      * Update bot status indicator
      */
-    updateBotStatus(status) {
+    updateBotStatus(status, captchaDetected = false, isSleeping = false) {
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
         
         if (statusDot && statusText) {
-            statusDot.className = `status-dot ${status}`;
-            statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            // Handle different status types
+            let displayStatus = status;
+            let statusClass = status;
+            
+            if (status === 'captcha' || captchaDetected) {
+                displayStatus = 'Captcha Detected';
+                statusClass = 'captcha';
+            } else if (status === 'paused' || isSleeping) {
+                displayStatus = 'Paused';
+                statusClass = 'paused';
+            } else if (status === 'online') {
+                displayStatus = 'Online';
+                statusClass = 'online';
+            } else if (status === 'offline') {
+                displayStatus = 'Offline';
+                statusClass = 'offline';
+            }
+            
+            statusDot.className = `status-dot ${statusClass}`;
+            statusText.textContent = displayStatus;
         }
         
-        this.isConnected = status === 'online';
+        this.isConnected = status === 'online' && !captchaDetected && !isSleeping;
     }
 
     /**
@@ -499,12 +517,24 @@ class MizuDashboard {
             const response = await fetch('/api/dashboard/status');
             if (response.ok) {
                 const statusData = await response.json();
-                this.updateBotStatus(statusData.status);
+                this.updateBotStatus(
+                    statusData.status, 
+                    statusData.captcha_detected, 
+                    statusData.is_sleeping
+                );
                 
                 // Update account info if available
                 if (statusData.active_accounts !== undefined) {
                     this.updateElement('active-accounts', statusData.active_accounts);
                     this.updateElement('total-accounts', statusData.total_accounts);
+                }
+                
+                // Show captcha notification if detected
+                if (statusData.captcha_detected && !this.lastCaptchaNotification) {
+                    this.showNotification('🚨 Captcha detected! Bot automatically stopped', 'error', 10000);
+                    this.lastCaptchaNotification = true;
+                } else if (!statusData.captcha_detected) {
+                    this.lastCaptchaNotification = false;
                 }
             }
         } catch (error) {

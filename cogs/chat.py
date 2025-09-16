@@ -21,7 +21,13 @@ class Chat(commands.Cog):
 
         if f"{cnf['prefix']}{cnf['commandToRestartAfterCaptcha']}" in message.content.lower():
             await self.bot.log("restarting owo-dusk after captcha","#87875f")
+            
+            # Add dashboard log for manual captcha restart
+            self.bot.add_dashboard_log("system", f"Bot manually restarted after captcha by {message.author.name}", "info")
+            
             self.bot.command_handler_status["captcha"]=False
+            
+            await self.bot.log("Bot successfully restarted after captcha!", "#51cf66")
 
 async def setup(bot):
     await bot.add_cog(Chat(bot))

@@ -187,8 +187,17 @@ class Captcha(commands.Cog):
             if "I have verified that you are human! Thank you! :3" in message.content:
                 time_to_sleep = self.bot.random_float(self.bot.settings_dict['defaultCooldowns']['captchaRestart'])
                 await self.bot.log(f"Captcha solved! - sleeping {time_to_sleep}s before restart.", "#5fd700")
+                
+                # Add dashboard log for captcha solved
+                self.bot.add_dashboard_log("captcha", f"Captcha solved! Resuming in {time_to_sleep:.1f}s", "success")
+                
                 await asyncio.sleep(time_to_sleep)
                 self.bot.command_handler_status["captcha"] = False
+                
+                # Add dashboard log for bot resumed
+                self.bot.add_dashboard_log("system", "Bot automatically resumed after captcha", "success")
+                await self.bot.log(f"Bot automatically resumed after captcha!", "#51cf66")
+                
                 await self.bot.update_captcha_db()
                 return
 
@@ -223,6 +232,11 @@ class Captcha(commands.Cog):
                         return
                 self.bot.command_handler_status["captcha"] = True
                 await self.bot.log(f"Captcha detected!", "#d70000")
+                
+                # Add dashboard log for captcha detected
+                channel_name = get_channel_name(message.channel)
+                self.bot.add_dashboard_log("captcha", f"Captcha detected in {channel_name}! Bot stopped automatically", "error")
+                
                 self.captcha_handler(message.channel, "Link")
                 if self.bot.global_settings_dict["webhook"]["enabled"]:
                     await self.bot.webhookSender(
@@ -230,7 +244,7 @@ class Captcha(commands.Cog):
                         desc=f"**User** : <@{self.bot.user.id}>\n**Link** : [OwO Captcha]({message.jump_url})",
                         colors="#00FFAF",
                         img_url="https://cdn.discordapp.com/emojis/1171297031772438618.png",
-                        author_img_url="https://i.imgur.com/6zeCgXo.png",
+                        author_img_url="https://imgur.com/a/xwALH1U",
                         plain_text=(
                             f"<@{self.bot.global_settings_dict['webhook']['webhookUserIdToPingOnCaptcha']}>"
                             if self.bot.global_settings_dict['webhook']['webhookUserIdToPingOnCaptcha']
@@ -243,6 +257,11 @@ class Captcha(commands.Cog):
             elif "**☠ |** You have been banned" in message.content:
                 self.bot.command_handler_status["captcha"] = True
                 await self.bot.log(f"Ban detected!", "#d70000")
+                
+                # Add dashboard log for ban detected
+                channel_name = get_channel_name(message.channel)
+                self.bot.add_dashboard_log("captcha", f"Ban detected in {channel_name}! Bot stopped automatically", "error")
+                
                 self.captcha_handler(message.channel, "Ban")
                 console_handler(self.bot.global_settings_dict["console"], captcha=False)
                 if self.bot.global_settings_dict["webhook"]["enabled"]:
@@ -251,7 +270,7 @@ class Captcha(commands.Cog):
                         desc=f"**User** : <@{self.bot.user.id}>\n**Link** : [Ban Message]({message.jump_url})",
                         colors="#00FFAF",
                         img_url="https://cdn.discordapp.com/emojis/1213902052879503480.gif",
-                        author_img_url="https://i.imgur.com/6zeCgXo.png",
+                        author_img_url="https://imgur.com/a/xwALH1U",
                         plain_text=(
                             f"<@{self.bot.global_settings_dict['webhook']['webhookUserIdToPingOnCaptcha']}>"
                             if self.bot.global_settings_dict["webhook"]["webhookUserIdToPingOnCaptcha"]
@@ -271,6 +290,11 @@ class Captcha(commands.Cog):
                             """clean function cleans the captcha message of unwanted symbols etc"""
                             self.bot.command_handler_status["captcha"] = True
                             await self.bot.log(f"Captcha detected...?", "#d70000")
+                            
+                            # Add dashboard log for embed captcha detected
+                            channel_name = get_channel_name(message.channel)
+                            self.bot.add_dashboard_log("captcha", f"Possible captcha detected in embed ({channel_name})! Bot stopped", "warning")
+                            
                             break
 
                     if embed.fields:
@@ -278,10 +302,20 @@ class Captcha(commands.Cog):
                             if field.name and any(b in clean(field.name) for b in list_captcha):
                                 self.bot.command_handler_status["captcha"] = True
                                 await self.bot.log(f"Captcha detected...?", "#d70000")
+                                
+                                # Add dashboard log for field captcha detected
+                                channel_name = get_channel_name(message.channel)
+                                self.bot.add_dashboard_log("captcha", f"Possible captcha in embed field ({channel_name})! Bot stopped", "warning")
+                                
                                 break
                             if field.value and any(b in clean(field.value) for b in list_captcha):
                                 self.bot.command_handler_status["captcha"] = True
                                 await self.bot.log(f"Captcha detected...?", "#d70000")
+                                
+                                # Add dashboard log for field value captcha detected
+                                channel_name = get_channel_name(message.channel)
+                                self.bot.add_dashboard_log("captcha", f"Possible captcha in embed field value ({channel_name})! Bot stopped", "warning")
+                                
                                 break
 
 async def setup(bot):

@@ -30,8 +30,13 @@
         "lottery": {"priority": 8, "basecd": 5, "log_color": "#457d5f"},
         "level": {"priority": 8, "basecd": 15, "log_color": "#434a46"},
         "sell": {"priority": 9, "basecd": 1, "log_color": "#6e6c0b"},
+        "autosell": {"priority": 1, "basecd": 1, "log_color": "#ffd43b"},
         "shop": {"priority": 9, "basecd": 15, "log_color": "#6e6c0b"},
-        "upgrade": {"priority": 9, "basecd": 1, "log_color": "#0a2963"}
+        "upgrade": {"priority": 9, "basecd": 1, "log_color": "#0a2963"},
+        "run": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
+        "pup": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
+        "piku": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
+        "rpp": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"}
     },
     "alias": {
         "hunt": {
@@ -103,6 +108,18 @@
         "upgrade": {
             "normal": "upg",
             "alias": ["upg", "upgrade"]
+        },
+        "run": {
+            "normal": "run",
+            "alias": ["run"]
+        },
+        "pup": {
+            "normal": "pup", 
+            "alias": ["pup"]
+        },
+        "piku": {
+            "normal": "piku",
+            "alias": ["piku"]
         }
     }
     
