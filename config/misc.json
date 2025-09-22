@@ -37,7 +37,11 @@
         "pup": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
         "piku": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
         "rpp": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
-        "autoenhance": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"}
+        "autoenhance": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
+        "autoenhance_inv": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
+        "autoenhance_gems": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
+        "autoenhance_huntbot": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
+        "autoenhance_upgrade": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"}
     },
     "alias": {
         "hunt": {
