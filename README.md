@@ -1,18 +1,19 @@
 <div align="center">
 
-# <span style="color: #00FFFF;">🌊 Mizu Network 水</span>
+# <span style="color: #00FFFF;">🌊 Mizu OwO 水</span>
 
-*Auto Farming Bot for OwO Discord Game*
+*Advanced Auto Farming Bot for OwO Discord Game*
 
-[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/ekBrzPpYcw)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mizu)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
-[![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
+[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Discord Bot](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/Version-1.0.0-cyan.svg)]()
-[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
+[![Version](https://img.shields.io/badge/Version-1.2.0-cyan.svg)]()[![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 
 ![Mizu Network Banner](static/imgs/mizu.png)
+
+**The most advanced, feature-rich, and user-friendly OwO farming bot**
 
 </div>
 
@@ -20,86 +21,117 @@
 
 ## ✨ **Features**
 
-🎯 **Core Features:**
-- 🤖 **Auto Farming** - Automated OwO commands
-- 🎮 **Mini Games** - Slots, coinflip, hunt, battle
-- 💎 **Economy** - Auto sell, shop, daily rewards
-- 🏆 **Leveling System** - XP tracking and progression
-- 🎁 **Giveaway Participation** - Auto join giveaways
-- 🔐 **Captcha Solver** - Intelligent captcha handling
+### 🎯 **Core Automation**
+- 🤖 **Smart Auto Farming** - Advanced OwO command automation
+- 🎮 **Mini Games** - Slots, coinflip, hunt, battle with smart strategies
+- 💎 **Economy Management** - Auto sell, shop, daily rewards optimization
+- 🏆 **Leveling System** - XP tracking, progression monitoring
+- 🎁 **Giveaway Participation** - Auto join Discord giveaways
+- 🔐 **Advanced Captcha Solver** - AI-powered captcha recognition
 
-🌐 **Web Dashboard:**
-- 📊 Real-time statistics
-- ⚙️ Configuration management
-- 📈 Performance monitoring
-- 🎨 Beautiful UI with dark theme
+### 🚀 **New Advanced Features**
+- ⚡ **AutoEnhance System** - Auto use gems & invest essence
+- 🎯 **AutoHuntBot** - Automated huntbot upgrades & management
+- 🎲 **RPP Commands** - Auto Run/Piku/Pup every minute
+- 💰 **Smart AutoSell** - Intelligent item selling with cash triggers
+- 🔄 **Auto Random Commands** - Varied command execution patterns
 
-🛡️ **Safety & Security:**
-- 🔒 Token encryption
-- 🛡️ Anti-detection measures
-- ⏱️ Smart delay system
-- 📡 API status monitoring
+### 🌐 **Web Dashboard**
+- 📊 **Real-time Statistics** - Live performance metrics
+- ⚙️ **Advanced Configuration** - Comprehensive settings management
+- 📈 **Performance Monitoring** - Resource usage & optimization
+- 🎨 **Modern UI** - Beautiful responsive design with dark theme
+- 🔧 **Live Controls** - Start/stop/configure without restart
+
+### 🛡️ **Safety & Security**
+- 🔒 **Token Protection** - Secure credential management
+- 🛡️ **Anti-Detection** - Human-like behavior patterns
+- ⏱️ **Smart Delay System** - Randomized timing to avoid detection
+- 📡 **API Status Monitoring** - Real-time service health checks
+- 🚨 **Safety Checks** - Account protection mechanisms
 
 ---
 
 ## 🚀 **Quick Start**
 
-### Prerequisites
-- Python 3.7 or higher
-- Discord account
-- Internet connection
+### 📋 Prerequisites
+- **Python 3.8+** (recommended: Python 3.9 or newer)
+- **Discord account** with Developer Mode enabled
+- **Git** (for easy updates)
+- **Internet connection** (stable recommended)
 
-### Installation
+### 📦 Installation
 
-Choose your platform:
+**Choose your platform for detailed setup:**
 
-| Platform | Installation Guide |
-|----------|-------------------|
-| 🪟 **Windows** | [windows-install.md](docs/windows-install.md) |
-| 🐧 **Linux** | [linux.md](/Tutor/linux.md) |
-| 🍎 **macOS** | [macos.md](/Tutor/macos.md) |
-| 📱 **Android (Termux)** | [termux.md](/Tutor/termux.md) |
+| Platform | Installation Guide | Difficulty |
+|----------|-------------------|------------|
+| 🪟 **Windows** | [📖 windows.md](/Tutor/windows.md) | ⭐ Easy |
+| 🐧 **Linux** | [📖 linux.md](/Tutor/linux.md) | ⭐⭐ Medium |
+| 🍎 **macOS** | [📖 macos.md](/Tutor/macos.md) | ⭐⭐ Medium |
+| 📱 **Android (Termux)** | [📖 termux.md](/Tutor/termux.md) | ⭐⭐⭐ Advanced |
 
-### Basic Setup
+### ⚡ **Quick Setup (All Platforms)**
 
-1. **Clone the repository:**
+1. **Clone & Navigate:**
    ```bash
    git clone https://github.com/kiy0w0/owomizu.git
    cd owomizu
    ```
 
-2. **Run setup:**
+2. **Install Dependencies:**
    ```bash
-   python setup.py
+   pip install -r requirements.txt
    ```
 
-3. **Start the bot:**
+3. **Configure Bot:**
+   ```bash
+   # Create tokens.txt with your Discord token and channel ID
+   echo "YOUR_DISCORD_TOKEN YOUR_CHANNEL_ID" > tokens.txt
+   ```
+
+4. **Start Bot:**
    ```bash
    python mizu.py
    ```
 
-4. **Access Web Dashboard:**
-   Open your browser and go to: `http://localhost:5000`
+5. **Access Dashboard:**
+   Open: `http://yourIP:2000`
+
+### 🔄 **Auto-Update System**
+```bash
+# Update to latest version with settings preservation
+python updater.py
+```
 
 ---
 
 ## 📖 **Documentation**
 
-### 📋 **Platform Guides**
-- [🐧 Linux Installation](linux.md)
-- [📱 Termux (Android) Setup](termux.md)
-- [🍎 macOS Installation](macos.md)
+### 📋 **Installation Guides**
+- 🪟 [**Windows Setup**](/Tutor/windows.md) - Complete Windows installation guide
+- 🐧 [**Linux Installation**](/Tutor/linux.md) - Ubuntu, Debian, CentOS setup
+- 🍎 [**macOS Setup**](/Tutor/macos.md) - macOS installation guide  
+- 📱 [**Termux (Android)**](/Tutor/termux.md) - Mobile setup guide
 
 ### ⚙️ **Configuration**
-- Token setup in `tokens.txt`
-- Settings configuration in `config/settings.json`
-- Global settings in `config/global_settings.json`
+- 🔑 **Token Setup** - Discord token extraction and setup
+- ⚙️ **Settings** - `config/settings.json` configuration options
+- 🌐 **Global Settings** - `config/global_settings.json` system settings
+- 🎯 **Command Configuration** - Individual command customization
 
-### 🔧 **Advanced Usage**
-- Custom command delays
-- Webhook notifications
-- Multi-account management
-- Safety checks configuration
+### 🔧 **Advanced Features**
+- 💎 **AutoEnhance** - Automatic gem usage and essence investment
+- 🎯 **AutoHuntBot** - Huntbot automation and upgrades
+- 💰 **AutoSell** - Smart item selling with triggers
+- 🎲 **RPP System** - Random command execution
+- 🔄 **Multi-Account** - Managing multiple Discord accounts
+
+### 🛠️ **Development**
+- 🤝 [**Contributing Guide**](/CONTRIBUTING.md) - How to contribute
+- 📝 **API Documentation** - Internal API reference
+- 🧪 **Testing** - Testing procedures and guidelines
+- 🔧 **Development Setup** - Local development environment
 
 ---
 
@@ -119,27 +151,59 @@ Choose your platform:
 
 ## 🔧 **API Integration**
 
-Mizu Network integrates with our live API for:
-- 📡 Status monitoring
-- 📢 Announcements
-- 🔄 Version checking
-- 🛡️ Safety updates
+### 🌐 **Mizu Network API**
+Our bot integrates with the live Mizu API for enhanced functionality:
+
+- 📡 **Status Monitoring** - Real-time service health checks
+- 📢 **Announcements** - Important updates and news
+- 🔄 **Version Checking** - Automatic update notifications
+- 🛡️ **Safety Updates** - Security patches and warnings
+- 📊 **Statistics** - Usage analytics and performance metrics
 
 **API Endpoint:** `https://kiy0w0.github.io/mizuowoapi`
+
+### 🎛️ **Web Dashboard API**
+The bot includes a built-in REST API for the web dashboard:
+- 📊 `/api/stats` - Real-time statistics
+- ⚙️ `/api/settings` - Configuration management
+- 🎮 `/api/commands` - Command control
+- 📈 `/api/performance` - Performance metrics
 
 ---
 
 ## 🤝 **Contributing**
 
-We welcome contributions! Please read our [Contributing Guidelines](CONTRIBUTING.md) for details.
+We welcome all types of contributions! Whether you're a developer, designer, or just want to help improve documentation.
 
-### Development Setup
+### 🌟 **Ways to Contribute**
+- 🐛 **Bug Reports** - Found an issue? Let us know!
+- 💡 **Feature Requests** - Have ideas? Share them!
+- 💻 **Code Contributions** - Fix bugs or add features
+- 📖 **Documentation** - Help improve guides and docs
+- 🎨 **Design** - UI/UX improvements
+- 🌐 **Translations** - Help make Mizu multilingual
+
+### 📋 **Getting Started**
+1. Read our [**Contributing Guidelines**](/CONTRIBUTING.md)
+2. Join our [**Discord Community**](https://discord.gg/mizu)
+3. Check [**Good First Issues**](https://github.com/kiy0w0/owomizu/labels/good%20first%20issue)
+
+### 🔧 **Development Setup**
 ```bash
-git clone https://github.com/kiy0w0/owomizu.git
+# Fork and clone the repository
+git clone https://github.com/YOUR_USERNAME/owomizu.git
 cd owomizu
+
+# Set up virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Install pre-commit hooks
+pre-commit install
 ```
 
 ---
@@ -156,16 +220,26 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 
 ---
 
-## 🌟 **Support**
+## 🌟 **Support & Community**
 
 <div align="center">
 
-[![GitHub](https://img.shields.io/badge/GitHub-Issues-black?logo=github)](https://github.com/kiy0w0/owomizu/issues)
-[![Discord](https://img.shields.io/badge/Discord-Support-7289da?logo=discord)](https://discord.gg/bkvMhwjSPG)
+### 💬 **Get Help**
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mizu)
+[![GitHub Issues](https://img.shields.io/badge/GitHub-Report%20Issues-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/kiy0w0/owomizu/issues)
 
-**Made with 💙 by Mizu Network Team**
+### 🎯 **Quick Links**
+| Need Help With | Go To |
+|----------------|-------|
+| 🐛 **Bug Reports** | [GitHub Issues](https://github.com/kiy0w0/owomizu/issues) |
+| 💡 **Feature Requests** | [GitHub Discussions](https://github.com/kiy0w0/owomizu/discussions) |
+| ❓ **General Questions** | [Discord #help](https://discord.gg/mizu) |
+| 💻 **Development** | [Discord #development](https://discord.gg/mizu) |
+| 📖 **Documentation** | [Wiki](https://github.com/kiy0w0/owomizu/wiki) |
 
-*Stay Mizu Stay Water* 🌊
+**Made with 💙 by the Mizu Network Community**
+
+*Stay Mizu, Stay Water* 🌊
 
 </div>
 
