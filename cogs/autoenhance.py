@@ -15,16 +15,16 @@ class AutoEnhance(commands.Cog):
         self.available_gems = None
         self.essence_balance = 0
         
-        # Commands
+        # Commands - Initialize with hardcoded values to avoid alias dependency issues
         self.inv_cmd = {
-            "cmd_name": self.bot.alias["inv"]["normal"],
+            "cmd_name": "inv",
             "prefix": True,
             "checks": True,
             "id": "autoenhance_inv"
         }
         
         self.gem_cmd = {
-            "cmd_name": self.bot.alias["use"]["normal"],
+            "cmd_name": "use",
             "cmd_arguments": "",
             "prefix": True,
             "checks": False,
@@ -32,14 +32,14 @@ class AutoEnhance(commands.Cog):
         }
         
         self.huntbot_cmd = {
-            "cmd_name": self.bot.alias["huntbot"]["normal"],
+            "cmd_name": "ah",
             "prefix": True,
             "checks": True,
             "id": "autoenhance_huntbot"
         }
         
         self.upgrade_cmd = {
-            "cmd_name": self.bot.alias["upgrade"]["normal"],
+            "cmd_name": "upg",
             "cmd_arguments": "",
             "prefix": True,
             "checks": False,

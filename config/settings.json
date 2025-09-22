@@ -240,7 +240,7 @@
     },
     "autoUse": {
         "gems": {
-            "enabled": false,
+            "enabled": true,
             "order": {
                 "lowestToHighest": true
             },
@@ -264,7 +264,7 @@
         "autoCrate": false
     },
     "autoSell": {
-        "enabled": true,
+        "enabled": false,
         "triggerWhenCashBelow": 50,
         "sellCommand": "all",
         "cooldownAfterSell": [
@@ -274,7 +274,7 @@
         "maxTriggersPerHour": 3
     },
     "autoRandomCommands": {
-        "enabled": false,
+        "enabled": true,
         "onlyWhenActive": true
     },
     "accountRotation": {
@@ -283,7 +283,7 @@
         "maxCommandsPerAccount": 10
     },
     "autoEnhance": {
-        "enabled": false,
+        "enabled": true,
         "autoUseGems": {
             "enabled": true,
             "cooldownMinutes": 15,
