@@ -22,7 +22,6 @@
 - [💡 Feature Requests](#-feature-requests)
 - [💻 Code Contributions](#-code-contributions)
 - [📖 Documentation](#-documentation)
-- [🎨 Design & UI](#-design--ui)
 - [🔧 Development Setup](#-development-setup)
 - [📏 Coding Standards](#-coding-standards)
 - [🧪 Testing](#-testing)
@@ -45,7 +44,6 @@ There are many ways to contribute to Mizu OwO, and we welcome all types of contr
 | 📖 **Documentation** | Improve guides and docs | Beginner |
 | 🌐 **Translations** | Translate to other languages | Beginner |
 | 💻 **Code** | Fix bugs or add features | Intermediate |
-| 🎨 **Design** | UI/UX improvements | Intermediate |
 | 🧪 **Testing** | Test new features | Intermediate |
 | 🔒 **Security** | Find security vulnerabilities | Advanced |
 
@@ -238,28 +236,6 @@ git push origin feature/amazing-new-feature
 4. **Submit PR** with documentation changes
 
 ---
-
-## 🎨 Design & UI
-
-### Design Philosophy
-- **Clean and modern** - Minimal, intuitive interface
-- **Responsive** - Works on all screen sizes
-- **Accessible** - Usable by everyone
-- **Performance-focused** - Fast loading, efficient
-
-### UI/UX Contributions
-- **Dashboard improvements**
-- **Mobile responsiveness**
-- **Accessibility features**
-- **Icon and graphic design**
-- **Color scheme optimization**
-
-### Design Tools
-- **Figma** - For mockups and prototypes
-- **CSS/SCSS** - For styling
-- **JavaScript** - For interactivity
-- **SVG** - For icons and graphics
-
 ---
 
 ## 🔧 Development Setup
@@ -681,9 +657,9 @@ Special recognition for outstanding contributions:
 
 ## 🌊 Thank You for Contributing! 
 
-**Every contribution, no matter how small, makes Mizu OwO better for everyone.**
+**Mizu Dayo**
 
-*Together, we build the best OwO farming experience! 水*
+*水*
 
 [![Contributors](https://img.shields.io/github/contributors/kiy0w0/owomizu?style=for-the-badge)](https://github.com/kiy0w0/owomizu/graphs/contributors)
 [![Stars](https://img.shields.io/github/stars/kiy0w0/owomizu?style=for-the-badge)](https://github.com/kiy0w0/owomizu/stargazers)
