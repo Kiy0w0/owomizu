@@ -24,7 +24,7 @@ try:
 except:
     pass
 print(
-    "\033[1;32mwelcome to Mizu Network\nThis setup will guide you through with the setup of Mizu Network\nThankyou for your trust in Mizu Network\033[m"
+    "\033[1;32mWelcome to Mizu OwO 水\nThis setup will guide you through the setup of Mizu OwO Bot\nThank you for choosing Mizu OwO - The most advanced OwO farming bot!\033[m"
 )
 
 def is_termux():
@@ -107,12 +107,18 @@ if scratchSetup:
             except Exception as e:
                 print(f"\033[1;31m[x]Error when trying to install numpy and PIL: {e}\033[m")
 
-        """Downgrade discord.py-self"""
+        """Install discord.py-self"""
         try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "git+https://github.com/dolfies/discord.py-self@20ae80b398ec83fa272f0a96812140e14868c88f"])
-            print("\033[1;36m[0]downgraded discord.py-self successfully!\033[m")
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "discord.py-self", "--upgrade"])
+            print("\033[1;36m[0]installed discord.py-self successfully!\033[m")
         except Exception as e:
-            print(f"\033[1;31m[x]error when trying to downgrade discord.py-self:-\n {e}\033[m")
+            print(f"\033[1;31m[x]error when trying to install discord.py-self:-\n {e}\033[m")
+            # Fallback to specific version if needed
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "git+https://github.com/dolfies/discord.py-self.git"])
+                print("\033[1;36m[0]installed discord.py-self from git successfully!\033[m")
+            except Exception as e2:
+                print(f"\033[1;31m[x]fallback installation also failed:-\n {e2}\033[m")
 
     except Exception as e:
         print(f"\033[1;31m[x]error when trying to install requirements:-\n {e}\033[m")
@@ -154,7 +160,7 @@ if scratchSetup:
             print(f'\033[1;36m[0]--API Status: {api_status.get("status", "Unknown")}\033[m')
             
             if api_status.get("status") == "online":
-                print('\033[1;32m[✓]Mizu Network API is online and ready!\033[m')
+                print('\033[1;32m[✓]Mizu OwO API is online and ready!\033[m')
             else:
                 print(f'\033[1;33m[!]API Status: {api_status.get("message", "Unknown status")}\033[m')
         except Exception as e:
@@ -164,13 +170,13 @@ if scratchSetup:
         try:
             ver_check_response = requests.get("https://kiy0w0.github.io/mizuowoapi/version.json", timeout=10)
             ver_check = ver_check_response.json()["version"]
-            print(f'\033[1;36m[0]--received current latest version for Mizu Network - v{ver_check}\033[m')
-            version = "1.0.0"
-            print(f'\033[1;36m[0]current version of Mizu Network - v{version}\033[m')
+            print(f'\033[1;36m[0]--received current latest version for Mizu OwO - v{ver_check}\033[m')
+            version = "2.0.0"
+            print(f'\033[1;36m[0]current version of Mizu OwO - v{version}\033[m')
 
             if compare_versions(version, ver_check):
                 print(
-                    "\033[1;33m[0]seems like there is a new version for Mizu Network available!\033[m"
+                    "\033[1;33m[0]seems like there is a new version for Mizu OwO available!\033[m"
                 )
                 while True:
                     o = input(
@@ -191,7 +197,7 @@ if scratchSetup:
                             "\033[1;33m[!]Please enter 'c' for continue or 's' for stop.\033[m"
                         )
             else:
-                print('\033[1;32m[✓]You have the latest version of Mizu Network!\033[m')
+                print('\033[1;32m[✓]You have the latest version of Mizu OwO!\033[m')
                 
         except Exception as e:
             print(f'\033[1;33m[!]Could not check version: {e}\033[m')
@@ -343,20 +349,23 @@ if scratchSetup:
                     print()
                     print()
                     print('\033[1;36m[0]Finished editing tokens.txt successfully!\033[m')
-                    print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config.json` file then\ntype `python mizu.py` to start the code\033[m')
+                    print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config/settings.json` file then\ntype `python mizu.py` to start the code\033[m')
                     break
                 except Exception as e:
                     print(
                         f"\033[1;31m[x]error when attempting to edit tokens.txt - {e}\033[m"
                     )
             else:
-                print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config.json` file and `tokens.txt` file then\ntype `python mizu.py` to start the code\033[m')
+                print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config/settings.json` file and `tokens.txt` file then\ntype `python mizu.py` to start the code\033[m')
                 break
         else:
             print("\033[1;33m[!]Please enter 1,2 only..\033[m")
             
 print()
-print('\033[1;35mMizu Network - Thank you for using Mizu Network, I hope you have a great day ahead!\nif there is any error then letme know through Discord\033[m')
+print('\033[1;35m🌊 Mizu OwO - Thank you for choosing Mizu OwO! Happy farming! 水\nFor support, join our Discord community or check GitHub issues\033[m')
+print('\033[1;36m📖 Documentation: https://github.com/kiy0w0/owomizu\033[m')
+print('\033[1;36m💬 Discord: https://discord.gg/mizu\033[m')
+print('\033[1;36m🎛️ Web Dashboard: http://localhost:8080 (after starting the bot)\033[m')
 sys.exit(0)
 
 
