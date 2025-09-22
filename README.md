@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/Python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![Discord Bot](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/Version-1.0.0-cyan.svg)]()
+[![Version](https://img.shields.io/badge/Version-1.2.0-cyan.svg)]()
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 
 ![Mizu Network Banner](static/imgs/mizu.png)
