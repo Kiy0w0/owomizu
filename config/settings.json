@@ -3,7 +3,7 @@
     "useSlashCommands": false,
     "commands": {
         "hunt": {
-            "enabled": false,
+            "enabled": true,
             "cooldown": [
                 15,
                 17
@@ -11,7 +11,7 @@
             "useShortForm": true
         },
         "battle": {
-            "enabled": false,
+            "enabled": true,
             "cooldown": [
                 15,
                 17
@@ -98,7 +98,7 @@
             ]
         },
         "owo": {
-            "enabled": false,
+            "enabled": true,
             "cooldown": [
                 10,
                 13
@@ -198,7 +198,7 @@
             0.09
         ]
     },
-    "autoDaily": false,
+    "autoDaily": true,
     "cashCheck": true,
     "defaultCooldowns": {
         "longCooldown": [
@@ -229,7 +229,7 @@
             "beforeReaddingToQueue": 7
         },
         "reactionBot": {
-            "hunt_and_battle": false,
+            "hunt_and_battle": true,
             "owo": false,
             "pray_and_curse": false,
             "cooldown": [
@@ -267,20 +267,50 @@
         "enabled": true,
         "triggerWhenCashBelow": 50,
         "sellCommand": "all",
-        "cooldownAfterSell": [300, 600],
+        "cooldownAfterSell": [
+            300,
+            600
+        ],
         "maxTriggersPerHour": 3
     },
     "autoRandomCommands": {
-        "enabled": true,
-        "commands": ["run", "pup", "piku"],
-        "intervalMinutes": [30, 120],
-        "randomizeOrder": true,
-        "maxCommandsPerHour": 8,
+        "enabled": false,
         "onlyWhenActive": true
     },
     "accountRotation": {
         "enabled": false,
         "cooldownSeconds": 300,
         "maxCommandsPerAccount": 10
+    },
+    "autoEnhance": {
+        "enabled": false,
+        "autoUseGems": {
+            "enabled": true,
+            "cooldownMinutes": 15,
+            "useLowestFirst": true,
+            "tiers": {
+                "common": true,
+                "uncommon": true,
+                "rare": true,
+                "epic": true,
+                "mythical": false,
+                "legendary": false,
+                "fabled": false
+            },
+            "gemTypes": {
+                "huntGem": true,
+                "empoweredGem": true,
+                "luckyGem": true,
+                "specialGem": false
+            }
+        },
+        "autoInvestEssence": {
+            "enabled": true,
+            "cooldownMinutes": 30,
+            "minEssenceRequired": 100,
+            "maxInvestmentPerTime": 50,
+            "maxEfficiencyLevel": 50,
+            "maxDurationLevel": 50
+        }
     }
 }

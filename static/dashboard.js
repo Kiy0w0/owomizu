@@ -217,6 +217,9 @@ class MizuDashboard {
             case 'security':
                 this.loadSecuritySettings();
                 break;
+            case 'autoenhance':
+                this.loadAutoEnhanceSettings();
+                break;
             case 'analytics':
                 this.loadAnalytics();
                 break;
@@ -1330,6 +1333,207 @@ class MizuDashboard {
             .catch(() => {});
     }
 
+    /**
+     * Load AutoEnhance settings
+     */
+    async loadAutoEnhanceSettings() {
+        try {
+            const response = await fetch('/api/dashboard/autoenhance-settings');
+            if (response.ok) {
+                const settings = await response.json();
+                this.populateAutoEnhanceForm(settings);
+            } else {
+                this.showNotification('Failed to load AutoEnhance settings', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading AutoEnhance settings:', error);
+            this.showNotification('Error loading AutoEnhance settings', 'error');
+        }
+    }
+
+    /**
+     * Populate AutoEnhance form with settings
+     */
+    populateAutoEnhanceForm(settings) {
+        // Master toggle
+        const masterToggle = document.getElementById('autoenhance-master-toggle');
+        if (masterToggle) masterToggle.checked = settings.enabled;
+
+        // Auto Use Gems settings
+        const autoGems = settings.autoUseGems;
+        const gemsEnabled = document.getElementById('auto-gems-enabled');
+        if (gemsEnabled) gemsEnabled.checked = autoGems.enabled;
+
+        const gemsCooldown = document.getElementById('gems-cooldown');
+        if (gemsCooldown) gemsCooldown.value = autoGems.cooldownMinutes;
+
+        const gemsLowestFirst = document.getElementById('gems-lowest-first');
+        if (gemsLowestFirst) gemsLowestFirst.checked = autoGems.useLowestFirst;
+
+        // Gem tiers
+        Object.keys(autoGems.tiers).forEach(tier => {
+            const checkbox = document.getElementById(`gems-tier-${tier}`);
+            if (checkbox) checkbox.checked = autoGems.tiers[tier];
+        });
+
+        // Gem types
+        Object.keys(autoGems.gemTypes).forEach(type => {
+            const typeMap = {
+                huntGem: 'hunt',
+                empoweredGem: 'empowered',
+                luckyGem: 'lucky',
+                specialGem: 'special'
+            };
+            const checkbox = document.getElementById(`gems-type-${typeMap[type]}`);
+            if (checkbox) checkbox.checked = autoGems.gemTypes[type];
+        });
+
+        // Auto Invest Essence settings
+        const autoEssence = settings.autoInvestEssence;
+        const essenceEnabled = document.getElementById('auto-essence-enabled');
+        if (essenceEnabled) essenceEnabled.checked = autoEssence.enabled;
+
+        const essenceCooldown = document.getElementById('essence-cooldown');
+        if (essenceCooldown) essenceCooldown.value = autoEssence.cooldownMinutes;
+
+        const essenceMinRequired = document.getElementById('essence-min-required');
+        if (essenceMinRequired) essenceMinRequired.value = autoEssence.minEssenceRequired;
+
+        const essenceMaxInvestment = document.getElementById('essence-max-investment');
+        if (essenceMaxInvestment) essenceMaxInvestment.value = autoEssence.maxInvestmentPerTime;
+
+        const essenceMaxEfficiency = document.getElementById('essence-max-efficiency');
+        if (essenceMaxEfficiency) essenceMaxEfficiency.value = autoEssence.maxEfficiencyLevel;
+
+        const essenceMaxDuration = document.getElementById('essence-max-duration');
+        if (essenceMaxDuration) essenceMaxDuration.value = autoEssence.maxDurationLevel;
+    }
+
+    /**
+     * Save AutoEnhance settings
+     */
+    async saveAutoEnhanceSettings() {
+        try {
+            const settings = this.collectAutoEnhanceSettings();
+            
+            const response = await fetch('/api/dashboard/autoenhance-settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(settings)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                this.showNotification(result.message || 'AutoEnhance settings saved successfully!', 'success');
+            } else {
+                this.showNotification('Failed to save AutoEnhance settings', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving AutoEnhance settings:', error);
+            this.showNotification('Error saving AutoEnhance settings', 'error');
+        }
+    }
+
+    /**
+     * Collect AutoEnhance settings from form
+     */
+    collectAutoEnhanceSettings() {
+        // Master toggle
+        const masterToggle = document.getElementById('autoenhance-master-toggle');
+        const enabled = masterToggle ? masterToggle.checked : false;
+
+        // Auto Use Gems settings
+        const gemsEnabled = document.getElementById('auto-gems-enabled');
+        const gemsCooldown = document.getElementById('gems-cooldown');
+        const gemsLowestFirst = document.getElementById('gems-lowest-first');
+
+        const gemTiers = {};
+        ['common', 'uncommon', 'rare', 'epic', 'mythical', 'legendary', 'fabled'].forEach(tier => {
+            const checkbox = document.getElementById(`gems-tier-${tier}`);
+            gemTiers[tier] = checkbox ? checkbox.checked : false;
+        });
+
+        const gemTypes = {};
+        const typeMap = {
+            'hunt': 'huntGem',
+            'empowered': 'empoweredGem',
+            'lucky': 'luckyGem',
+            'special': 'specialGem'
+        };
+        Object.keys(typeMap).forEach(type => {
+            const checkbox = document.getElementById(`gems-type-${type}`);
+            gemTypes[typeMap[type]] = checkbox ? checkbox.checked : false;
+        });
+
+        // Auto Invest Essence settings
+        const essenceEnabled = document.getElementById('auto-essence-enabled');
+        const essenceCooldown = document.getElementById('essence-cooldown');
+        const essenceMinRequired = document.getElementById('essence-min-required');
+        const essenceMaxInvestment = document.getElementById('essence-max-investment');
+        const essenceMaxEfficiency = document.getElementById('essence-max-efficiency');
+        const essenceMaxDuration = document.getElementById('essence-max-duration');
+
+        return {
+            enabled: enabled,
+            autoUseGems: {
+                enabled: gemsEnabled ? gemsEnabled.checked : false,
+                cooldownMinutes: gemsCooldown ? parseInt(gemsCooldown.value) : 15,
+                useLowestFirst: gemsLowestFirst ? gemsLowestFirst.checked : true,
+                tiers: gemTiers,
+                gemTypes: gemTypes
+            },
+            autoInvestEssence: {
+                enabled: essenceEnabled ? essenceEnabled.checked : false,
+                cooldownMinutes: essenceCooldown ? parseInt(essenceCooldown.value) : 30,
+                minEssenceRequired: essenceMinRequired ? parseInt(essenceMinRequired.value) : 100,
+                maxInvestmentPerTime: essenceMaxInvestment ? parseInt(essenceMaxInvestment.value) : 50,
+                maxEfficiencyLevel: essenceMaxEfficiency ? parseInt(essenceMaxEfficiency.value) : 50,
+                maxDurationLevel: essenceMaxDuration ? parseInt(essenceMaxDuration.value) : 50
+            }
+        };
+    }
+
+    /**
+     * Reset AutoEnhance settings to defaults
+     */
+    resetAutoEnhanceSettings() {
+        const defaultSettings = {
+            enabled: false,
+            autoUseGems: {
+                enabled: true,
+                cooldownMinutes: 15,
+                useLowestFirst: true,
+                tiers: {
+                    common: true,
+                    uncommon: true,
+                    rare: true,
+                    epic: true,
+                    mythical: false,
+                    legendary: false,
+                    fabled: false
+                },
+                gemTypes: {
+                    huntGem: true,
+                    empoweredGem: true,
+                    luckyGem: true,
+                    specialGem: false
+                }
+            },
+            autoInvestEssence: {
+                enabled: true,
+                cooldownMinutes: 30,
+                minEssenceRequired: 100,
+                maxInvestmentPerTime: 50,
+                maxEfficiencyLevel: 50,
+                maxDurationLevel: 50
+            }
+        };
+        
+        this.populateAutoEnhanceForm(defaultSettings);
+        this.showNotification('AutoEnhance settings reset to defaults', 'info');
+    }
 }
 
 // Notification styles (injected dynamically)
@@ -1483,6 +1687,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialize dashboard
     window.mizuDashboard = new MizuDashboard();
+    
+    // Add AutoEnhance event listeners
+    const saveAutoEnhanceBtn = document.getElementById('save-autoenhance');
+    const resetAutoEnhanceBtn = document.getElementById('reset-autoenhance');
+    
+    if (saveAutoEnhanceBtn) {
+        saveAutoEnhanceBtn.addEventListener('click', () => {
+            window.mizuDashboard.saveAutoEnhanceSettings();
+        });
+    }
+    
+    if (resetAutoEnhanceBtn) {
+        resetAutoEnhanceBtn.addEventListener('click', () => {
+            window.mizuDashboard.resetAutoEnhanceSettings();
+        });
+    }
     
 });
 

@@ -71,6 +71,7 @@ class Huntbot(commands.Cog):
             except ExtensionNotLoaded:
                 pass
         else:
+            await self.bot.log("Huntbot is active - Hunt and Battle commands are automatically disabled", "#afaf87")
             asyncio.create_task(self.send_ah(startup=True))
 
     async def cog_unload(self):
@@ -170,6 +171,7 @@ class Huntbot(commands.Cog):
             for embed in message.embeds:
                 if embed.author and "'s huntbot" in embed.author.name.lower():
                     await self.bot.remove_queue(id="huntbot")
+                    await self.bot.log("Huntbot response received, pausing commands for upgrade", "#afaf87")
                     await self.bot.set_stat(False)
                     if embed.fields:
                         self.get_experience(embed)
@@ -178,10 +180,13 @@ class Huntbot(commands.Cog):
                         for trait, essence_alloc in data.items():
                             self.upgrade_cmd["cmd_arguments"] = f"{trait} {essence_alloc}"
                             if essence_alloc > 0:
-                                print(self.upgrade_cmd["cmd_arguments"])
+                                await self.bot.log(f"Upgrading huntbot {trait} with {essence_alloc} essence", "#afaf87")
                                 await self.bot.put_queue(self.upgrade_cmd, priority=True)
                                 await self.upgrade_confirmation()
-                                print(self.upgrade_details)
+                        await self.bot.log("Huntbot upgrade complete, resuming commands", "#afaf87")
+                        await self.bot.set_stat(True)
+                    else:
+                        await self.bot.log("No huntbot fields to process, resuming commands", "#afaf87")
                         await self.bot.set_stat(True)
                     await self.send_ah(
                         timeToSleep=self.bot.settings_dict["defaultCooldowns"]["briefCooldown"]

@@ -36,7 +36,8 @@
         "run": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
         "pup": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
         "piku": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
-        "rpp": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"}
+        "rpp": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
+        "autoenhance": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"}
     },
     "alias": {
         "hunt": {

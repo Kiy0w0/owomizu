@@ -94,7 +94,7 @@ mizuArt = r"""
 M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "1.0.1"
+version = "1.2.0"
 debug_print = True
 
 
@@ -946,6 +946,160 @@ def save_security_settings():
         print(f"Error saving security settings: {e}")
         return jsonify({"error": "Failed to save security settings"}), 500
 
+@app.route('/api/dashboard/autoenhance-settings', methods=['GET'])
+def get_autoenhance_settings():
+    """Get current AutoEnhance settings"""
+    try:
+        settings_path = "config/settings.json"
+        
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            autoenhance = settings.get("autoEnhance", {})
+            auto_gems = autoenhance.get("autoUseGems", {})
+            auto_essence = autoenhance.get("autoInvestEssence", {})
+            
+            return jsonify({
+                "enabled": autoenhance.get("enabled", False),
+                "autoUseGems": {
+                    "enabled": auto_gems.get("enabled", True),
+                    "cooldownMinutes": auto_gems.get("cooldownMinutes", 15),
+                    "useLowestFirst": auto_gems.get("useLowestFirst", True),
+                    "tiers": auto_gems.get("tiers", {
+                        "common": True,
+                        "uncommon": True,
+                        "rare": True,
+                        "epic": True,
+                        "mythical": False,
+                        "legendary": False,
+                        "fabled": False
+                    }),
+                    "gemTypes": auto_gems.get("gemTypes", {
+                        "huntGem": True,
+                        "empoweredGem": True,
+                        "luckyGem": True,
+                        "specialGem": False
+                    })
+                },
+                "autoInvestEssence": {
+                    "enabled": auto_essence.get("enabled", True),
+                    "cooldownMinutes": auto_essence.get("cooldownMinutes", 30),
+                    "minEssenceRequired": auto_essence.get("minEssenceRequired", 100),
+                    "maxInvestmentPerTime": auto_essence.get("maxInvestmentPerTime", 50),
+                    "maxEfficiencyLevel": auto_essence.get("maxEfficiencyLevel", 50),
+                    "maxDurationLevel": auto_essence.get("maxDurationLevel", 50)
+                }
+            })
+        else:
+            # Return default values
+            return jsonify({
+                "enabled": False,
+                "autoUseGems": {
+                    "enabled": True,
+                    "cooldownMinutes": 15,
+                    "useLowestFirst": True,
+                    "tiers": {
+                        "common": True,
+                        "uncommon": True,
+                        "rare": True,
+                        "epic": True,
+                        "mythical": False,
+                        "legendary": False,
+                        "fabled": False
+                    },
+                    "gemTypes": {
+                        "huntGem": True,
+                        "empoweredGem": True,
+                        "luckyGem": True,
+                        "specialGem": False
+                    }
+                },
+                "autoInvestEssence": {
+                    "enabled": True,
+                    "cooldownMinutes": 30,
+                    "minEssenceRequired": 100,
+                    "maxInvestmentPerTime": 50,
+                    "maxEfficiencyLevel": 50,
+                    "maxDurationLevel": 50
+                }
+            })
+            
+    except Exception as e:
+        print(f"Error getting AutoEnhance settings: {e}")
+        return jsonify({"error": "Failed to get AutoEnhance settings"}), 500
+
+@app.route('/api/dashboard/autoenhance-settings', methods=['POST'])
+def save_autoenhance_settings():
+    """Save AutoEnhance settings"""
+    try:
+        data = request.get_json()
+        
+        settings_path = "config/settings.json"
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            # Update AutoEnhance settings
+            if "autoEnhance" not in settings:
+                settings["autoEnhance"] = {}
+            
+            settings["autoEnhance"]["enabled"] = data.get("enabled", False)
+            
+            # Auto Use Gems settings
+            auto_gems = data.get("autoUseGems", {})
+            settings["autoEnhance"]["autoUseGems"] = {
+                "enabled": auto_gems.get("enabled", True),
+                "cooldownMinutes": int(auto_gems.get("cooldownMinutes", 15)),
+                "useLowestFirst": auto_gems.get("useLowestFirst", True),
+                "tiers": auto_gems.get("tiers", {
+                    "common": True,
+                    "uncommon": True,
+                    "rare": True,
+                    "epic": True,
+                    "mythical": False,
+                    "legendary": False,
+                    "fabled": False
+                }),
+                "gemTypes": auto_gems.get("gemTypes", {
+                    "huntGem": True,
+                    "empoweredGem": True,
+                    "luckyGem": True,
+                    "specialGem": False
+                })
+            }
+            
+            # Auto Invest Essence settings
+            auto_essence = data.get("autoInvestEssence", {})
+            settings["autoEnhance"]["autoInvestEssence"] = {
+                "enabled": auto_essence.get("enabled", True),
+                "cooldownMinutes": int(auto_essence.get("cooldownMinutes", 30)),
+                "minEssenceRequired": int(auto_essence.get("minEssenceRequired", 100)),
+                "maxInvestmentPerTime": int(auto_essence.get("maxInvestmentPerTime", 50)),
+                "maxEfficiencyLevel": int(auto_essence.get("maxEfficiencyLevel", 50)),
+                "maxDurationLevel": int(auto_essence.get("maxDurationLevel", 50))
+            }
+            
+            # Save updated settings
+            with open(settings_path, 'w') as f:
+                json.dump(settings, f, indent=4)
+            
+            # Log the change for all active bot instances
+            for user_id in listUserIds:
+                add_command_log(user_id, "system", "AutoEnhance settings updated", "info")
+        
+        # Refresh bot settings for all active instances
+        refresh_bot_settings()
+        
+        return jsonify({
+            "success": True,
+            "message": "AutoEnhance settings saved successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error saving AutoEnhance settings: {e}")
+        return jsonify({"error": "Failed to save AutoEnhance settings"}), 500
+
 @app.route('/api/dashboard/command-logs', methods=['GET'])
 def get_command_logs():
     """Get real-time command logs for dashboard"""
@@ -1507,9 +1661,13 @@ class MyClient(commands.Bot):
     def refresh_commands_dict(self):
         commands_dict = self.settings_dict["commands"]
         reaction_bot_dict = self.settings_dict["defaultCooldowns"]["reactionBot"]
+        # Check if huntbot is active - only disable conflicting commands
+        huntbot_active = commands_dict["autoHuntBot"]["enabled"]
+        
         self.commands_dict = {
+            "autoenhance": self.settings_dict.get("autoEnhance", {}).get("enabled", False),
             "autosell": self.settings_dict.get("autoSell", {}).get("enabled", False),
-            "battle": commands_dict["battle"]["enabled"] and not reaction_bot_dict["hunt_and_battle"],
+            "battle": commands_dict["battle"]["enabled"] and not reaction_bot_dict["hunt_and_battle"] and not huntbot_active,
             "captcha": True,
             "channelswitcher": self.global_settings_dict["channelSwitcher"]["enabled"],
             "chat": True,
@@ -1517,10 +1675,10 @@ class MyClient(commands.Bot):
             "commands": True,
             "cookie": commands_dict["cookie"]["enabled"],
             "daily": self.settings_dict["autoDaily"],
-            "gems": self.settings_dict["autoUse"]["gems"]["enabled"],
+            "gems": self.settings_dict["autoUse"]["gems"]["enabled"],  # Gems can work with huntbot
             "giveaway": self.settings_dict["giveawayJoiner"]["enabled"],
-            "hunt": commands_dict["hunt"]["enabled"] and not reaction_bot_dict["hunt_and_battle"],
-            "huntbot": commands_dict["autoHuntBot"]["enabled"],
+            "hunt": commands_dict["hunt"]["enabled"] and not reaction_bot_dict["hunt_and_battle"] and not huntbot_active,
+            "huntbot": huntbot_active,
             "level": commands_dict["lvlGrind"]["enabled"],
             "lottery": commands_dict["lottery"]["enabled"],
             "others": True,

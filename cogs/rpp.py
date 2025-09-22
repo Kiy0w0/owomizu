@@ -10,9 +10,7 @@ class RPP(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.last_command_time = 0
-        self.commands_this_hour = 0
-        self.hour_reset_time = time.time() + 3600  # Reset counter every hour
-        self.next_command_time = 0
+        self.commands_sent = 0
         
     async def cog_load(self):
         if not self.bot.settings_dict.get("autoRandomCommands", {}).get("enabled", False):
@@ -21,28 +19,14 @@ class RPP(commands.Cog):
             except ExtensionNotLoaded:
                 pass
         else:
-            # Schedule first random command
-            await self.schedule_next_command()
-            # Start the loop
             self.random_command_loop.start()
+            await self.bot.log("RPP (Run/Pup/Piku) system loaded - commands will run every 1 minute randomly!", "#74c0fc")
 
     async def cog_unload(self):
         if hasattr(self, 'random_command_loop'):
             self.random_command_loop.cancel()
         await self.bot.remove_queue(id="rpp")
-
-    def get_random_interval(self):
-        """Get random interval in seconds based on settings."""
-        config = self.bot.settings_dict.get("autoRandomCommands", {})
-        interval_minutes = config.get("intervalMinutes", [30, 120])
-        min_minutes, max_minutes = interval_minutes
-        return self.bot.random.uniform(min_minutes * 60, max_minutes * 60)
-
-    async def schedule_next_command(self):
-        """Schedule the next random command."""
-        interval = self.get_random_interval()
-        self.next_command_time = time.time() + interval
-        await self.bot.log(f"Next random command scheduled in {interval/60:.1f} minutes", "#74c0fc")
+        await self.bot.log("RPP system unloaded.", "#74c0fc")
 
     def should_send_command(self):
         """Check if we should send a random command based on conditions."""
@@ -59,21 +43,6 @@ class RPP(commands.Cog):
                     self.bot.command_handler_status.get("sleep", False) or
                     not self.bot.command_handler_status.get("state", True)):
                     return False
-            
-            # Reset hourly counter if needed
-            current_time = time.time()
-            if current_time > self.hour_reset_time:
-                self.commands_this_hour = 0
-                self.hour_reset_time = current_time + 3600
-            
-            # Check max commands per hour
-            max_per_hour = config.get("maxCommandsPerHour", 8)
-            if self.commands_this_hour >= max_per_hour:
-                return False
-            
-            # Check if it's time for next command
-            if current_time < self.next_command_time:
-                return False
                 
             return True
             
@@ -84,20 +53,11 @@ class RPP(commands.Cog):
     async def send_random_command(self):
         """Send a random command from the configured list."""
         try:
-            config = self.bot.settings_dict.get("autoRandomCommands", {})
-            available_commands = config.get("commands", ["run", "pup", "piku"])
-            
-            if not available_commands:
-                await self.bot.log("No random commands configured", "#ff6b6b")
-                return
+            # Always use run, pup, piku commands
+            available_commands = ["run", "pup", "piku"]
             
             # Select random command
-            if config.get("randomizeOrder", True):
-                selected_command = self.bot.random.choice(available_commands)
-            else:
-                # Use round-robin if not randomizing
-                index = self.commands_this_hour % len(available_commands)
-                selected_command = available_commands[index]
+            selected_command = self.bot.random.choice(available_commands)
             
             # Create command object
             cmd = {
@@ -114,23 +74,21 @@ class RPP(commands.Cog):
             
             # Update counters
             self.last_command_time = time.time()
-            self.commands_this_hour += 1
+            self.commands_sent += 1
             
             # Log the command
-            await self.bot.log(f"Random command sent: {selected_command} ({self.commands_this_hour}/{config.get('maxCommandsPerHour', 8)} this hour)", "#74c0fc")
+            await self.bot.log(f"RPP command sent: {selected_command} (Total sent: {self.commands_sent})", "#74c0fc")
             
             # Add dashboard log
             self.bot.add_dashboard_log("rpp", f"RPP command: {selected_command}", "info")
             
-            # Schedule next command
-            await self.schedule_next_command()
-            
         except Exception as e:
             await self.bot.log(f"Error sending random command: {e}", "#c25560")
+            self.bot.add_dashboard_log("rpp", f"Error sending RPP command: {e}", "error")
 
-    @tasks.loop(seconds=60)  # Check every minute
+    @tasks.loop(seconds=60)  # Run every minute
     async def random_command_loop(self):
-        """Main loop for random command scheduling."""
+        """Main loop - sends a random RPP command every minute."""
         try:
             if self.should_send_command():
                 await self.send_random_command()

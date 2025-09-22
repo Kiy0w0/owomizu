@@ -36,8 +36,10 @@ def convert_small_numbers(small_number):
         "⁸": "8",
         "⁹": "9",
     }
-    normal_string = ''.join(numbers.get(char, char) for char in small_number)
-    return int(normal_string)
+    # Only convert superscript numbers, filter out other characters
+    converted = ''.join(numbers.get(char, '') for char in small_number if char in numbers)
+    # If no valid numbers found, return 0
+    return int(converted) if converted else 0
 
 
 def find_gems_available(message):

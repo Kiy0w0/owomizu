@@ -11,52 +11,57 @@
 - **Cooldown system** - 5-10 minute cooldown after each auto-sell
 - **Dashboard integration** - Real-time logging and notifications
 
-#### 🎲 **Automatic Run Piku PuP (RPP)**
-- **Natural behavior simulation** - Automatically sends run/pup/piku commands
-- **Smart scheduling** - Random intervals between 30-120 minutes
-- **Rate limiting** - Maximum 8 commands per hour
-- **Intelligent execution** - Only runs when bot is active (not during captcha/sleep)
-- **Configurable commands** - Customizable command list and intervals
+#### 🎲 **RPP System (Run/Piku/Pup)**
+- **Random command execution** - Automatically sends run/pup/piku commands every 1 minute
+- **Natural behavior simulation** - Random selection from available commands
+- **Smart execution** - Only runs when bot is active (not during captcha/sleep/huntbot)
+- **Configurable system** - Easy enable/disable through dashboard
+- **Anti-detection** - Natural timing patterns to avoid bot detection
 
-#### 🚨 **Enhanced Captcha Detection System**
-- **Automatic stop** - Bot immediately stops all commands when captcha is detected
-- **Automatic resume** - Bot automatically resumes after captcha is solved
-- **Multiple detection methods** - Buttons, attachments, embeds, text-based detection
-- **Real-time dashboard notifications** - Visual alerts with pulsing orange status dot
-- **Enhanced logging** - Detailed captcha events in console and dashboard
+#### 💎 **Auto Enhance System**
+- **Auto Use Gems** - Automatically uses gems during hunting for better rewards
+- **Auto Invest Essence** - Invests essence into huntbot efficiency and duration
+- **Smart Management** - Configurable cooldowns and investment limits
+- **Dashboard Control** - Full configuration through web interface
+- **Performance Tracking** - Monitor gem usage and essence investments
 
-#### 📊 **Improved Web Dashboard**
-- **Real-time command logging** - Live activity feed with filtering options
-- **Quick settings toggles** - Easy enable/disable for Hunt, Battle, Daily, OwO commands
-- **Enhanced status monitoring** - Visual indicators for online/offline/captcha/paused states
-- **Account statistics breakdown** - Per-account cowoncy, hunts, and battles tracking
-- **Live notifications** - Toast notifications for important events
+#### 🚨 **Enhanced Safety System**
+- **Improved Captcha Detection** - Multiple detection methods with auto-pause
+- **Command Handler Optimization** - Better pause/resume logic for huntbot
+- **Anti-Spam Protection** - Smart delays and rate limiting
+- **Real-time Status** - Dashboard shows current bot state and activities
+- **Error Recovery** - Automatic recovery from common errors
 
 ### 🔧 **Technical Improvements**
 
 #### ⚙️ **Configuration Enhancements**
 - Added `autoSell` configuration section
-- Added `autoRandomCommands` configuration section  
+- Added `autoRandomCommands` (RPP) configuration section  
+- Added `autoEnhance` configuration for gems and essence
 - Enhanced command info with new priorities and colors
 - Improved settings validation and error handling
 
-#### 🎨 **UI/UX Improvements**
-- New status indicators with animations
-- Enhanced color coding for different command types
-- Improved responsive design for dashboard
-- Better error handling and user feedback
+#### 🎨 **Dashboard Improvements**
+- New AutoEnhance settings panel with full configuration
+- Enhanced status indicators with real-time updates
+- Improved command logging with better filtering
+- Better responsive design for all screen sizes
+- Toast notifications for important events
 
 #### 🛡️ **Security & Safety**
-- Enhanced anti-detection with random command patterns
-- Improved rate limiting across all features
-- Better error recovery and logging
-- Smart command scheduling to avoid patterns
+- Enhanced anti-detection with natural command patterns
+- Improved rate limiting across all automation features
+- Better error recovery and comprehensive logging
+- Smart command scheduling to avoid detection patterns
+- File reading safety with proper error handling
 
-### 🐛 **Bug Fixes**
-- Fixed dashboard status not updating correctly
-- Fixed toggle buttons overlapping with text
-- Improved error handling for missing configuration files
-- Enhanced stability for long-running sessions
+### 🐛 **Major Bug Fixes**
+- **Fixed OWO Infinite Loop** - Bot no longer spams "owo" messages
+- **Fixed Huntbot Conflicts** - Manual hunt/battle commands now work properly
+- **Fixed Command Handler Stuck** - Bot properly pauses/resumes during huntbot
+- **Fixed Integer Conversion Errors** - Better handling of superscript numbers
+- **Fixed File Reading Issues** - Safe handling of missing tokens.txt
+- **Fixed Dashboard Sync Issues** - Real-time updates now work correctly
 
 ---
 
@@ -96,11 +101,12 @@
 ## 🔮 **Upcoming Features**
 
 ### 🎯 **Planned for Next Version**
-- Advanced gambling strategies
-- Enhanced multi-account rotation
-- Custom command scripting
-- Performance analytics
-- Mobile app companion
+- 🎪 **Advanced Gambling AI** - Smart betting strategies for slots and coinflip
+- 📱 **Mobile App** - Companion app for monitoring and control
+- 🎨 **Custom Themes** - Personalized dashboard themes and colors
+- 🤖 **AI Chat Integration** - Smart responses to OwO bot messages
+- 📊 **Advanced Analytics** - Detailed performance and earnings reports
+- 🔄 **Enhanced Multi-Account** - Better rotation and management system
 
 ---
 

@@ -37,8 +37,9 @@ class Owo(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.channel.id == self.bot.cm.id and message.author.id == self.bot.user.id:
-            if message.content in {'owo', 'uwu'}:
+        # Only respond to OwO bot messages, not our own messages
+        if message.channel.id == self.bot.cm.id and message.author.id == self.bot.owo_bot_id:
+            if "**OwO**" in message.content or "**UwU**" in message.content:
                 if not self.owo_ongoing:
                     await self.send_owo()
 
