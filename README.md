@@ -65,12 +65,12 @@
 
 **Choose your platform for detailed setup:**
 
-| Platform | Installation Guide | Difficulty |
-|----------|-------------------|------------|
-| 🪟 **Windows** | [📖 windows.md](/Tutor/windows.md) | ⭐ Easy |
-| 🐧 **Linux** | [📖 linux.md](/Tutor/linux.md) | ⭐⭐ Medium |
-| 🍎 **macOS** | [📖 macos.md](/Tutor/macos.md) | ⭐⭐ Medium |
-| 📱 **Android (Termux)** | [📖 termux.md](/Tutor/termux.md) | ⭐⭐⭐ Advanced |
+| Platform | Installation Guide |
+|----------|-------------------|
+| 🪟 **Windows** | [📖 windows.md](/Tutor/windows.md) |
+| 🐧 **Linux** | [📖 linux.md](/Tutor/linux.md) |
+| 🍎 **macOS** | [📖 macos.md](/Tutor/macos.md) |
+| 📱 **Android (Termux)** | [📖 termux.md](/Tutor/termux.md) |
 
 ### ⚡ **Quick Setup (All Platforms)**
 
