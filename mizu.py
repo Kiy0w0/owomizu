@@ -82,7 +82,7 @@ console_width = console.size.width
 listUserIds = []
 
 
-mizu_network_api = "https://kiy0w0.github.io/mizuowoapi"
+mizu_network_api = "https://mizuowoapi.vercel.app"
 
 mizuArt = r"""
  ███╗   ███╗██╗███████╗██╗   ██╗

@@ -156,7 +156,7 @@ if scratchSetup:
         
         # Check API status
         try:
-            api_status = requests.get("https://kiy0w0.github.io/mizuowoapi/status.json", timeout=10).json()
+            api_status = requests.get("https://mizuowoapi.vercel.app/status.json", timeout=10).json()
             print(f'\033[1;36m[0]--API Status: {api_status.get("status", "Unknown")}\033[m')
             
             if api_status.get("status") == "online":
@@ -168,7 +168,7 @@ if scratchSetup:
         
         # Check version
         try:
-            ver_check_response = requests.get("https://kiy0w0.github.io/mizuowoapi/version.json", timeout=10)
+            ver_check_response = requests.get("https://mizuowoapi.vercel.app/version.json", timeout=10)
             ver_check = ver_check_response.json()["version"]
             print(f'\033[1;36m[0]--received current latest version for Mizu OwO - v{ver_check}\033[m')
             version = "2.0.0"
@@ -204,7 +204,7 @@ if scratchSetup:
             
         # Check for announcements
         try:
-            announcements = requests.get("https://kiy0w0.github.io/mizuowoapi/announcements.json", timeout=10).json()
+            announcements = requests.get("https://mizuowoapi.vercel.app/announcements.json", timeout=10).json()
             if announcements.get("announcements"):
                 print('\033[1;36m[0]--Fetching latest announcements...\033[m')
                 for announcement in announcements["announcements"][:3]:  # Show only first 3
