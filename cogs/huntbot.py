@@ -156,13 +156,30 @@ class Huntbot(commands.Cog):
                 await self.bot.log(f"huntbot back! sending next huntbot command.", "#afaf87")
 
         elif "Here is your password!" in message.content:
-            ans = await solveHbCaptcha(message.attachments[0].url, self.bot.session)
-            await self.bot.log(f"huntbot receieved password, attempting to solve!", "#afaf87")
-            await self.send_ah(
-                timeToSleep=self.bot.settings_dict["defaultCooldowns"]["briefCooldown"],
-                ans=ans,
-            )
+            await self.bot.log(f"huntbot received password captcha, attempting to solve!", "#afaf87")
+            try:
+                if message.attachments:
+                    ans = await solveHbCaptcha(message.attachments[0].url, self.bot.session)
+                    if ans and len(ans) > 0:
+                        await self.bot.log(f"huntbot captcha solved: '{ans}' - sending response", "#51cf66")
+                        await self.send_ah(
+                            timeToSleep=self.bot.settings_dict["defaultCooldowns"]["briefCooldown"],
+                            ans=ans,
+                        )
+                    else:
+                        await self.bot.log(f"huntbot captcha solver failed - empty result. Waiting for password reset...", "#c25560")
+                        # Don't send anything, let it timeout and get "Please include your password!" message
+                        # which will trigger the password reset handler
+                else:
+                    await self.bot.log(f"huntbot captcha message has no attachments - cannot solve", "#c25560")
+            except Exception as e:
+                await self.bot.log(f"huntbot captcha solver error: {e} - waiting for password reset...", "#c25560")
 
+        elif "Wrong password" in message.content or "Incorrect password" in message.content:
+            await self.bot.log(f"huntbot wrong password - captcha solver failed. Waiting for password reset...", "#c25560")
+            # Don't send anything, let it timeout and get "Please include your password!" message
+            # which will trigger the password reset handler
+            
         elif "You successfully upgraded" in message.content:
             self.upgrade_event.set()
             await self.bot.remove_queue(id="upgrade")
