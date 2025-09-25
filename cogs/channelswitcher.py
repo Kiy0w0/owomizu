@@ -11,7 +11,7 @@ class ChannelSwitcher(commands.Cog):
 
     @tasks.loop()
     async def switch_channel_loop(self):
-        await self.bot.sleep_till(self.bot.global_settings_dict["channelSwitcher"]["interval"])
+        await self.bot.sleep_till(self.bot.settings_dict["channelSwitcher"]["interval"])
         status, resp = await self.change_channel()
 
         if not status:
@@ -21,7 +21,7 @@ class ChannelSwitcher(commands.Cog):
         
 
     async def change_channel(self):
-        cnf = self.bot.global_settings_dict["channelSwitcher"]
+        cnf = self.bot.settings_dict["channelSwitcher"]
         current_channel_id = self.bot.cm.id
 
         item = None
@@ -56,7 +56,7 @@ class ChannelSwitcher(commands.Cog):
         return True
 
     async def cog_load(self):
-        if not self.bot.global_settings_dict["channelSwitcher"]["enabled"]:
+        if not self.bot.settings_dict["channelSwitcher"]["enabled"]:
             try:
                 asyncio.create_task(self.bot.unload_cog("cogs.channelSwitcher"))
             except ExtensionNotLoaded:

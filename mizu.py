@@ -1412,7 +1412,7 @@ class MyClient(commands.Bot):
 
     async def empty_checks_and_switch(self, channel):
         self.command_handler_status["hold_handler"] = True
-        await self.sleep_till(self.global_settings_dict["channelSwitcher"]["delayBeforeSwitch"])
+        await self.sleep_till(self.settings_dict["channelSwitcher"]["delayBeforeSwitch"])
         self.cm = channel
         self.command_handler_status["hold_handler"] = False
 
@@ -1669,7 +1669,7 @@ class MyClient(commands.Bot):
             "autosell": self.settings_dict.get("autoSell", {}).get("enabled", False),
             "battle": commands_dict["battle"]["enabled"] and not reaction_bot_dict["hunt_and_battle"] and not huntbot_active,
             "captcha": True,
-            "channelswitcher": self.global_settings_dict["channelSwitcher"]["enabled"],
+            "channelswitcher": self.settings_dict["channelSwitcher"]["enabled"],
             "chat": True,
             "coinflip": self.settings_dict["gamble"]["coinflip"]["enabled"],
             "commands": True,
