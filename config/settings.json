@@ -314,18 +314,31 @@
         }
     },
     "channelSwitcher": {
-        "enabled": false,
+        "enabled": true,
         "users": [
             {
                 "userid": 23454123321,
-                "channels": [444234234, 23423423, 234324234]
+                "channels": [
+                    444234234,
+                    23423423,
+                    234324234
+                ]
             },
             {
                 "userid": 23432454321,
-                "channels": [42342344, 552342345]
+                "channels": [
+                    42342344,
+                    552342345
+                ]
             }
         ],
-        "interval": [300, 600],
-        "delayBeforeSwitch": [2, 4]
+        "interval": [
+            300,
+            600
+        ],
+        "delayBeforeSwitch": [
+            2,
+            4
+        ]
     }
 }

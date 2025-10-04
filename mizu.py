@@ -784,6 +784,8 @@ def toggle_quick_setting():
                 settings["commands"]["owo"]["enabled"] = enabled
             elif command == "useSlashCommands":
                 settings["useSlashCommands"] = enabled
+            elif command == "channelSwitcher":
+                settings["channelSwitcher"]["enabled"] = enabled
             
             # Save updated settings
             with open(settings_path, 'w') as f:
@@ -793,6 +795,8 @@ def toggle_quick_setting():
             for user_id in listUserIds:
                 if command == "useSlashCommands":
                     add_command_log(user_id, "system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
+                elif command == "channelSwitcher":
+                    add_command_log(user_id, "system", f"Channel Switcher {'enabled' if enabled else 'disabled'}", "info")
                 else:
                     add_command_log(user_id, "system", f"{command.upper()} {'enabled' if enabled else 'disabled'}", "info")
         
@@ -805,7 +809,8 @@ def toggle_quick_setting():
             "battle": "Battle", 
             "daily": "Daily",
             "owo": "OwO",
-            "useSlashCommands": "Slash Commands"
+            "useSlashCommands": "Slash Commands",
+            "channelSwitcher": "Channel Switcher"
         }
         
         command_display = command_names.get(command, command.upper())
@@ -836,14 +841,15 @@ def get_quick_settings():
                 "battle": settings.get("commands", {}).get("battle", {}).get("enabled", False), 
                 "daily": settings.get("autoDaily", False),
                 "owo": settings.get("commands", {}).get("owo", {}).get("enabled", False),
-                "useSlashCommands": settings.get("useSlashCommands", False)
+                "useSlashCommands": settings.get("useSlashCommands", False),
+                "channelSwitcher": settings.get("channelSwitcher", {}).get("enabled", False)
             })
         else:
-            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False})
+            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False})
             
     except Exception as e:
         print(f"Error getting quick settings: {e}")
-        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False})
+        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False})
 
 @app.route('/api/dashboard/security-settings', methods=['GET'])
 def get_security_settings():
@@ -945,6 +951,125 @@ def save_security_settings():
     except Exception as e:
         print(f"Error saving security settings: {e}")
         return jsonify({"error": "Failed to save security settings"}), 500
+
+@app.route('/api/dashboard/gambling-settings', methods=['GET'])
+def get_gambling_settings():
+    """Get current Gambling settings"""
+    try:
+        settings_path = "config/settings.json"
+        
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            gamble = settings.get("gamble", {})
+            
+            return jsonify({
+                "allottedAmount": gamble.get("allottedAmount", 30000),
+                "goalSystem": gamble.get("goalSystem", {
+                    "enabled": False,
+                    "amount": 300
+                }),
+                "coinflip": gamble.get("coinflip", {
+                    "enabled": False,
+                    "startValue": 200,
+                    "multiplierOnLose": 2,
+                    "cooldown": [16, 18],
+                    "options": ["t"]
+                }),
+                "slots": gamble.get("slots", {
+                    "enabled": False,
+                    "startValue": 200,
+                    "multiplierOnLose": 2,
+                    "cooldown": [16, 18]
+                })
+            })
+        else:
+            # Return default values
+            return jsonify({
+                "allottedAmount": 30000,
+                "goalSystem": {
+                    "enabled": False,
+                    "amount": 300
+                },
+                "coinflip": {
+                    "enabled": False,
+                    "startValue": 200,
+                    "multiplierOnLose": 2,
+                    "cooldown": [16, 18],
+                    "options": ["t"]
+                },
+                "slots": {
+                    "enabled": False,
+                    "startValue": 200,
+                    "multiplierOnLose": 2,
+                    "cooldown": [16, 18]
+                }
+            })
+            
+    except Exception as e:
+        print(f"Error getting Gambling settings: {e}")
+        return jsonify({"error": "Failed to get Gambling settings"}), 500
+
+@app.route('/api/dashboard/gambling-settings', methods=['POST'])
+def save_gambling_settings():
+    """Save Gambling settings"""
+    try:
+        data = request.get_json()
+        
+        settings_path = "config/settings.json"
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            # Update Gambling settings
+            if "gamble" not in settings:
+                settings["gamble"] = {}
+            
+            settings["gamble"]["allottedAmount"] = int(data.get("allottedAmount", 30000))
+            settings["gamble"]["goalSystem"] = data.get("goalSystem", {
+                "enabled": False,
+                "amount": 300
+            })
+            
+            # Coinflip settings
+            coinflip = data.get("coinflip", {})
+            settings["gamble"]["coinflip"] = {
+                "enabled": coinflip.get("enabled", False),
+                "startValue": int(coinflip.get("startValue", 200)),
+                "multiplierOnLose": float(coinflip.get("multiplierOnLose", 2)),
+                "cooldown": coinflip.get("cooldown", [16, 18]),
+                "options": coinflip.get("options", ["t"])
+            }
+            
+            # Slots settings
+            slots = data.get("slots", {})
+            settings["gamble"]["slots"] = {
+                "enabled": slots.get("enabled", False),
+                "startValue": int(slots.get("startValue", 200)),
+                "multiplierOnLose": float(slots.get("multiplierOnLose", 2)),
+                "cooldown": slots.get("cooldown", [16, 18])
+            }
+            
+            # Save updated settings
+            with open(settings_path, 'w') as f:
+                json.dump(settings, f, indent=4)
+            
+            # Log the change for all active bot instances
+            for user_id in listUserIds:
+                add_command_log(user_id, "system", "Gambling settings updated", "info")
+        
+        # Refresh bot settings for all active instances
+        refresh_bot_settings()
+        
+        return jsonify({
+            "success": True,
+            "message": "Gambling settings saved successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error saving Gambling settings: {e}")
+        return jsonify({"error": "Failed to save Gambling settings"}), 500
 
 @app.route('/api/dashboard/autoenhance-settings', methods=['GET'])
 def get_autoenhance_settings():
@@ -1777,6 +1902,27 @@ class MyClient(commands.Bot):
                 await self.log(f"Slash commands {'enabled' if enabled else 'disabled'}", "#40e0d0")
                 # Add dashboard log
                 self.add_dashboard_log("system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
+                return
+            
+            # Handle channelSwitcher setting
+            if command == "channelSwitcher":
+                self.settings_dict["channelSwitcher"]["enabled"] = enabled
+                await self.log(f"Channel Switcher {'enabled' if enabled else 'disabled'}", "#9dc3f5")
+                # Add dashboard log
+                self.add_dashboard_log("system", f"Channel Switcher {'enabled' if enabled else 'disabled'}", "info")
+                
+                # Load or unload the channelswitcher cog
+                extension = 'cogs.channelswitcher'
+                if not enabled and extension in self.extensions:
+                    await self.unload_cog(extension)
+                    await self.log("Channel Switcher cog unloaded", "#ff6b6b")
+                elif enabled and extension not in self.extensions:
+                    try:
+                        await self.load_extension(extension)
+                        await self.log("Channel Switcher cog loaded", "#51cf66")
+                    except Exception as e:
+                        await self.log(f"Error - Failed to load Channel Switcher: {e}", "#c25560")
+                        self.add_dashboard_log("system", f"Failed to enable Channel Switcher: {e}", "error")
                 return
             
             ext_map = {

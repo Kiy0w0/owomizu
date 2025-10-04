@@ -313,6 +313,16 @@
                                 </span>
                             </div>
                             <div class="toggle-item">
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="channel-switcher-toggle">
+                                    <span class="toggle-slider"></span>
+                                </label>
+                                <span class="toggle-label">
+                                    <i class="fas fa-random"></i>
+                                    Channel Switcher
+                                </span>
+                            </div>
+                            <div class="toggle-item">
                                 <button class="btn btn-danger" id="terminate-bot">
                                     <i class="fas fa-power-off"></i>
                                     Terminate Bot
@@ -388,12 +398,206 @@
                         <i class="fas fa-dice"></i>
                         Gambling Settings
                     </h1>
-                    <div class="warning-banner">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>High Risk Feature - Use with caution</span>
+                    <div class="section-actions">
+                        <button class="btn btn-success" id="save-gambling">
+                            <i class="fas fa-save"></i>
+                            Save Settings
+                        </button>
+                        <button class="btn btn-outline" id="reset-gambling">
+                            <i class="fas fa-undo"></i>
+                            Reset
+                        </button>
                     </div>
                 </div>
-                <!-- Gambling settings content -->
+                
+                <div class="warning-banner" style="margin-bottom: var(--spacing-2xl);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>High Risk Feature - Use with caution. Gambling can result in significant cowoncy loss!</span>
+                </div>
+
+                <!-- Global Gambling Settings -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h3>
+                            <i class="fas fa-cog"></i>
+                            Global Gambling Settings
+                        </h3>
+                    </div>
+                    <div class="settings-card-body">
+                        <div class="form-group">
+                            <label for="gambling-allotted-amount">
+                                <i class="fas fa-wallet"></i>
+                                Allotted Amount (Max Loss Protection)
+                                <span class="label-hint">Maximum cowoncy you're willing to lose in gambling session</span>
+                            </label>
+                            <input type="number" id="gambling-allotted-amount" class="form-input" min="1000" step="1000" value="30000">
+                        </div>
+
+                        <div class="toggle-group">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="gambling-goal-system-enabled">
+                                <span class="toggle-slider"></span>
+                            </label>
+                            <div class="toggle-info">
+                                <span class="toggle-label">Goal System</span>
+                                <span class="toggle-description">Stop gambling when target profit is reached</span>
+                            </div>
+                        </div>
+
+                        <div class="form-group" id="gambling-goal-amount-group">
+                            <label for="gambling-goal-amount">
+                                <i class="fas fa-bullseye"></i>
+                                Target Profit Goal
+                                <span class="label-hint">Stop gambling after reaching this profit amount</span>
+                            </label>
+                            <input type="number" id="gambling-goal-amount" class="form-input" min="100" step="100" value="300">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coinflip Settings -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h3>
+                            <i class="fas fa-coins"></i>
+                            Coinflip Settings
+                        </h3>
+                        <div class="card-toggle">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="coinflip-enabled">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-card-body" id="coinflip-settings-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="coinflip-start-value">
+                                    <i class="fas fa-play"></i>
+                                    Start Value
+                                    <span class="label-hint">Initial bet amount</span>
+                                </label>
+                                <input type="number" id="coinflip-start-value" class="form-input" min="50" step="50" value="200">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="coinflip-multiplier">
+                                    <i class="fas fa-times"></i>
+                                    Multiplier On Lose
+                                    <span class="label-hint">Multiply bet by this amount after each loss (Martingale strategy)</span>
+                                </label>
+                                <input type="number" id="coinflip-multiplier" class="form-input" min="1" max="3" step="0.1" value="2">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="coinflip-cooldown-min">
+                                    <i class="fas fa-clock"></i>
+                                    Cooldown Min (seconds)
+                                </label>
+                                <input type="number" id="coinflip-cooldown-min" class="form-input" min="10" step="1" value="16">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="coinflip-cooldown-max">
+                                    <i class="fas fa-clock"></i>
+                                    Cooldown Max (seconds)
+                                </label>
+                                <input type="number" id="coinflip-cooldown-max" class="form-input" min="10" step="1" value="18">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>
+                                <i class="fas fa-hand-pointer"></i>
+                                Coin Side Selection
+                                <span class="label-hint">Choose which side(s) to bet on (h = heads, t = tails)</span>
+                            </label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="coinflip-heads" value="h" checked>
+                                    <span>Heads (h)</span>
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="coinflip-tails" value="t">
+                                    <span>Tails (t)</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Martingale Strategy:</strong> Bot doubles (or multiplies) bet after each loss. 
+                                When you win, it resets to start value. This can recover losses but is high risk!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slots Settings -->
+                <div class="settings-card">
+                    <div class="settings-card-header">
+                        <h3>
+                            <i class="fas fa-slot-machine"></i>
+                            Slots Settings
+                        </h3>
+                        <div class="card-toggle">
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="slots-enabled">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="settings-card-body" id="slots-settings-body">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="slots-start-value">
+                                    <i class="fas fa-play"></i>
+                                    Start Value
+                                    <span class="label-hint">Initial bet amount</span>
+                                </label>
+                                <input type="number" id="slots-start-value" class="form-input" min="50" step="50" value="200">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="slots-multiplier">
+                                    <i class="fas fa-times"></i>
+                                    Multiplier On Lose
+                                    <span class="label-hint">Multiply bet by this amount after each loss</span>
+                                </label>
+                                <input type="number" id="slots-multiplier" class="form-input" min="1" max="3" step="0.1" value="2">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="slots-cooldown-min">
+                                    <i class="fas fa-clock"></i>
+                                    Cooldown Min (seconds)
+                                </label>
+                                <input type="number" id="slots-cooldown-min" class="form-input" min="10" step="1" value="16">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="slots-cooldown-max">
+                                    <i class="fas fa-clock"></i>
+                                    Cooldown Max (seconds)
+                                </label>
+                                <input type="number" id="slots-cooldown-max" class="form-input" min="10" step="1" value="18">
+                            </div>
+                        </div>
+
+                        <div class="info-box">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <strong>Slots Risk:</strong> Higher variance than coinflip. Can have longer losing streaks but bigger wins.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </section>
 
             <section id="automation" class="content-section">

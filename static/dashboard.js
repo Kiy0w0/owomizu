@@ -108,10 +108,15 @@ class MizuDashboard {
         document.getElementById('daily-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('daily', e.target.checked));
         document.getElementById('owo-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('owo', e.target.checked));
         document.getElementById('slash-commands-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('useSlashCommands', e.target.checked));
+        document.getElementById('channel-switcher-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('channelSwitcher', e.target.checked));
         
         // Security Settings buttons
         document.getElementById('save-security')?.addEventListener('click', () => this.saveSecuritySettings());
         document.getElementById('reset-security')?.addEventListener('click', () => this.resetSecuritySettings());
+
+        // Gambling Settings buttons
+        document.getElementById('save-gambling')?.addEventListener('click', () => this.saveGamblingSettings());
+        document.getElementById('reset-gambling')?.addEventListener('click', () => this.loadGamblingSettings());
 
         // Stats refresh
         document.getElementById('refresh-stats')?.addEventListener('click', () => this.refreshStats());
@@ -216,6 +221,9 @@ class MizuDashboard {
                 break;
             case 'security':
                 this.loadSecuritySettings();
+                break;
+            case 'gambling':
+                this.loadGamblingSettings();
                 break;
             case 'autoenhance':
                 this.loadAutoEnhanceSettings();
@@ -828,12 +836,14 @@ class MizuDashboard {
                 const dailyToggle = document.getElementById('daily-toggle');
                 const owoToggle = document.getElementById('owo-toggle');
                 const slashCommandsToggle = document.getElementById('slash-commands-toggle');
+                const channelSwitcherToggle = document.getElementById('channel-switcher-toggle');
                 
                 if (huntToggle) huntToggle.checked = settings.hunt;
                 if (battleToggle) battleToggle.checked = settings.battle;
                 if (dailyToggle) dailyToggle.checked = settings.daily;
                 if (owoToggle) owoToggle.checked = settings.owo;
                 if (slashCommandsToggle) slashCommandsToggle.checked = settings.useSlashCommands;
+                if (channelSwitcherToggle) channelSwitcherToggle.checked = settings.channelSwitcher;
             }
         } catch (error) {
             console.error('Failed to load quick settings:', error);
@@ -1331,6 +1341,163 @@ class MizuDashboard {
                 });
             })
             .catch(() => {});
+    }
+
+    /**
+     * Load Gambling settings
+     */
+    async loadGamblingSettings() {
+        try {
+            const response = await fetch('/api/dashboard/gambling-settings');
+            if (response.ok) {
+                const settings = await response.json();
+                this.populateGamblingForm(settings);
+            } else {
+                this.showNotification('Failed to load Gambling settings', 'error');
+            }
+        } catch (error) {
+            console.error('Error loading Gambling settings:', error);
+            this.showNotification('Error loading Gambling settings', 'error');
+        }
+    }
+
+    /**
+     * Populate gambling form with settings
+     */
+    populateGamblingForm(settings) {
+        // Global settings
+        document.getElementById('gambling-allotted-amount').value = settings.allottedAmount || 30000;
+        document.getElementById('gambling-goal-system-enabled').checked = settings.goalSystem?.enabled || false;
+        document.getElementById('gambling-goal-amount').value = settings.goalSystem?.amount || 300;
+
+        // Coinflip settings
+        document.getElementById('coinflip-enabled').checked = settings.coinflip?.enabled || false;
+        document.getElementById('coinflip-start-value').value = settings.coinflip?.startValue || 200;
+        document.getElementById('coinflip-multiplier').value = settings.coinflip?.multiplierOnLose || 2;
+        document.getElementById('coinflip-cooldown-min').value = settings.coinflip?.cooldown?.[0] || 16;
+        document.getElementById('coinflip-cooldown-max').value = settings.coinflip?.cooldown?.[1] || 18;
+        
+        // Coinflip options
+        const options = settings.coinflip?.options || ['t'];
+        document.getElementById('coinflip-heads').checked = options.includes('h');
+        document.getElementById('coinflip-tails').checked = options.includes('t');
+
+        // Slots settings
+        document.getElementById('slots-enabled').checked = settings.slots?.enabled || false;
+        document.getElementById('slots-start-value').value = settings.slots?.startValue || 200;
+        document.getElementById('slots-multiplier').value = settings.slots?.multiplierOnLose || 2;
+        document.getElementById('slots-cooldown-min').value = settings.slots?.cooldown?.[0] || 16;
+        document.getElementById('slots-cooldown-max').value = settings.slots?.cooldown?.[1] || 18;
+
+        // Toggle body visibility based on enabled state
+        this.toggleGamblingBody('coinflip', settings.coinflip?.enabled);
+        this.toggleGamblingBody('slots', settings.slots?.enabled);
+        
+        // Setup toggle listeners
+        this.setupGamblingToggles();
+    }
+
+    /**
+     * Setup gambling toggle listeners
+     */
+    setupGamblingToggles() {
+        const coinflipToggle = document.getElementById('coinflip-enabled');
+        const slotsToggle = document.getElementById('slots-enabled');
+        
+        if (coinflipToggle) {
+            coinflipToggle.addEventListener('change', (e) => {
+                this.toggleGamblingBody('coinflip', e.target.checked);
+            });
+        }
+        
+        if (slotsToggle) {
+            slotsToggle.addEventListener('change', (e) => {
+                this.toggleGamblingBody('slots', e.target.checked);
+            });
+        }
+    }
+
+    /**
+     * Toggle gambling settings body visibility
+     */
+    toggleGamblingBody(type, enabled) {
+        const body = document.getElementById(`${type}-settings-body`);
+        if (body) {
+            body.style.display = enabled ? 'block' : 'none';
+            body.style.opacity = enabled ? '1' : '0.5';
+        }
+    }
+
+    /**
+     * Save Gambling settings
+     */
+    async saveGamblingSettings() {
+        try {
+            const settings = this.collectGamblingSettings();
+            
+            // Validation
+            if (settings.coinflip.startValue < 50) {
+                this.showNotification('Coinflip start value must be at least 50', 'error');
+                return;
+            }
+            
+            if (settings.slots.startValue < 50) {
+                this.showNotification('Slots start value must be at least 50', 'error');
+                return;
+            }
+
+            const response = await fetch('/api/dashboard/gambling-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(settings)
+            });
+
+            if (response.ok) {
+                this.showNotification('✅ Gambling settings saved successfully!', 'success');
+            } else {
+                this.showNotification('Failed to save Gambling settings', 'error');
+            }
+        } catch (error) {
+            console.error('Error saving Gambling settings:', error);
+            this.showNotification('Error saving Gambling settings', 'error');
+        }
+    }
+
+    /**
+     * Collect gambling settings from form
+     */
+    collectGamblingSettings() {
+        // Collect coinflip options
+        const coinflipOptions = [];
+        if (document.getElementById('coinflip-heads')?.checked) coinflipOptions.push('h');
+        if (document.getElementById('coinflip-tails')?.checked) coinflipOptions.push('t');
+
+        return {
+            allottedAmount: parseInt(document.getElementById('gambling-allotted-amount').value),
+            goalSystem: {
+                enabled: document.getElementById('gambling-goal-system-enabled').checked,
+                amount: parseInt(document.getElementById('gambling-goal-amount').value)
+            },
+            coinflip: {
+                enabled: document.getElementById('coinflip-enabled').checked,
+                startValue: parseInt(document.getElementById('coinflip-start-value').value),
+                multiplierOnLose: parseFloat(document.getElementById('coinflip-multiplier').value),
+                cooldown: [
+                    parseInt(document.getElementById('coinflip-cooldown-min').value),
+                    parseInt(document.getElementById('coinflip-cooldown-max').value)
+                ],
+                options: coinflipOptions
+            },
+            slots: {
+                enabled: document.getElementById('slots-enabled').checked,
+                startValue: parseInt(document.getElementById('slots-start-value').value),
+                multiplierOnLose: parseFloat(document.getElementById('slots-multiplier').value),
+                cooldown: [
+                    parseInt(document.getElementById('slots-cooldown-min').value),
+                    parseInt(document.getElementById('slots-cooldown-max').value)
+                ]
+            }
+        };
     }
 
     /**
