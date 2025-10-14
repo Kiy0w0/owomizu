@@ -75,6 +75,12 @@ class Hunt(commands.Cog):
                     await self.bot.update_cash(sell_value - 5, assumed=True)
                     await self.bot.update_cash(5, reduce=True)
 
+                    # Check if stopHuntingWhenNoGems is enabled and no_gems status is true
+                    if self.bot.settings_dict.get("stopHuntingWhenNoGems", False) and self.bot.user_status.get("no_gems", False):
+                        await self.bot.log(f"Hunt paused - No gems available (stopHuntingWhenNoGems enabled)", "#ff9800")
+                        self.bot.add_dashboard_log("hunt", "Hunt paused - No gems available", "warning")
+                        return
+
                     await self.bot.sleep_till(self.bot.settings_dict["commands"]["hunt"]["cooldown"])
                     self.cmd["cmd_name"] = (
                         self.bot.alias["hunt"]["shortform"] 

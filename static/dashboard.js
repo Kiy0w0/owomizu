@@ -109,6 +109,7 @@ class MizuDashboard {
         document.getElementById('owo-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('owo', e.target.checked));
         document.getElementById('slash-commands-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('useSlashCommands', e.target.checked));
         document.getElementById('channel-switcher-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('channelSwitcher', e.target.checked));
+        document.getElementById('stop-hunt-no-gems-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('stopHuntingWhenNoGems', e.target.checked));
         
         // Security Settings buttons
         document.getElementById('save-security')?.addEventListener('click', () => this.saveSecuritySettings());
@@ -838,12 +839,15 @@ class MizuDashboard {
                 const slashCommandsToggle = document.getElementById('slash-commands-toggle');
                 const channelSwitcherToggle = document.getElementById('channel-switcher-toggle');
                 
+                const stopHuntNoGemsToggle = document.getElementById('stop-hunt-no-gems-toggle');
+                
                 if (huntToggle) huntToggle.checked = settings.hunt;
                 if (battleToggle) battleToggle.checked = settings.battle;
                 if (dailyToggle) dailyToggle.checked = settings.daily;
                 if (owoToggle) owoToggle.checked = settings.owo;
                 if (slashCommandsToggle) slashCommandsToggle.checked = settings.useSlashCommands;
                 if (channelSwitcherToggle) channelSwitcherToggle.checked = settings.channelSwitcher;
+                if (stopHuntNoGemsToggle) stopHuntNoGemsToggle.checked = settings.stopHuntingWhenNoGems;
             }
         } catch (error) {
             console.error('Failed to load quick settings:', error);

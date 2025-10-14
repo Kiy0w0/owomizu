@@ -170,9 +170,22 @@ class Gems(commands.Cog):
                 if gems_list:
                     for i in gems_list:
                         self.gem_cmd["cmd_arguments"]+=f"{i[1:]} "
+                    # Reset no_gems status when gems are available
+                    if self.bot.user_status["no_gems"]:
+                        self.bot.user_status["no_gems"] = False
+                        await self.bot.log(f"Gems available again - Resuming hunting", "#51cf66")
+                        self.bot.add_dashboard_log("gems", "Gems available - Hunt resumed", "success")
                 else:
-                    await self.log(f"Warn: No gems to use.", "#924444")
-                    self.bot.user_status["no_gems"] = True
+                    if not self.bot.user_status["no_gems"]:
+                        await self.bot.log(f"Warn: No gems to use.", "#924444")
+                        self.bot.add_dashboard_log("gems", "No gems available", "warning")
+                        self.bot.user_status["no_gems"] = True
+                        
+                        # Check if stopHuntingWhenNoGems is enabled
+                        if self.bot.settings_dict.get("stopHuntingWhenNoGems", False):
+                            await self.bot.log(f"stopHuntingWhenNoGems enabled - Hunt will pause", "#ff9800")
+                            self.bot.add_dashboard_log("hunt", "Hunt will pause (no gems + stopHuntingWhenNoGems enabled)", "warning")
+                            
                 await self.bot.put_queue(self.gem_cmd, priority=True)
                 await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["briefCooldown"])
                 await self.bot.set_stat(True)

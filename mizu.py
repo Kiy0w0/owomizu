@@ -786,6 +786,8 @@ def toggle_quick_setting():
                 settings["useSlashCommands"] = enabled
             elif command == "channelSwitcher":
                 settings["channelSwitcher"]["enabled"] = enabled
+            elif command == "stopHuntingWhenNoGems":
+                settings["stopHuntingWhenNoGems"] = enabled
             
             # Save updated settings
             with open(settings_path, 'w') as f:
@@ -797,6 +799,8 @@ def toggle_quick_setting():
                     add_command_log(user_id, "system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
                 elif command == "channelSwitcher":
                     add_command_log(user_id, "system", f"Channel Switcher {'enabled' if enabled else 'disabled'}", "info")
+                elif command == "stopHuntingWhenNoGems":
+                    add_command_log(user_id, "system", f"Stop Hunt When No Gems {'enabled' if enabled else 'disabled'}", "info")
                 else:
                     add_command_log(user_id, "system", f"{command.upper()} {'enabled' if enabled else 'disabled'}", "info")
         
@@ -810,7 +814,8 @@ def toggle_quick_setting():
             "daily": "Daily",
             "owo": "OwO",
             "useSlashCommands": "Slash Commands",
-            "channelSwitcher": "Channel Switcher"
+            "channelSwitcher": "Channel Switcher",
+            "stopHuntingWhenNoGems": "Stop Hunt When No Gems"
         }
         
         command_display = command_names.get(command, command.upper())
@@ -842,14 +847,15 @@ def get_quick_settings():
                 "daily": settings.get("autoDaily", False),
                 "owo": settings.get("commands", {}).get("owo", {}).get("enabled", False),
                 "useSlashCommands": settings.get("useSlashCommands", False),
-                "channelSwitcher": settings.get("channelSwitcher", {}).get("enabled", False)
+                "channelSwitcher": settings.get("channelSwitcher", {}).get("enabled", False),
+                "stopHuntingWhenNoGems": settings.get("stopHuntingWhenNoGems", False)
             })
         else:
-            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False})
+            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False})
             
     except Exception as e:
         print(f"Error getting quick settings: {e}")
-        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False})
+        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False})
 
 @app.route('/api/dashboard/security-settings', methods=['GET'])
 def get_security_settings():
@@ -2641,15 +2647,22 @@ if __name__ == "__main__":
             import tkinter as tk
             from tkinter import PhotoImage
             from queue import Queue
-        except Exception as e:
-            print(f"ImportError: {e}")
             
-        popup_queue = Queue()
+            popup_queue = Queue()
 
-        main_bot_thread = threading.Thread(target=run_bots, args=(tokens_and_channels,))
-        main_bot_thread.daemon = True
-        main_bot_thread.start()
+            main_bot_thread = threading.Thread(target=run_bots, args=(tokens_and_channels,))
+            main_bot_thread.daemon = True
+            main_bot_thread.start()
 
-        popup_main_loop()
+            popup_main_loop()
+        except ImportError as e:
+            print(f"⚠️ GUI features not available (tkinter not installed): {e}")
+            print("Running in headless mode without popup notifications...")
+            print("Tip: Set 'hostMode': true in config/misc.json to skip this check")
+            run_bots(tokens_and_channels)
+        except Exception as e:
+            print(f"Error initializing GUI: {e}")
+            print("Falling back to headless mode...")
+            run_bots(tokens_and_channels)
     else:
         run_bots(tokens_and_channels)
