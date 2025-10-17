@@ -1337,7 +1337,7 @@ def resource_path(relative_path):
     return os.path.join(os.path.abspath("."), relative_path)
 
 def install_package(package_name):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--break-system-packages", package_name])
 
 def is_termux():
     termux_prefix = os.environ.get("PREFIX")
@@ -2560,7 +2560,7 @@ def run_bot(token, channel_id, global_settings_dict):
         printBox(f"Error starting bot: {e}", "bold red")
 
 def install_package(package_name):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--break-system-packages", package_name])
 
 if __name__ == "__main__":
     try:

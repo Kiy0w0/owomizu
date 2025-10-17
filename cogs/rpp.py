@@ -28,7 +28,7 @@ class RPP(commands.Cog):
         await self.bot.remove_queue(id="rpp")
         await self.bot.log("RPP system unloaded.", "#74c0fc")
 
-    def should_send_command(self):
+    async def should_send_command(self):
         """Check if we should send a random command based on conditions."""
         try:
             config = self.bot.settings_dict.get("autoRandomCommands", {})
@@ -47,7 +47,7 @@ class RPP(commands.Cog):
             return True
             
         except Exception as e:
-            asyncio.create_task(self.bot.log(f"Error in should_send_command: {e}", "#c25560"))
+            await self.bot.log(f"Error in should_send_command: {e}", "#c25560")
             return False
 
     async def send_random_command(self):
@@ -90,7 +90,7 @@ class RPP(commands.Cog):
     async def random_command_loop(self):
         """Main loop - sends a random RPP command every minute."""
         try:
-            if self.should_send_command():
+            if await self.should_send_command():
                 await self.send_random_command()
         except Exception as e:
             await self.bot.log(f"Error in random_command_loop: {e}", "#c25560")
