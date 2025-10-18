@@ -32,10 +32,19 @@
     },
     "webhook": {
         "enabled": false,
-        "webhookUselessLog": false,
         "webhookUrl": "webhook url here",
         "webhookCaptchaUrl": null,
-        "webhookUserIdToPingOnCaptcha": 1
+        "webhookUserIdToPingOnCaptcha": "YOUR_DISCORD_USER_ID",
+        "notifyCaptcha": true,
+        "notifyBan": true,
+        "notifyRareCatch": true,
+        "notifyDailySummary": true,
+        "notifyWarning": true,
+        "notifyQuestCompleted": true,
+        "notifyGemsStatus": true,
+        "notifyError": false,
+        "dailySummaryTime": "00:00",
+        "webhookUselessLog": false
     },
     "console": {
         "runConsoleCommandOnCaptcha": false,

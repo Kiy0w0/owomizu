@@ -41,7 +41,8 @@
         "autoenhance_inv": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
         "autoenhance_gems": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
         "autoenhance_huntbot": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
-        "autoenhance_upgrade": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"}
+        "autoenhance_upgrade": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
+        "quest": {"priority": 7, "basecd": 10, "log_color": "#00d7af"}
     },
     "alias": {
         "hunt": {

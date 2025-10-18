@@ -340,5 +340,14 @@
             2,
             4
         ]
-    }
+    },
+    "questTracker": {
+        "enabled": false,
+        "autoCheckQuests": true,
+        "notifications": true,
+        "logRareAnimals": true,
+        "trackProgress": true,
+        "notifyOnCompletion": true
+    },
+    "stopHuntingWhenNoGems": false
 }

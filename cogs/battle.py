@@ -57,6 +57,13 @@ class Battle(commands.Cog):
                                 
                             
                             await self.bot.remove_queue(id="battle")
+                            
+                            # Check if stopHuntingWhenNoGems is enabled and no_gems status is true
+                            if self.bot.settings_dict.get("stopHuntingWhenNoGems", False) and self.bot.user_status.get("no_gems", False):
+                                await self.bot.log(f"Battle paused - No gems available (stopHuntingWhenNoGems enabled)", "#ff9800")
+                                self.bot.add_dashboard_log("battle", "Battle paused - No gems available", "warning")
+                                return
+                                
                             await self.bot.sleep_till(self.bot.settings_dict["commands"]["battle"]["cooldown"])
                             self.cmd["cmd_name"] = (
                                 self.bot.alias["battle"]["shortform"] 

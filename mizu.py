@@ -1231,6 +1231,114 @@ def save_autoenhance_settings():
         print(f"Error saving AutoEnhance settings: {e}")
         return jsonify({"error": "Failed to save AutoEnhance settings"}), 500
 
+@app.route('/api/dashboard/quest-tracker', methods=['GET'])
+def get_quest_tracker():
+    """Get quest tracker status and progress"""
+    try:
+        quest_data = {
+            "enabled": False,
+            "quests": {},
+            "rare_catches": {"mythical": 0, "fabled": 0, "legendary": 0},
+            "detected": False
+        }
+        
+        # Get quest data from active bot instances
+        for client in bot_instances:
+            if hasattr(client, 'user') and client.user:
+                # Try to get quest cog
+                quest_cog = client.get_cog('Quest')
+                if quest_cog:
+                    quest_status = quest_cog.get_quest_status()
+                    quest_data = {
+                        "enabled": True,
+                        "quests": quest_status["quests"],
+                        "rare_catches": quest_status["rare_catches"],
+                        "detected": quest_status["detected"]
+                    }
+                    break
+                    
+        return jsonify(quest_data)
+        
+    except Exception as e:
+        print(f"Error getting quest tracker: {e}")
+        return jsonify({
+            "enabled": False,
+            "quests": {},
+            "rare_catches": {"mythical": 0, "fabled": 0, "legendary": 0},
+            "detected": False
+        })
+
+@app.route('/api/dashboard/quest-tracker-settings', methods=['GET'])
+def get_quest_tracker_settings():
+    """Get quest tracker settings"""
+    try:
+        settings_path = "config/settings.json"
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            quest_settings = settings.get("questTracker", {})
+            return jsonify({
+                "enabled": quest_settings.get("enabled", False),
+                "autoCheckQuests": quest_settings.get("autoCheckQuests", True),
+                "notifications": quest_settings.get("notifications", True),
+                "logRareAnimals": quest_settings.get("logRareAnimals", True),
+                "trackProgress": quest_settings.get("trackProgress", True),
+                "notifyOnCompletion": quest_settings.get("notifyOnCompletion", True)
+            })
+        else:
+            return jsonify({
+                "enabled": False,
+                "autoCheckQuests": True,
+                "notifications": True,
+                "logRareAnimals": True,
+                "trackProgress": True,
+                "notifyOnCompletion": True
+            })
+            
+    except Exception as e:
+        print(f"Error getting quest tracker settings: {e}")
+        return jsonify({"error": "Failed to get quest tracker settings"}), 500
+
+@app.route('/api/dashboard/quest-tracker-settings', methods=['POST'])
+def save_quest_tracker_settings():
+    """Save quest tracker settings"""
+    try:
+        data = request.get_json()
+        
+        settings_path = "config/settings.json"
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r') as f:
+                settings = json.load(f)
+            
+            settings["questTracker"] = {
+                "enabled": data.get("enabled", False),
+                "autoCheckQuests": data.get("autoCheckQuests", True),
+                "notifications": data.get("notifications", True),
+                "logRareAnimals": data.get("logRareAnimals", True),
+                "trackProgress": data.get("trackProgress", True),
+                "notifyOnCompletion": data.get("notifyOnCompletion", True)
+            }
+            
+            with open(settings_path, 'w') as f:
+                json.dump(settings, f, indent=4)
+            
+            # Log the change
+            for user_id in listUserIds:
+                add_command_log(user_id, "system", "Quest Tracker settings updated", "info")
+        
+        # Refresh bot settings
+        refresh_bot_settings()
+        
+        return jsonify({
+            "success": True,
+            "message": "Quest Tracker settings saved successfully"
+        })
+        
+    except Exception as e:
+        print(f"Error saving quest tracker settings: {e}")
+        return jsonify({"error": "Failed to save quest tracker settings"}), 500
+
 @app.route('/api/dashboard/command-logs', methods=['GET'])
 def get_command_logs():
     """Get real-time command logs for dashboard"""

@@ -172,19 +172,42 @@ class Gems(commands.Cog):
                         self.gem_cmd["cmd_arguments"]+=f"{i[1:]} "
                     # Reset no_gems status when gems are available
                     if self.bot.user_status["no_gems"]:
+                        was_paused = self.bot.settings_dict.get("stopHuntingWhenNoGems", False)
                         self.bot.user_status["no_gems"] = False
-                        await self.bot.log(f"Gems available again - Resuming hunting", "#51cf66")
-                        self.bot.add_dashboard_log("gems", "Gems available - Hunt resumed", "success")
+                        await self.bot.log(f"✅ Gems available again!", "#51cf66")
+                        self.bot.add_dashboard_log("gems", "Gems available", "success")
+                        
+                        # Auto-resume hunt and battle if stopHuntingWhenNoGems is enabled
+                        if was_paused:
+                            await self.bot.log(f"🔄 Resuming hunt and battle...", "#51cf66")
+                            
+                            # Resume hunt if enabled
+                            if self.bot.settings_dict.get("commands", {}).get("hunt", {}).get("enabled", False):
+                                hunt_cog = self.bot.get_cog('Hunt')
+                                if hunt_cog:
+                                    await asyncio.sleep(2)  # Small delay before resuming
+                                    await self.bot.put_queue(hunt_cog.cmd)
+                                    await self.bot.log(f"Hunt resumed", "#51cf66")
+                                    self.bot.add_dashboard_log("hunt", "Hunt resumed - gems available", "success")
+                            
+                            # Resume battle if enabled
+                            if self.bot.settings_dict.get("commands", {}).get("battle", {}).get("enabled", False):
+                                battle_cog = self.bot.get_cog('Battle')
+                                if battle_cog:
+                                    await asyncio.sleep(2)  # Small delay before resuming
+                                    await self.bot.put_queue(battle_cog.cmd)
+                                    await self.bot.log(f"Battle resumed", "#51cf66")
+                                    self.bot.add_dashboard_log("battle", "Battle resumed - gems available", "success")
                 else:
                     if not self.bot.user_status["no_gems"]:
-                        await self.bot.log(f"Warn: No gems to use.", "#924444")
+                        await self.bot.log(f"⚠️ No gems available!", "#ff9800")
                         self.bot.add_dashboard_log("gems", "No gems available", "warning")
                         self.bot.user_status["no_gems"] = True
                         
                         # Check if stopHuntingWhenNoGems is enabled
                         if self.bot.settings_dict.get("stopHuntingWhenNoGems", False):
-                            await self.bot.log(f"stopHuntingWhenNoGems enabled - Hunt will pause", "#ff9800")
-                            self.bot.add_dashboard_log("hunt", "Hunt will pause (no gems + stopHuntingWhenNoGems enabled)", "warning")
+                            await self.bot.log(f"🛑 stopHuntingWhenNoGems enabled - Hunt & Battle will pause", "#ff9800")
+                            self.bot.add_dashboard_log("hunt", "Hunt & Battle pausing (no gems)", "warning")
                             
                 await self.bot.put_queue(self.gem_cmd, priority=True)
                 await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["briefCooldown"])
