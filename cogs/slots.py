@@ -72,11 +72,11 @@ class Slots(commands.Cog):
             if (amount_to_gamble > self.bot.user_status["balance"] and self.bot.settings_dict["cashCheck"]):
                 if not self.gamble_flags["no_balance"]:
                     self.gamble_flags["no_balance"] = True
-                    await self.bot.log(f"Amount to gamle next ({amount_to_gamble}) exceeds bot balance ({self.bot.user_status["balance"]}), stopping slots!", "#4a270c")
+                    await self.bot.log(f"Amount to gamle next ({amount_to_gamble}) exceeds bot balance ({self.bot.user_status['balance']}), stopping slots!", "#4a270c")
 
                 return await self.start_slots()
             elif self.gamble_flags["no_balance"]:
-                await self.bot.log(f"Balance regained! ({self.bot.user_status["balance"]}) - restarting slots!", "#4a270c")
+                await self.bot.log(f"Balance regained! ({self.bot.user_status['balance']}) - restarting slots!", "#4a270c")
                 self.gamble_flags["no_balance"] = False
             
             # Allotted value check

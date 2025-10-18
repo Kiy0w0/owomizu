@@ -1995,6 +1995,11 @@ class MyClient(commands.Bot):
     async def put_queue(self, cmd_data, priority=False, quick=False):
         cnf = self.misc["command_info"]
         try:
+            # Check if cmd_data has required 'id' field
+            if not isinstance(cmd_data, dict) or "id" not in cmd_data:
+                await self.log(f"Error - Command data missing 'id' field. Data: {cmd_data}", "#c25560")
+                return
+                
             while (
                 not self.command_handler_status["state"]
                 or self.command_handler_status["hold_handler"]
@@ -2028,7 +2033,7 @@ class MyClient(commands.Bot):
                 ))
                 self.cmds_state[cmd_data["id"]]["in_queue"] = True
         except Exception as e:
-            await self.log(f"Error - {e}, during put_queue", "#c25560")
+            await self.log(f"Error - {e}, during put_queue. Command data: {cmd_data}", "#c25560")
 
     async def remove_queue(self, cmd_data=None, id=None):
         if not cmd_data and not id:
