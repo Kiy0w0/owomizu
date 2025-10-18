@@ -267,6 +267,8 @@ class AutoEnhance(commands.Cog):
             max_efficiency = config.get("maxEfficiencyLevel", 50)
             max_duration = config.get("maxDurationLevel", 50)
             
+            investment_amount = 0  # Initialize to track how much was invested
+            
             # Invest in efficiency first if below max
             if efficiency_level < max_efficiency:
                 investment_amount = min(essence_available // 2, config.get("maxInvestmentPerTime", 50))
