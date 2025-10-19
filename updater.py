@@ -117,7 +117,7 @@ def write_tokens_file(content):
     """Write content to tokens file"""
     try:
         with open(TOKENS_PATH, "w") as tokens_file:
-        tokens_file.write(content)
+            tokens_file.write(content)
     except Exception as e:
         console.print(f"[red]❌ Failed to write tokens file: {e}[/red]")
 
@@ -196,26 +196,26 @@ def merge_configurations(backup_path):
 def perform_git_update(backup_path):
     """Perform git update with proper error handling"""
     try:
-    repo_dir = "."
-    os.chdir(repo_dir)
+        repo_dir = "."
+        os.chdir(repo_dir)
 
-    # Check for uncommitted changes
+        # Check for uncommitted changes
         with console.status("[bold cyan]🔍 Checking for uncommitted changes..."):
             status_result = subprocess.run(['git', 'status', '--porcelain'], 
                                          capture_output=True, text=True, check=True)
 
-    if status_result.stdout:
+        if status_result.stdout:
             console.print("[yellow]⚠️ Uncommitted changes detected. Stashing changes...[/yellow]")
             with console.status("[bold yellow]📦 Stashing changes..."):
                 subprocess.run(['git', 'stash'], check=True)
             sleep(1)
 
-    # Check for untracked files
+        # Check for untracked files
         with console.status("[bold cyan]🔍 Checking for untracked files..."):
             untracked_files = subprocess.run(['git', 'ls-files', '--others', '--exclude-standard'], 
                                            capture_output=True, text=True, check=True)
 
-    if untracked_files.stdout:
+        if untracked_files.stdout:
             console.print("[yellow]⚠️ Untracked files detected. Cleaning up...[/yellow]")
             with console.status("[bold red]🧹 Cleaning untracked files..."):
                 subprocess.run(['git', 'clean', '-f', '-d'], check=True)
