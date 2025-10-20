@@ -4,7 +4,7 @@
 
 *Advanced Auto Farming Bot for OwO Discord Game*
 
-[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mizu)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://mizu)
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Discord Bot](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
@@ -186,7 +186,7 @@ We welcome all types of contributions! Whether you're a developer, designer, or 
 
 ### 📋 **Getting Started**
 1. Read our [**Contributing Guidelines**](/CONTRIBUTING.md)
-2. Join our [**Discord Community**](https://discord.gg/mizu)
+2. Join our [**Discord Community**](https://4NsdaRWD2K)
 3. Check [**Good First Issues**](https://github.com/kiy0w0/owomizu/labels/good%20first%20issue)
 
 ### 🔧 **Development Setup**
@@ -226,7 +226,7 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 <div align="center">
 
 ### 💬 **Get Help**
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mizu)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://mizu)
 [![GitHub Issues](https://img.shields.io/badge/GitHub-Report%20Issues-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/kiy0w0/owomizu/issues)
 
 ### 🎯 **Quick Links**
@@ -234,8 +234,8 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 |----------------|-------|
 | 🐛 **Bug Reports** | [GitHub Issues](https://github.com/kiy0w0/owomizu/issues) |
 | 💡 **Feature Requests** | [GitHub Discussions](https://github.com/kiy0w0/owomizu/discussions) |
-| ❓ **General Questions** | [Discord #help](https://discord.gg/mizu) |
-| 💻 **Development** | [Discord #development](https://discord.gg/mizu) |
+| ❓ **General Questions** | [Discord #help](https://4NsdaRWD2K) |
+| 💻 **Development** | [Discord #development](https://4NsdaRWD2K) |
 | 📖 **Documentation** | [Wiki](https://github.com/kiy0w0/owomizu/wiki) |
 
 **Made with 💙 by the Mizu Network Community**
