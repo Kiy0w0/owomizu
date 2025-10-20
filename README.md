@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Discord Bot](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/Version-2.0.0-cyan.svg)]()
+[![Version](https://img.shields.io/badge/Version-1.3.0-cyan.svg)]()
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 
 ![Mizu Network Banner](static/imgs/mizu.png)
@@ -257,5 +257,13 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 ![GitHub last commit](https://img.shields.io/github/last-commit/kiy0w0/owomizu)
 ![GitHub repo size](https://img.shields.io/github/repo-size/kiy0w0/owomizu)
 ![GitHub language count](https://img.shields.io/github/languages/count/kiy0w0/owomizu)
+
+</div>
+
+---
+
+<div align="center">
+
+<sub>Based on [owo-dusk](https://github.com/EchoQuill/owo-dusk) by [@EchoQuill](https://github.com/EchoQuill) • Licensed under GPL-3.0</sub>
 
 </div>

@@ -83,7 +83,7 @@ class Slots(commands.Cog):
             if (self.bot.gain_or_lose + (self.bot.settings_dict["gamble"]["allottedAmount"] - amount_to_gamble) <=0):
                 if not self.gamble_flags["amount_exceeded"]:
                     self.gamble_flags["amount_exceeded"] = True
-                    await self.bot.log(f"Alloted value ({self.bot.settings_dict["gamble"]["allottedAmount"]}) exceeded, stopping slots!", "#4a270c")
+                    await self.bot.log(f"Alloted value ({self.bot.settings_dict['gamble']['allottedAmount']}) exceeded, stopping slots!", "#4a270c")
 
                 return await self.start_slots()
             elif self.gamble_flags["amount_exceeded"]:

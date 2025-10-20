@@ -1,6 +1,6 @@
 # 🌊 Mizu OwO - Recent Updates
 
-## v1.2.0 - Latest Release 🎉
+## v1.3.0 - Latest Release 🎉
 
 ### ✨ New Features
 - **AutoEnhance System** - Auto-use gems when hunting & auto-invest essence

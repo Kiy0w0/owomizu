@@ -171,7 +171,7 @@ if scratchSetup:
             ver_check_response = requests.get("https://mizuowoapi.vercel.app/version.json", timeout=10)
             ver_check = ver_check_response.json()["version"]
             print(f'\033[1;36m[0]--received current latest version for Mizu OwO - v{ver_check}\033[m')
-            version = "2.0.0"
+            version = "1.3.0"
             print(f'\033[1;36m[0]current version of Mizu OwO - v{version}\033[m')
 
             if compare_versions(version, ver_check):

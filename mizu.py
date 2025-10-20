@@ -94,7 +94,7 @@ mizuArt = r"""
 M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "1.2.0"
+version = "1.3.0"
 debug_print = True
 
 
