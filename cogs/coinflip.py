@@ -1,3 +1,10 @@
+"""
+Mizu OwO Bot
+Copyright (C) 2025 MizuNetwork
+Copyright (C) 2025 Kiy0w0
+
+"""
+
 import re
 import asyncio
 

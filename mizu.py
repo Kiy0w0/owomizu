@@ -1702,8 +1702,11 @@ class MyClient(commands.Bot):
                 
                 if compare_versions(latest_version.get("version", "0.0.0"), safety_check.get("version", "0.0.0")):
                     await self.log(f"Please update to: v{latest_version.get('version', 'latest')}", "#33245e")
+        except requests.exceptions.RequestException:
+            # Network error, silently pass to avoid spam
+            pass
         except Exception as e:
-            await self.log(f"Failed to perform safety check: {e}", "#c25560")
+            await self.log(f"Failed to perform safety check: {str(e)}", "#c25560")
 
     async def start_cogs(self):
         files = os.listdir(resource_path("./cogs"))  # Get the list of files
@@ -2020,6 +2023,15 @@ class MyClient(commands.Bot):
             
             # Handle channelSwitcher setting
             if command == "channelSwitcher":
+                # Ensure channelSwitcher exists in settings_dict
+                if "channelSwitcher" not in self.settings_dict or self.settings_dict["channelSwitcher"] is None:
+                    self.settings_dict["channelSwitcher"] = {
+                        "enabled": False, 
+                        "users": [], 
+                        "interval": [300, 600], 
+                        "delayBeforeSwitch": [2, 4]
+                    }
+                
                 self.settings_dict["channelSwitcher"]["enabled"] = enabled
                 await self.log(f"Channel Switcher {'enabled' if enabled else 'disabled'}", "#9dc3f5")
                 # Add dashboard log
