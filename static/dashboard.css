@@ -24,7 +24,7 @@
   width: 100%;
   overflow-x: auto;
 }
-/* Mizu Network Dashboard - Modern CSS */
+/* Mizu Network Dashboard - Drawer */
 
 /* CSS Variables */
 :root {
@@ -47,6 +47,10 @@
   --text-secondary: #e2e8f0;
   --text-muted: #a0aec0;
   --text-dark: #2d3748;
+  
+  /* Drawer */
+  --drawer-width: 280px;
+  --drawer-transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
   --bg-primary: #1a202c;
   --bg-secondary: #2d3748;

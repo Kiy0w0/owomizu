@@ -9,6 +9,7 @@
     
     <!-- Stylesheets -->
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='drawer.css') }}">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,6 +31,13 @@
     <!-- Navigation Header -->
     <header class="navbar">
         <div class="navbar-container">
+            <!-- Drawer Toggle Button -->
+            <button class="drawer-toggle" id="drawer-toggle" aria-label="Toggle Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+            
             <div class="navbar-brand">
                 <i class="fas fa-water brand-icon"></i>
                 <span class="brand-text">Mizu Network</span>
@@ -68,18 +76,24 @@
                 </div>
         </header>
         
+    <!-- Drawer Backdrop -->
+    <div class="drawer-backdrop" id="drawer-backdrop"></div>
+    
     <!-- Main Container -->
     <div class="main-container">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h3>
-                    <i class="fas fa-tachometer-alt"></i>
-                    Control Panel
-                </h3>
+        <!-- Drawer/Sidebar -->
+        <aside class="drawer" id="drawer">
+            <div class="drawer-header">
+                <div class="drawer-logo">
+                    <i class="fas fa-water"></i>
+                    <span>Mizu Control</span>
+                </div>
+                <button class="drawer-close" id="drawer-close" aria-label="Close Menu">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
 
-            <nav class="sidebar-nav">
+            <nav class="drawer-nav">
                 <ul class="nav-menu">
                     <li class="nav-item active" data-section="overview">
                         <a href="#" class="nav-link">
@@ -136,7 +150,11 @@
                 </ul>
             </nav>
 
-            <div class="sidebar-footer">
+            <div class="drawer-footer">
+                <div class="drawer-footer-content">
+                    <i class="fas fa-code"></i>
+                    <span>Mizu Network © 2025</span>
+                </div>
             </div>
         </aside>
 

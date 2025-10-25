@@ -26,6 +26,9 @@ class MizuDashboard {
         // Show loading screen
         this.showLoadingScreen();
         
+        // Initialize drawer system
+        this.initializeDrawer();
+        
         // Setup event listeners
         this.setupEventListeners();
         
@@ -42,6 +45,77 @@ class MizuDashboard {
         this.showNotification('Dashboard loaded successfully!', 'success');
         
         console.log('✅ Dashboard initialized successfully');
+    }
+    
+    /**
+     * Initialize drawer/sidebar system
+     */
+    initializeDrawer() {
+        const drawer = document.getElementById('drawer');
+        const drawerToggle = document.getElementById('drawer-toggle');
+        const drawerClose = document.getElementById('drawer-close');
+        const drawerBackdrop = document.getElementById('drawer-backdrop');
+        
+        if (!drawer || !drawerToggle || !drawerClose || !drawerBackdrop) {
+            console.error('Drawer elements not found');
+            return;
+        }
+        
+        // Open drawer
+        const openDrawer = () => {
+            drawer.classList.add('active');
+            drawerToggle.classList.add('active');
+            drawerBackdrop.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        };
+        
+        // Close drawer
+        const closeDrawer = () => {
+            drawer.classList.remove('active');
+            drawerToggle.classList.remove('active');
+            drawerBackdrop.classList.remove('active');
+            document.body.style.overflow = '';
+        };
+        
+        // Toggle drawer
+        const toggleDrawer = () => {
+            drawer.classList.contains('active') ? closeDrawer() : openDrawer();
+        };
+        
+        // Event listeners
+        drawerToggle.addEventListener('click', toggleDrawer);
+        drawerClose.addEventListener('click', closeDrawer);
+        drawerBackdrop.addEventListener('click', closeDrawer);
+        
+        // ESC key to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && drawer.classList.contains('active')) {
+                closeDrawer();
+            }
+        });
+        
+        // Close drawer on nav link click (mobile only)
+        const navLinks = document.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    setTimeout(closeDrawer, 300);
+                }
+            });
+        });
+        
+        // Handle window resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 1024) {
+                    closeDrawer();
+                }
+            }, 250);
+        });
+        
+        console.log('✅ Drawer system initialized');
     }
 
     /**
