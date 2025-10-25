@@ -125,8 +125,20 @@ if scratchSetup:
 
     print()
     print()
-    import discord
-    import asyncio
+    
+    # Import discord with Termux compatibility
+    discord_available = True
+    try:
+        import discord
+        import asyncio
+    except ImportError as e:
+        if "curl" in str(e).lower() and is_termux():
+            print("\033[1;33m[!]Note: Some features unavailable on Termux (curl_cffi incompatibility)\033[m")
+            print("\033[1;33m[!]Token validation will be skipped - please ensure tokens are correct\033[m")
+            discord_available = False
+        else:
+            print(f"\033[1;31m[x]Failed to import discord: {e}\033[m")
+            discord_available = False
 
     # version check
     def compare_versions(current_version, latest_version):
@@ -237,6 +249,7 @@ if scratchSetup:
                     with open("tokens.txt", "w") as t:
                         pass
 
+                    # Token validation function (skip on Termux if discord unavailable)
                     async def validate_token(token, channelinput):
                         try:
                             client = discord.Client()
@@ -326,14 +339,25 @@ if scratchSetup:
                                         f"\033[1;31m[x]error while attempting to retrieve channel id -\n{e}\033[m"
                                     )
                             # validtoken=False
-                            try:
-                                validtoken, validchannel = asyncio.run(
-                                    validate_token(tokeninput, channelinput)
-                                )
-                            except Exception as e:
+                            # Skip validation on Termux if discord unavailable
+                            if not discord_available or is_termux():
                                 print(
-                                    f"\033[1;31m[x] Error validating token for account #{i+1}:\n{e}\033[m"
+                                    f"\033[1;33m[!] Token validation skipped (Termux/compatibility mode)\033[m"
                                 )
+                                print(
+                                    f"\033[1;36m[0] Adding token for account #{i+1} without validation\033[m"
+                                )
+                                validtoken = True
+                                validchannel = (True, "channel (not validated)")
+                            else:
+                                try:
+                                    validtoken, validchannel = asyncio.run(
+                                        validate_token(tokeninput, channelinput)
+                                    )
+                                except Exception as e:
+                                    print(
+                                        f"\033[1;31m[x] Error validating token for account #{i+1}:\n{e}\033[m"
+                                    )
                             if validtoken:
                                 if validchannel[0]:
                                     print(

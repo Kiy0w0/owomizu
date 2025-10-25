@@ -1928,6 +1928,7 @@ class MyClient(commands.Bot):
             "pray": commands_dict["pray"]["enabled"] and not reaction_bot_dict["pray_and_curse"],
             "rpp": self.settings_dict.get("autoRandomCommands", {}).get("enabled", False),
             "reactionbot": reaction_bot_dict["hunt_and_battle"] or reaction_bot_dict["owo"] or reaction_bot_dict["pray_and_curse"],
+            "richpresence": self.global_settings_dict.get("richPresence", {}).get("enabled", True),
             "sell": commands_dict["sell"]["enabled"],
             "shop": commands_dict["shop"]["enabled"],
             "slots": self.settings_dict["gamble"]["slots"]["enabled"]

@@ -32,7 +32,7 @@
     },
     "webhook": {
         "enabled": false,
-        "webhookUrl": "webhook url here",
+        "webhookUrl": "",
         "webhookCaptchaUrl": null,
         "webhookUserIdToPingOnCaptcha": "YOUR_DISCORD_USER_ID",
         "notifyCaptcha": true,
