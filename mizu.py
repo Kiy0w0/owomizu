@@ -2765,7 +2765,11 @@ if __name__ == "__main__":
 
     if not on_mobile:
         # To catch `Broken pipe` error
-        from curl_cffi.curl import CurlError
+        try:
+            from curl_cffi.curl import CurlError
+        except ImportError:
+            # curl_cffi not available (Termux/ARM), use fallback
+            CurlError = Exception
     
     if global_settings_dict["captcha"]["toastOrPopup"] and not on_mobile and not misc_dict["hostMode"]:
         try:

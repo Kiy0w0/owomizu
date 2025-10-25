@@ -1,10 +1,21 @@
 import glob
 import os
-import numpy as np
 import aiohttp
 import io
-from PIL import Image
 import requests
+
+# Platform-compatible imports
+try:
+    import numpy as np
+except ImportError:
+    print("⚠️ numpy not available - HuntBot solver may not work optimally")
+    np = None
+
+try:
+    from PIL import Image
+except ImportError:
+    print("⚠️ PIL not available - HuntBot solver may not work")
+    Image = None
 
 """
 Made with the help of https://github.com/realphandat/phandat-selfbot/blob/main/owo/modules.py
@@ -13,6 +24,12 @@ I have recieved permission to use this code snippet.
 
 
 async def solveHbCaptcha(captcha_url, session):
+    # Check if required libraries are available
+    if np is None or Image is None:
+        print("❌ Cannot solve HuntBot captcha: numpy or PIL not available")
+        print("💡 For Termux: pkg install python-numpy python-pillow")
+        return ""
+    
     checks = []
     """
     I tried my best to make these work without folder seperation but uhh failed lol.
