@@ -6,7 +6,7 @@
 
 **Welcome to the Mizu OwO Community!**
 
-[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mizu)
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/bkvMhwjSPG)
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/kiy0w0/owomizu)
 
 *Thank you for your interest in contributing to Mizu OwO! 水*

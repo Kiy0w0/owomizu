@@ -287,7 +287,7 @@ If you encounter issues:
 1. **Check logs:** `tail -f logs/mizu.log`
 2. **Verify Python version:** `python3 --version`
 3. **Check dependencies:** `pip3 list`
-4. **Join our Discord:** [Support Server](https://discord.gg/your-server)
+4. **Join our Discord:** [Support Server](https://discord.gg/bkvMhwjSPG)
 5. **Create GitHub issue:** [Issues](https://github.com/kiy0w0/owomizu/issues)
 
 ---

@@ -459,7 +459,7 @@ logcat | grep Termux
 
 ### Getting Help
 1. **Check Termux Wiki:** [Termux Wiki](https://wiki.termux.com/)
-2. **Join our Discord:** [Support Server](https://discord.gg/your-server)
+2. **Join our Discord:** [Support Server](https://discord.gg/bkvMhwjSPG)
 3. **Create GitHub issue:** [Issues](https://github.com/kiy0w0/owomizu/issues)
 4. **Termux Community:** r/termux on Reddit
 
