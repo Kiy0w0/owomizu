@@ -49,11 +49,14 @@ termux-setup-storage
 # Install essential packages
 pkg install python git curl wget -y
 
-# Install build tools
-pkg install build-essential -y
+# Install build tools & compilers (important for avoiding ninja errors!)
+pkg install clang cmake ninja rust binutils -y
 
-# Install additional libraries
-pkg install libjpeg-turbo libpng -y
+# Install development libraries
+pkg install libffi openssl readline sqlite zlib libjpeg-turbo libpng -y
+
+# Upgrade pip and setuptools
+pip install --upgrade pip setuptools wheel
 ```
 
 ### Step 3: Clone Repository
@@ -66,20 +69,30 @@ git clone https://github.com/kiy0w0/owomizu.git
 cd owomizu
 ```
 
-### Step 4: Run Setup Script
+### Step 4: Install Python Dependencies
+
+**For Termux, use this optimized installation:**
+
 ```bash
+# Option 1: Standard installation (may have issues)
 python setup.py
+
+# Option 2: Termux-optimized installation (Recommended)
+pip install discord.py-self aiohttp requests rich flask pytz Pillow beautifulsoup4 lxml
 ```
 
-**What the setup does for Termux:**
-- ✅ Detects Termux environment automatically
-- ✅ Installs Termux-optimized packages:
-  - `python-numpy` (Termux version)
-  - `python-pillow` (Termux version)
-  - `termux-api` (system integration)
-- ✅ Updates package manager
-- ✅ Configures Python dependencies
-- ✅ Tests API connectivity
+**⚠️ Common Issue Fix:**
+If you get `ninja` or `curl-cffi` errors, use Option 2 above.
+
+**What gets installed:**
+- ✅ `discord.py-self` - Discord selfbot library
+- ✅ `aiohttp` - Async HTTP requests
+- ✅ `requests` - HTTP library
+- ✅ `rich` - Beautiful terminal output
+- ✅ `flask` - Web dashboard
+- ✅ `pytz` - Timezone support
+- ✅ `Pillow` - Image processing
+- ✅ `beautifulsoup4` & `lxml` - HTML parsing
 
 ### Step 5: Configure Discord Tokens
 
@@ -223,41 +236,99 @@ curl -fLo ~/.termux/font.ttf https://github.com/ryanoasis/nerd-fonts/raw/master/
 
 ### Common Issues
 
-**1. Package Installation Fails:**
+**1. 🔴 Ninja Build Error (`spawn.h` not found)**
+
+This is the most common error in Termux!
+
+```bash
+# Fix: Install build tools
+pkg install clang cmake ninja rust binutils -y
+
+# Then reinstall
+pip cache purge
+pip install discord.py-self aiohttp requests rich flask pytz
+```
+
+**2. 🔴 curl-cffi Error (`libcurl-impersonate.so.4` not found)**
+
+`curl-cffi` is not compatible with Termux.
+
+```bash
+# Solution: Skip curl-cffi and use standard libraries
+pip uninstall curl-cffi discord.py -y
+pip install discord.py-self aiohttp requests
+
+# Bot will work fine without curl-cffi!
+```
+
+**3. 🔴 Failed Building Wheel Error**
+
+```bash
+# Clear cache and reinstall
+pip cache purge
+rm -rf ~/.cache/pip
+
+# Install minimal requirements
+pip install discord.py-self aiohttp requests rich flask pytz Pillow
+
+# Run bot
+python mizu.py
+```
+
+**4. 🟡 Package Installation Fails:**
 ```bash
 pkg clean
 pkg update
-pkg upgrade
+pkg upgrade -y
 ```
 
-**2. Python Module Errors:**
+**5. 🟡 Python Module Errors:**
 ```bash
-pip install --upgrade pip
-pip install -r requirements.txt --force-reinstall
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt --no-cache-dir
 ```
 
-**3. Storage Permission Issues:**
+**6. 🟡 Storage Permission Issues:**
 ```bash
 termux-setup-storage
-# Grant permission in Android settings
+# Then grant permission in Android settings
+# Settings → Apps → Termux → Permissions → Storage
 ```
 
-**4. Network Connection Issues:**
+**7. 🟡 Network Connection Issues:**
 ```bash
 # Check network
-ping google.com
+ping -c 3 google.com
 
 # Reset DNS
 echo "nameserver 8.8.8.8" > $PREFIX/etc/resolv.conf
+echo "nameserver 1.1.1.1" >> $PREFIX/etc/resolv.conf
 ```
 
-**5. Bot Stops When Screen Locks:**
+**8. 🟡 Bot Stops When Screen Locks:**
 ```bash
 # Acquire wake lock
 termux-wake-lock
 
-# Use background execution
-nohup python mizu.py &
+# Use background execution with logging
+nohup python mizu.py > mizu.log 2>&1 &
+
+# Check if running
+ps aux | grep python
+```
+
+**9. 🟡 Import Error after Installation:**
+```bash
+# Reinstall specific module
+pip uninstall [module-name] -y
+pip install [module-name] --no-cache-dir
+```
+
+**10. 🟡 Permission Denied Errors:**
+```bash
+# Fix permissions
+chmod +x mizu.py
+chmod -R 755 ~/owomizu
 ```
 
 ### Performance Issues
@@ -269,13 +340,48 @@ free -h
 
 # Kill unnecessary processes
 pkill -f "process_name"
+
+# Clear cache
+sync; echo 3 > /proc/sys/vm/drop_caches 2>/dev/null || echo "Need root for cache clear"
 ```
 
 **2. Slow Performance:**
 ```bash
 # Reduce bot delay settings in config
-# Close other apps
+# Close other apps running in background
 # Enable developer options → "Don't keep activities"
+# Restart Termux session
+```
+
+**3. Disk Space Issues:**
+```bash
+# Check disk usage
+df -h
+
+# Clean up
+pkg clean
+apt autoremove -y
+pip cache purge
+rm -rf ~/.cache/*
+```
+
+---
+
+## 🔧 **Quick Fix Commands**
+
+### One-Liner Fresh Install
+```bash
+pkg update && pkg upgrade -y && termux-setup-storage && pkg install python git clang cmake ninja -y && cd ~/storage/downloads && git clone https://github.com/kiy0w0/owomizu.git && cd owomizu && pip install --upgrade pip && pip install discord.py-self aiohttp requests rich flask pytz Pillow && python mizu.py
+```
+
+### One-Liner Fix for Errors
+```bash
+pkg install clang cmake ninja -y && pip cache purge && pip uninstall curl-cffi discord.py -y && pip install discord.py-self aiohttp requests rich flask pytz && cd ~/owomizu && python mizu.py
+```
+
+### Reset Everything
+```bash
+cd ~ && rm -rf owomizu && pkg clean && pip cache purge && pkg install python git clang cmake ninja -y && git clone https://github.com/kiy0w0/owomizu.git && cd owomizu && pip install discord.py-self aiohttp requests rich flask pytz && python mizu.py
 ```
 
 ---
@@ -371,9 +477,9 @@ logcat | grep Termux
 
 <div align="center">
 
-**📱 Happy Mobile Farming! 🌊**
+**📱 Happy Farming!**
 
-*Mizu Network - Bringing automation to your pocket*
+*Mizu Network - Pocked Edition*
 
 [← Back to Main README](README.md)
 
