@@ -128,17 +128,8 @@ class Gems(commands.Cog):
 
 
     def process_result(self, result):
-        print(f"Resulting gem groups: {result}")
-        
         # Find the group with the highest number of items
         max_group = max(result, key=len, default=None)
-        
-        if max_group:
-            print(f"Selected group with the highest count: {max_group}")
-        else:
-            print("No groups found.")
-        print(max_group)
-        
         return max_group
 
 
@@ -164,6 +155,7 @@ class Gems(commands.Cog):
                 return
             await self.bot.set_stat(False)
             self.inventory_check = True
+            await self.bot.log(f"🔍 Checking inventory for gems...", "#00bcd4")
             await self.bot.put_queue(self.inv_cmd, priority=True)
         elif "'s Inventory ======**" in message.content:
             if self.inventory_check:
@@ -176,6 +168,12 @@ class Gems(commands.Cog):
                 if gems_list:
                     for i in gems_list:
                         self.gem_cmd["cmd_arguments"]+=f"{i[1:]} "
+                    
+                    # Log the gems being used
+                    gems_used = self.gem_cmd["cmd_arguments"].strip()
+                    await self.bot.log(f"💎 Using gems: {gems_used}", "#9c27b0")
+                    self.bot.add_dashboard_log("gems", f"Using gems: {gems_used}", "info")
+                    
                     # Reset no_gems status when gems are available
                     if self.bot.user_status["no_gems"]:
                         was_paused = self.bot.settings_dict.get("stopHuntingWhenNoGems", False)

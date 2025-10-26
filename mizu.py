@@ -17,13 +17,49 @@ from importlib.metadata import version as import_ver
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from threading import Thread
+
+# Termux Detection (MUST be before discord import!)
+def is_termux():
+    termux_prefix = os.environ.get("PREFIX")
+    termux_home = os.environ.get("HOME")
+    
+    if termux_prefix and "com.termux" in termux_prefix:
+        return True
+    elif termux_home and "com.termux" in termux_home:
+        return True
+    else:
+        return os.path.isdir("/data/data/com.termux")
+
+on_mobile = is_termux()
+
 # Third-Party Libraries
 import aiosqlite
 import aiohttp
-import discord
+
+# Discord import with Termux compatibility handling
+try:
+    import discord
+    from discord.ext import commands, tasks
+except ImportError as e:
+    if "curl" in str(e).lower() and on_mobile:
+        print("\033[1;33m" + "="*60)
+        print("⚠️  TERMUX COMPATIBILITY MODE")
+        print("="*60)
+        print("[!] curl_cffi is not compatible with Termux")
+        print("[!] Please install discord.py-self without curl_cffi:")
+        print()
+        print("    pip uninstall curl-cffi curl_cffi discord.py -y")
+        print("    pip install discord.py-self aiohttp requests")
+        print()
+        print("See: Tutor/termux.md for full instructions")
+        print("="*60 + "\033[m")
+        sys.exit(1)
+    else:
+        print(f"\033[1;31m[x] Failed to import discord: {e}\033[m")
+        sys.exit(1)
+
 import pytz
 import requests
-from discord.ext import commands, tasks
 from flask import Flask, jsonify, render_template, request
 from rich.align import Align
 from rich.console import Console
@@ -1447,18 +1483,7 @@ def resource_path(relative_path):
 def install_package(package_name):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "--break-system-packages", package_name])
 
-def is_termux():
-    termux_prefix = os.environ.get("PREFIX")
-    termux_home = os.environ.get("HOME")
-    
-    if termux_prefix and "com.termux" in termux_prefix:
-        return True
-    elif termux_home and "com.termux" in termux_home:
-        return True
-    else:
-        return os.path.isdir("/data/data/com.termux")
-
-on_mobile = is_termux()
+# Note: is_termux() and on_mobile already defined at the top of the file (line 22-33)
 
 if not on_mobile and not misc_dict["hostMode"]:
     try:

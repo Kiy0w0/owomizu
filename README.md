@@ -234,8 +234,8 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 |----------------|-------|
 | 🐛 **Bug Reports** | [GitHub Issues](https://github.com/kiy0w0/owomizu/issues) |
 | 💡 **Feature Requests** | [GitHub Discussions](https://github.com/kiy0w0/owomizu/discussions) |
-| ❓ **General Questions** | [Discord #help](https://4NsdaRWD2K) |
-| 💻 **Development** | [Discord #development](https://4NsdaRWD2K) |
+| ❓ **General Questions** | [Discord #help](https://discord.gg/4NsdaRWD2K) |
+| 💻 **Development** | [Discord #development](https://discord.gg/4NsdaRWD2K) |
 | 📖 **Documentation** | [Wiki](https://github.com/kiy0w0/owomizu/wiki) |
 
 **Made with 💙 by the Mizu Network Community**
