@@ -2735,12 +2735,16 @@ if __name__ == "__main__":
     
     version_json = fetch_mizu_api("version.json")
 
-    if compare_versions(version, version_json["version"]):
-        printBox(f"""Update Detected - {version_json["version"]}
+    # Only check version if API fetch was successful
+    if version_json and "version" in version_json:
+        if compare_versions(version, version_json["version"]):
+            printBox(f"""Update Detected - {version_json["version"]}
     Changelog:-
         {version_json["changelog"]}""",'bold gold3')
-        if version_json["important_update"]:
-            printBox('It is reccomended to update....','bold light_yellow3' )
+            if version_json.get("important_update", False):
+                printBox('It is reccomended to update....','bold light_yellow3' )
+    else:
+        printBox("⚠️ Could not check for updates - API unavailable", "bold yellow")
 
     tokens_and_channels = [line.strip().split() for line in open("tokens.txt", "r")]
     token_len = len(tokens_and_channels)
