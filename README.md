@@ -161,7 +161,7 @@ Our bot integrates with the live Mizu API for enhanced functionality:
 - 🛡️ **Safety Updates** - Security patches and warnings
 - 📊 **Statistics** - Usage analytics and performance metrics
 
-**API Endpoint:** `https://mizuowoapi.vercel.app`
+**API Endpoint:** `https://api.ive.my.id`
 
 ### 🎛️ **Web Dashboard API**
 The bot includes a built-in REST API for the web dashboard:

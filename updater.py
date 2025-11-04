@@ -24,7 +24,7 @@ GITHUB_API_URL = "https://api.github.com/repos/kiy0w0/owomizu"
 GITHUB_REPO_URL = "https://github.com/kiy0w0/owomizu.git"
 
 # Mizu Network API
-MIZU_API_URL = "https://mizuowoapi.vercel.app"
+MIZU_API_URL = "https://api.ive.my.id"
 
 def print_mizu_header():
     """Display Mizu Network header"""

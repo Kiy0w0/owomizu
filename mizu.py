@@ -118,7 +118,7 @@ console_width = console.size.width
 listUserIds = []
 
 
-mizu_network_api = "https://mizuowoapi.vercel.app"
+mizu_network_api = "https://api.ive.my.id"
 
 mizuArt = r"""
  ███╗   ███╗██╗███████╗██╗   ██╗
