@@ -46,6 +46,7 @@
 
 ### 🛡️ **Safety & Security**
 - 🔒 **Token Protection** - Secure credential management
+- 🔐 **Web Authentication** - Secure code-based authentication system
 - 🛡️ **Anti-Detection** - Human-like behavior patterns
 - ⏱️ **Smart Delay System** - Randomized timing to avoid detection
 - 📡 **API Status Monitoring** - Real-time service health checks
@@ -60,6 +61,33 @@
 - **Discord account** with Developer Mode enabled
 - **Git** (for easy updates)
 - **Internet connection** (stable recommended)
+- **Authentication Code** - Get your code from [ive.my.id/owo](https://ive.my.id/owo)
+
+### 🔑 **Get Your Authentication Code**
+
+Before running the bot for the first time, you need to generate an authentication code:
+
+1. **Visit Code Generator:**
+   ```
+   https://ive.my.id/owo
+   ```
+
+2. **Register/Login:**
+   - Create account with username & password
+   - Or login if you already have an account
+
+3. **Generate Code:**
+   - Click "Generate New Code" button
+   - Copy the code (format: `MIZU-XXXX-XXXX-XXXX`)
+   - Keep this code safe!
+
+4. **Use Code:**
+   - When you run `python mizu.py` for the first time
+   - Bot will ask for authentication code
+   - Paste the code from website
+   - Code will be saved automatically
+
+> **Note:** You only need to do this once during first setup. The code will be saved in `config/auth_config.json`
 
 ### 📦 Installation
 
@@ -85,18 +113,25 @@
    pip install -r requirements.txt
    ```
 
-3. **Configure Bot:**
+3. **Get Authentication Code:**
+   - Visit: https://ive.my.id/owo
+   - Register/Login to your account
+   - Generate and copy your authentication code
+
+4. **Configure Bot:**
    ```bash
    # Create tokens.txt with your Discord token and channel ID
    echo "YOUR_DISCORD_TOKEN YOUR_CHANNEL_ID" > tokens.txt
    ```
 
-4. **Start Bot:**
+5. **Start Bot:**
    ```bash
    python mizu.py
    ```
+   - On first run, paste your authentication code when prompted
+   - Code will be saved automatically
 
-5. **Access Dashboard:**
+6. **Access Dashboard:**
    Open: `http://yourIP:2000`
 
 ### 🔄 **Auto-Update System**
