@@ -1452,6 +1452,88 @@ def control_bot(action):
         print(f"Error controlling bot: {e}")
         return jsonify({"status": "error", "message": f"Failed to {action} bot"}), 500
 
+@app.route('/api/auth/verify', methods=['POST'])
+def verify_auth():
+    """Verify authentication code for web access"""
+    try:
+        # Load auth config
+        auth_config_path = os.path.join(os.path.dirname(__file__), 'config', 'auth_config.json')
+        
+        if os.path.exists(auth_config_path):
+            with open(auth_config_path, 'r') as f:
+                auth_config = json.load(f)
+        else:
+            # Default config if file doesn't exist
+            auth_config = {
+                "authentication": {
+                    "enabled": True,
+                    "auth_code": "mizu2024"
+                }
+            }
+        
+        # Get auth code from request
+        data = request.get_json()
+        provided_code = data.get('code', '')
+        
+        # Check if authentication is enabled
+        if not auth_config['authentication']['enabled']:
+            return jsonify({
+                "status": "success",
+                "message": "Authentication disabled",
+                "authenticated": True
+            })
+        
+        # Verify code
+        correct_code = auth_config['authentication']['auth_code']
+        
+        if provided_code == correct_code:
+            return jsonify({
+                "status": "success",
+                "message": "Authentication successful",
+                "authenticated": True
+            })
+        else:
+            return jsonify({
+                "status": "error",
+                "message": "Invalid authentication code",
+                "authenticated": False
+            }), 401
+            
+    except Exception as e:
+        print(f"Error verifying auth: {e}")
+        return jsonify({
+            "status": "error",
+            "message": "Authentication error",
+            "authenticated": False
+        }), 500
+
+@app.route('/api/auth/config', methods=['GET'])
+def get_auth_config():
+    """Get authentication configuration (excluding sensitive data)"""
+    try:
+        auth_config_path = os.path.join(os.path.dirname(__file__), 'config', 'auth_config.json')
+        
+        if os.path.exists(auth_config_path):
+            with open(auth_config_path, 'r') as f:
+                auth_config = json.load(f)
+        else:
+            auth_config = {
+                "authentication": {"enabled": True},
+                "security": {"cors_enabled": True}
+            }
+        
+        # Return only non-sensitive config
+        return jsonify({
+            "status": "success",
+            "config": {
+                "enabled": auth_config['authentication']['enabled'],
+                "cors_enabled": auth_config.get('security', {}).get('cors_enabled', True)
+            }
+        })
+    except Exception as e:
+        print(f"Error getting auth config: {e}")
+        return jsonify({"status": "error", "message": "Failed to get config"}), 500
+
 
 def web_start():
     flaskLog = logging.getLogger("werkzeug")
@@ -2635,6 +2717,193 @@ def get_api_status():
     """Get system status from API"""
     return fetch_mizu_api("status.json")
 
+def setup_auth_code():
+    """Setup authentication code for web access"""
+    auth_config_path = os.path.join(os.path.dirname(__file__), 'config', 'auth_config.json')
+    
+    # Check if config exists and has valid code
+    if os.path.exists(auth_config_path):
+        try:
+            with open(auth_config_path, 'r') as f:
+                auth_config = json.load(f)
+                
+            # Check if code exists and is not default
+            if auth_config.get('authentication', {}).get('auth_code') and \
+               auth_config['authentication']['auth_code'] != 'mizu2024':
+                return  # Already setup
+        except:
+            pass
+    
+    # Need to setup
+    console.print()
+    console.rule("[bold cyan]🔐 Web Authentication Setup[/bold cyan]", style="cyan")
+    console.print()
+    console.print("[bold yellow]⚠️  First Time Setup Required[/bold yellow]\n", justify="center")
+    console.print("[cyan]To use the web dashboard, you need to generate an authentication code.[/cyan]")
+    console.print("[cyan]Please visit:[/cyan] [bold white]https://ive.my.id/owo[/bold white]\n", justify="center")
+    console.print("[dim]1. Click 'Generate New Code' button[/dim]")
+    console.print("[dim]2. Copy the generated code[/dim]")
+    console.print("[dim]3. Paste it below[/dim]\n")
+    
+    # Prompt for code
+    while True:
+        try:
+            auth_code = input("\n[🔑] Enter your authentication code from website: ").strip()
+            
+            if not auth_code:
+                console.print("[bold red]❌ Code cannot be empty![/bold red]")
+                continue
+            
+            # Validate format (should be MIZU-XXXX-XXXX-XXXX)
+            expected_format = "MIZU-XXXX-XXXX-XXXX"
+            valid_chars = set('ABCDEFGHJKLMNPQRSTUVWXYZ23456789-')
+            
+            # Check for dummy/placeholder codes
+            dummy_codes = [
+                'XXXX-XXXX-XXXX-XXXX',
+                'MIZU-XXXX-XXXX-XXXX',
+                'MIZU-AAAA-AAAA-AAAA',
+                'MIZU-BBBB-BBBB-BBBB',
+                'MIZU-CCCC-CCCC-CCCC',
+                'MIZU-DDDD-DDDD-DDDD',
+                'MIZU-TEST-TEST-TEST',
+                'MIZU-1234-1234-1234',
+                'MIZU-ABCD-ABCD-ABCD',
+                'TEST-TEST-TEST-TEST',
+                'AAAA-AAAA-AAAA-AAAA',
+            ]
+            
+            if auth_code.upper() in dummy_codes:
+                console.print("[bold red]❌ Placeholder code detected![/bold red]")
+                console.print("[dim]Please go to https://ive.my.id/owo and generate a real code.[/dim]")
+                console.print("[dim]Don't use the example format 'MIZU-XXXX-XXXX-XXXX'[/dim]")
+                continue
+            
+            # Check if code matches expected format
+            code_parts = auth_code.upper().split('-')
+            is_valid_format = (
+                len(code_parts) == 4 and 
+                code_parts[0] == 'MIZU' and  # First segment must be "MIZU"
+                all(len(part) == 4 for part in code_parts) and
+                all(c in valid_chars for c in auth_code.upper())
+            )
+            
+            # Check for repetitive patterns (all same character in a segment, skip first segment "MIZU")
+            has_repetitive = False
+            for i, part in enumerate(code_parts):
+                if i == 0:  # Skip "MIZU" prefix
+                    continue
+                if len(set(part)) == 1:  # All same character like "AAAA" or "XXXX"
+                    has_repetitive = True
+                    break
+            
+            if has_repetitive and len(code_parts) == 4:
+                console.print("[bold yellow]⚠️  Warning: Code looks like a dummy/test code![/bold yellow]")
+                console.print(f"[dim]Code segments should have mixed characters, not repetitive like '{code_parts[1]}'[/dim]")
+                console.print("[yellow]This might not be a real generated code. Continue anyway? (y/n):[/yellow] ", end='')
+                confirm = input().strip().lower()
+                if confirm != 'y':
+                    console.print("[dim]Please generate a new code from https://ive.my.id/owo[/dim]")
+                    continue
+            
+            if not is_valid_format:
+                console.print("\n[bold yellow]⚠️  Warning: Code format doesn't match website generator![/bold yellow]")
+                console.print(f"[dim]Expected format: {expected_format}[/dim]")
+                console.print(f"[dim]Your code: {auth_code}[/dim]\n")
+                
+                # Check common issues
+                if len(auth_code) < 8:
+                    console.print("[bold red]❌ Code too short! Please enter the full code from website.[/bold red]")
+                    continue
+                
+                if '-' not in auth_code:
+                    console.print("[bold red]❌ Missing dashes! Format should be: MIZU-XXXX-XXXX-XXXX[/bold red]")
+                    continue
+                
+                # Check if starts with MIZU
+                if not auth_code.upper().startswith('MIZU-'):
+                    console.print("[bold red]❌ Invalid code format! Code must start with 'MIZU-'[/bold red]")
+                    console.print("[dim]Please generate code from https://ive.my.id/owo[/dim]")
+                    continue
+                
+                # Invalid characters
+                invalid_chars = set(auth_code) - valid_chars
+                if invalid_chars:
+                    console.print(f"[bold red]❌ Invalid characters found: {', '.join(invalid_chars)}[/bold red]")
+                    console.print("[dim]Valid characters: A-Z (except I, O), 2-9 (except 0, 1)[/dim]")
+                    continue
+                
+                # Wrong segment count or length
+                if len(code_parts) != 4:
+                    console.print(f"[bold red]❌ Wrong format! Should have 4 segments (MIZU-XXXX-XXXX-XXXX), found {len(code_parts)}[/bold red]")
+                    continue
+                
+                for i, part in enumerate(code_parts, 1):
+                    if len(part) != 4:
+                        console.print(f"[bold red]❌ Segment {i} should be 4 characters, found {len(part)}[/bold red]")
+                        continue
+                
+                # Ask for confirmation if format is slightly off
+                console.print("[yellow]Do you want to use this code anyway? (y/n):[/yellow] ", end='')
+                confirm = input().strip().lower()
+                if confirm != 'y':
+                    console.print("[dim]Please go to https://ive.my.id/owo and generate a new code.[/dim]")
+                    continue
+            
+            # Code is valid
+            if is_valid_format:
+                console.print(f"\n[bold green]✓ Code format verified![/bold green]")
+            
+            # Create/update auth config
+            auth_config = {
+                "authentication": {
+                    "enabled": True,
+                    "auth_code": auth_code,
+                    "session_timeout": 3600,
+                    "max_failed_attempts": 5,
+                    "lockout_duration": 300
+                },
+                "web_access": {
+                    "allow_external": False,
+                    "allowed_ips": ["127.0.0.1", "localhost"]
+                },
+                "security": {
+                    "require_https": False,
+                    "cors_enabled": True,
+                    "allowed_origins": [
+                        "http://localhost",
+                        "http://127.0.0.1",
+                        "https://ive.my.id"
+                    ]
+                }
+            }
+            
+            # Save to file
+            os.makedirs(os.path.dirname(auth_config_path), exist_ok=True)
+            with open(auth_config_path, 'w') as f:
+                json.dump(auth_config, indent=2, fp=f)
+            
+            console.print(f"\n[bold green]✅ Authentication code saved successfully![/bold green]")
+            console.print(f"[bold cyan]🔑 Your code: {auth_code}[/bold cyan]\n", justify="center")
+            console.print("[dim]You can now use this code to login to the web dashboard.[/dim]")
+            console.print("[dim]Keep this code safe and don't share it with anyone![/dim]\n")
+            
+            time.sleep(2)
+            break
+            
+        except KeyboardInterrupt:
+            console.print("\n[bold red]❌ Setup cancelled by user.[/bold red]")
+            console.print("[bold yellow]⚠️  You can run this setup again anytime.[/bold yellow]")
+            time.sleep(1)
+            break
+        except Exception as e:
+            console.print(f"[bold red]❌ Error: {e}[/bold red]")
+            continue
+    
+    console.print()
+    console.rule(style="cyan")
+    console.print()
+
 def run_bots(tokens_and_channels):
     threads = []
     for token, channel_id in tokens_and_channels:
@@ -2726,6 +2995,9 @@ if __name__ == "__main__":
     if not misc_dict["console"]["compactMode"]:
         console.print(mizuPanel)
         console.rule(f"[bold blue1]version - {version}", style="navy_blue")
+    
+    # Setup authentication code (first time only)
+    setup_auth_code()
     
     # Check API connectivity
     if check_api_status():

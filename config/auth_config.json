@@ -1,0 +1,25 @@
+{
+  "authentication": {
+    "enabled": true,
+    "auth_code": "L96Y-H4CV-FWTX-RBN6",
+    "session_timeout": 3600,
+    "max_failed_attempts": 5,
+    "lockout_duration": 300
+  },
+  "web_access": {
+    "allow_external": false,
+    "allowed_ips": [
+      "127.0.0.1",
+      "localhost"
+    ]
+  },
+  "security": {
+    "require_https": false,
+    "cors_enabled": true,
+    "allowed_origins": [
+      "http://localhost",
+      "http://127.0.0.1",
+      "https://ive.my.id"
+    ]
+  }
+}
