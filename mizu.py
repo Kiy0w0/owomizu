@@ -2781,11 +2781,15 @@ def setup_auth_code():
             
             # Check if code matches expected format
             code_parts = auth_code.upper().split('-')
+            
+            # Check format of random segments only (exclude "MIZU" prefix)
+            random_part_chars = ''.join(code_parts[1:]) if len(code_parts) > 1 else ''
+            
             is_valid_format = (
                 len(code_parts) == 4 and 
                 code_parts[0] == 'MIZU' and  # First segment must be "MIZU"
                 all(len(part) == 4 for part in code_parts) and
-                all(c in valid_chars for c in auth_code.upper())
+                all(c in 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' for c in random_part_chars)
             )
             
             # Check for repetitive patterns (all same character in a segment, skip first segment "MIZU")
@@ -2826,10 +2830,11 @@ def setup_auth_code():
                     console.print("[dim]Please generate code from https://ive.my.id/owo[/dim]")
                     continue
                 
-                # Invalid characters
-                invalid_chars = set(auth_code) - valid_chars
+                # Invalid characters (check only the random segments, skip "MIZU-" prefix)
+                random_segments = '-'.join(code_parts[1:])  # Get segments after "MIZU"
+                invalid_chars = set(random_segments.upper()) - set('ABCDEFGHJKLMNPQRSTUVWXYZ23456789-')
                 if invalid_chars:
-                    console.print(f"[bold red]❌ Invalid characters found: {', '.join(invalid_chars)}[/bold red]")
+                    console.print(f"[bold red]❌ Invalid characters found: {', '.join(sorted(invalid_chars))}[/bold red]")
                     console.print("[dim]Valid characters: A-Z (except I, O), 2-9 (except 0, 1)[/dim]")
                     continue
                 
@@ -2853,6 +2858,9 @@ def setup_auth_code():
             # Code is valid
             if is_valid_format:
                 console.print(f"\n[bold green]✓ Code format verified![/bold green]")
+            
+            # Normalize code to uppercase
+            auth_code = auth_code.upper()
             
             # Create/update auth config
             auth_config = {

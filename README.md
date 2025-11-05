@@ -73,8 +73,11 @@ Before running the bot for the first time, you need to generate an authenticatio
    ```
 
 2. **Register/Login:**
-   - Create account with username & password
-   - Or login if you already have an account
+   - Create account with your email & password
+   - **Verify your email** - Check inbox for verification link
+   - Login after email is verified
+   
+   > **⚠️ Important:** You must verify your email before you can generate codes!
 
 3. **Generate Code:**
    - Click "Generate New Code" button
@@ -115,8 +118,9 @@ Before running the bot for the first time, you need to generate an authenticatio
 
 3. **Get Authentication Code:**
    - Visit: https://ive.my.id/owo
-   - Register/Login to your account
-   - Generate and copy your authentication code
+   - Register with your email and verify it
+   - Login to your verified account
+   - Generate and copy your authentication code (format: `MIZU-XXXX-XXXX-XXXX`)
 
 4. **Configure Bot:**
    ```bash
