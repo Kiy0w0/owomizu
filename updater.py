@@ -262,15 +262,15 @@ def rollback_update(backup_path):
         return False
 
 def fetch_mizu_announcements():
-    """Fetch announcements from Mizu API"""
-    try:
-        response = requests.get(f"{MIZU_API_URL}/announcements.json", timeout=10)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get("enabled") and data.get("announcements"):
-                return data["announcements"]
-    except requests.RequestException:
-        pass
+    """Fetch announcements from Mizu API - DISABLED (website down)"""
+    # try:
+    #     response = requests.get(f"{MIZU_API_URL}/announcements.json", timeout=10)
+    #     if response.status_code == 200:
+    #         data = response.json()
+    #         if data.get("enabled") and data.get("announcements"):
+    #             return data["announcements"]
+    # except requests.RequestException:
+    #     pass
     return []
 
 

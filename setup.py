@@ -166,66 +166,68 @@ if scratchSetup:
         import requests
         print('\033[1;36m[0]--imported requests module\033[m')
         
-        # Check API status
-        try:
-            api_status = requests.get("https://api.ive.my.id/status.json", timeout=10).json()
-            print(f'\033[1;36m[0]--API Status: {api_status.get("status", "Unknown")}\033[m')
-            
-            if api_status.get("status") == "online":
-                print('\033[1;32m[✓]Mizu OwO API is online and ready!\033[m')
-            else:
-                print(f'\033[1;33m[!]API Status: {api_status.get("message", "Unknown status")}\033[m')
-        except Exception as e:
-            print(f'\033[1;33m[!]Could not check API status: {e}\033[m')
-        
-        # Check version
-        try:
-            ver_check_response = requests.get("https://api.ive.my.id/version.json", timeout=10)
-            ver_check = ver_check_response.json()["version"]
-            print(f'\033[1;36m[0]--received current latest version for Mizu OwO - v{ver_check}\033[m')
-            version = "1.3.0"
-            print(f'\033[1;36m[0]current version of Mizu OwO - v{version}\033[m')
-
-            if compare_versions(version, ver_check):
-                print(
-                    "\033[1;33m[0]seems like there is a new version for Mizu OwO available!\033[m"
-                )
-                while True:
-                    o = input(
-                        "\033[1;34mWould you like to stop the installation process or continue?\n(continue = c / stop = s):\n\033[m"
-                    ).lower()
-
-                    if o in ["c", "s"]:
-                        if o == "s":
-                            print("\033[1;36m[0]Stopping the installation process...\033[m")
-                            sys.exit(0)
-                        else:
-                            print(
-                                "\033[1;36m[0]Continuing the installation process...\033[m"
-                            )
-                            break
-                    else:
-                        print(
-                            "\033[1;33m[!]Please enter 'c' for continue or 's' for stop.\033[m"
-                        )
-            else:
-                print('\033[1;32m[✓]You have the latest version of Mizu OwO!\033[m')
-                
-        except Exception as e:
-            print(f'\033[1;33m[!]Could not check version: {e}\033[m')
-            
-        # Check for announcements
-        try:
-            announcements = requests.get("https://api.ive.my.id/announcements.json", timeout=10).json()
-            if announcements.get("announcements"):
-                print('\033[1;36m[0]--Fetching latest announcements...\033[m')
-                for announcement in announcements["announcements"][:3]:  # Show only first 3
-                    print(f'\033[1;96m[📢] {announcement.get("title", "Announcement")}: {announcement.get("message", "No message")}\033[m')
-        except Exception as e:
-            print(f'\033[1;33m[!]Could not fetch announcements: {e}\033[m')
+        # API features disabled (website down)
+        print('\033[1;33m[!]API checks disabled (website down)\033[m')
+        # # Check API status
+        # try:
+        #     api_status = requests.get("https://api.ive.my.id/status.json", timeout=10).json()
+        #     print(f'\033[1;36m[0]--API Status: {api_status.get("status", "Unknown")}\033[m')
+        #     
+        #     if api_status.get("status") == "online":
+        #         print('\033[1;32m[✓]Mizu OwO API is online and ready!\033[m')
+        #     else:
+        #         print(f'\033[1;33m[!]API Status: {api_status.get("message", "Unknown status")}\033[m')
+        # except Exception as e:
+        #     print(f'\033[1;33m[!]Could not check API status: {e}\033[m')
+        # 
+        # # Check version
+        # try:
+        #     ver_check_response = requests.get("https://api.ive.my.id/version.json", timeout=10)
+        #     ver_check = ver_check_response.json()["version"]
+        #     print(f'\033[1;36m[0]--received current latest version for Mizu OwO - v{ver_check}\033[m')
+        #     version = "1.3.0"
+        #     print(f'\033[1;36m[0]current version of Mizu OwO - v{version}\033[m')
+        #
+        #     if compare_versions(version, ver_check):
+        #         print(
+        #             "\033[1;33m[0]seems like there is a new version for Mizu OwO available!\033[m"
+        #         )
+        #         while True:
+        #             o = input(
+        #                 "\033[1;34mWould you like to stop the installation process or continue?\n(continue = c / stop = s):\n\033[m"
+        #             ).lower()
+        #
+        #             if o in ["c", "s"]:
+        #                 if o == "s":
+        #                     print("\033[1;36m[0]Stopping the installation process...\033[m")
+        #                     sys.exit(0)
+        #                 else:
+        #                     print(
+        #                         "\033[1;36m[0]Continuing the installation process...\033[m"
+        #                     )
+        #                     break
+        #             else:
+        #                 print(
+        #                     "\033[1;33m[!]Please enter 'c' for continue or 's' for stop.\033[m"
+        #                 )
+        #     else:
+        #         print('\033[1;32m[✓]You have the latest version of Mizu OwO!\033[m')
+        #         
+        # except Exception as e:
+        #     print(f'\033[1;33m[!]Could not check version: {e}\033[m')
+        #     
+        # # Check for announcements
+        # try:
+        #     announcements = requests.get("https://api.ive.my.id/announcements.json", timeout=10).json()
+        #     if announcements.get("announcements"):
+        #         print('\033[1;36m[0]--Fetching latest announcements...\033[m')
+        #         for announcement in announcements["announcements"][:3]:  # Show only first 3
+        #             print(f'\033[1;96m[📢] {announcement.get("title", "Announcement")}: {announcement.get("message", "No message")}\033[m')
+        # except Exception as e:
+        #     print(f'\033[1;33m[!]Could not fetch announcements: {e}\033[m')
             
     except Exception as e:
-        print(f"\033[1;31m[x]error when trying to check API status and versions:-\n {e}\033[m")
+        print(f"\033[1;31m[x]error when trying to import requests module:-\n {e}\033[m")
 
     # ---EDIT TOKENS.TXT---#
     while True:
