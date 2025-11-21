@@ -63,34 +63,6 @@
 - **Internet connection** (stable recommended)
 - **Authentication Code** - Get your code from [ive.my.id/owo](https://ive.my.id/owo)
 
-### 🔑 **Get Your Authentication Code**
-
-Before running the bot for the first time, you need to generate an authentication code:
-
-1. **Visit Code Generator:**
-   ```
-   https://ive.my.id/owo
-   ```
-
-2. **Register/Login:**
-   - Create account with your email & password
-   - **Verify your email** - Check inbox for verification link
-   - Login after email is verified
-   
-   > **⚠️ Important:** You must verify your email before you can generate codes!
-
-3. **Generate Code:**
-   - Click "Generate New Code" button
-   - Copy the code (format: `MIZU-XXXX-XXXX-XXXX`)
-   - Keep this code safe!
-
-4. **Use Code:**
-   - When you run `python mizu.py` for the first time
-   - Bot will ask for authentication code
-   - Paste the code from website
-   - Code will be saved automatically
-
-> **Note:** You only need to do this once during first setup. The code will be saved in `config/auth_config.json`
 
 ### 📦 Installation
 
