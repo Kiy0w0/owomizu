@@ -2966,6 +2966,15 @@ def run_bot(token, channel_id, global_settings_dict):
 def run_bot(token, channel_id, global_settings_dict):
     """Original run_bot function for backwards compatibility"""
     global bot_instances
+    
+    # Create and set event loop for this thread (required for Termux compatibility)
+    # In some environments (especially Termux), threads don't have an event loop by default
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    
     try:
         logging.getLogger("discord.client").setLevel(logging.ERROR)
 

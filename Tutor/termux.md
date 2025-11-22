@@ -236,6 +236,47 @@ curl -fLo ~/.termux/font.ttf https://github.com/ryanoasis/nerd-fonts/raw/master/
 
 ### Common Issues
 
+**0. 🔴 Port Already in Use Error**
+
+Error: `Address already in use - Port 1200 is in use by another program`
+
+This happens when a previous bot instance is still running.
+
+```bash
+# Solution 1: Kill old bot processes
+pkill -f "python mizu.py"
+
+# Solution 2: Find and kill specific process
+# Find process using port 1200
+lsof -i :1200
+# Kill the process ID shown
+kill -9 <PID>
+
+# Solution 3: Change port in config
+# Edit config/global_settings.json and change port to 1201 or another unused port
+
+# Then start bot again
+python mizu.py
+```
+
+**0.1 🔴 Event Loop Error in Thread**
+
+Error: `There is no current event loop in thread 'Thread-3 (run_bot)'`
+
+**✅ This is now fixed in the latest update!**
+
+If you still see this error:
+```bash
+# Pull latest updates
+cd ~/owomizu
+git pull origin main
+
+# Restart bot
+python mizu.py
+```
+
+The fix automatically creates event loops for threads in Termux environment.
+
 **1. 🔴 Ninja Build Error (`spawn.h` not found)**
 
 This is the most common error in Termux!
