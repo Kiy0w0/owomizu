@@ -1690,6 +1690,22 @@ def popup_main_loop():
 class MyClient(commands.Bot):
 
     def __init__(self, token, channel_id, global_settings_dict, *args, **kwargs):
+        # Handle intents for compatibility with different discord.py-self versions
+        # Some versions (especially in Termux) require intents parameter
+        if 'intents' not in kwargs:
+            try:
+                # Try to create intents if the attribute exists
+                if hasattr(discord, 'Intents'):
+                    intents = discord.Intents.default()
+                    intents.messages = True
+                    intents.guilds = True
+                    intents.message_content = True
+                    kwargs['intents'] = intents
+            except (AttributeError, Exception):
+                # If intents don't exist or fail, continue without them
+                # This is normal for older versions of discord.py-self
+                pass
+        
         super().__init__(command_prefix="-", self_bot=True, *args, **kwargs)
         self.token = token
         self.channel_id = int(channel_id)
