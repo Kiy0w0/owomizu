@@ -66,9 +66,7 @@ def dashboard():
 @app.route('/api/console', methods=['GET'])
 def get_console_logs():
     global_settings = load_global_settings()
-    password = request.headers.get('password')
-    if not password or password != global_settings.get("website", {}).get("password"):
-        return "Invalid Password", 401
+
     try:
         log_string = '\n'.join(state.website_logs)
         return log_string
@@ -79,9 +77,7 @@ def get_console_logs():
 @app.route('/api/fetch_gamble_data', methods=['GET'])
 def fetch_gamble_data():
     global_settings = load_global_settings()
-    password = request.headers.get('password')
-    if not password or password != global_settings.get("website", {}).get("password"):
-        return "Invalid Password", 401
+
     try:
         rows = get_from_db("SELECT hour, wins, losses FROM gamble_winrate ORDER BY hour")
         win_data = [row["wins"] for row in rows]
@@ -98,9 +94,7 @@ def fetch_gamble_data():
 @app.route('/api/fetch_cowoncy_data', methods=['GET'])
 def fetch_cowoncy_data():
     global_settings = load_global_settings()
-    password = request.headers.get('password')
-    if not password or password != global_settings.get("website", {}).get("password"):
-        return "Invalid Password", 401
+
 
     try:
         rows = get_from_db("SELECT user_id, hour, earnings FROM cowoncy_earnings ORDER BY hour")
@@ -150,9 +144,7 @@ def fetch_cowoncy_data():
 @app.route('/api/fetch_cmd_data', methods=['GET'])
 def fetch_cmd_data():
     global_settings = load_global_settings()
-    password = request.headers.get('password')
-    if not password or password != global_settings.get("website", {}).get("password"):
-        return "Invalid Password", 401
+
     try:
         rows = get_from_db("SELECT * FROM commands")
         filtered_rows = [row for row in rows if row["count"] != 0]
@@ -171,9 +163,7 @@ def fetch_cmd_data():
 @app.route('/api/fetch_weekly_runtime', methods=['GET'])
 def fetch_weekly_runtime():
     global_settings = load_global_settings()
-    password = request.headers.get('password')
-    if not password or password != global_settings.get("website", {}).get("password"):
-        return "Invalid Password", 401
+
     try:
         with open("utils/data/weekly_runtime.json", "r") as config_file:
             data_dict = json.load(config_file)

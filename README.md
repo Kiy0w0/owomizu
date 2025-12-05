@@ -9,7 +9,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![Discord Bot](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/Version-1.3.0-cyan.svg)]()
+[![Version](https://img.shields.io/badge/Version-1.3.5-cyan.svg)]()
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 
 ![Mizu Network Banner](static/imgs/mizu.png)
@@ -46,7 +46,7 @@
 
 ### 🛡️ **Safety & Security**
 - 🔒 **Token Protection** - Secure credential management
-- 🔐 **Web Authentication** - Secure code-based authentication system
+- 🔒 **Token Protection** - Secure credential management
 - 🛡️ **Anti-Detection** - Human-like behavior patterns
 - ⏱️ **Smart Delay System** - Randomized timing to avoid detection
 - 📡 **API Status Monitoring** - Real-time service health checks
@@ -55,62 +55,27 @@
 ---
 
 ## 🚀 **Quick Start**
-
-### 📋 Prerequisites
-- **Python 3.8+** (recommended: Python 3.9 or newer)
-- **Discord account** with Developer Mode enabled
-- **Git** (for easy updates)
-- **Internet connection** (stable recommended)
-- **Authentication Code** - Get your code from [ive.my.id/owo](https://ive.my.id/owo)
-
-
-### 📦 Installation
-
-**Choose your platform for detailed setup:**
-
-| Platform | Installation Guide |
-|----------|-------------------|
-| 🪟 **Windows** | [📖 windows.md](/Tutor/windows.md) |
-| 🐧 **Linux** | [📖 linux.md](/Tutor/linux.md) |
-| 🍎 **macOS** | [📖 macos.md](/Tutor/macos.md) |
-| 📱 **Android (Termux)** | [📖 termux.md](/Tutor/termux.md) |
-
-### ⚡ **Quick Setup (All Platforms)**
-
-1. **Clone & Navigate:**
-   ```bash
-   git clone https://github.com/kiy0w0/owomizu.git
-   cd owomizu
-   ```
-
-2. **Install Dependencies:**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Get Authentication Code:**
-   - Visit: https://ive.my.id/owo
-   - Register with your email and verify it
-   - Login to your verified account
-   - Generate and copy your authentication code (format: `MIZU-XXXX-XXXX-XXXX`)
-
-4. **Configure Bot:**
-   ```bash
-   # Create tokens.txt with your Discord token and channel ID
-   echo "YOUR_DISCORD_TOKEN YOUR_CHANNEL_ID" > tokens.txt
-   ```
-
-5. **Start Bot:**
    ```bash
    python mizu.py
    ```
-   - On first run, paste your authentication code when prompted
-   - Code will be saved automatically
+   - Bot will start immediately
 
-6. **Access Dashboard:**
-   Open: `http://yourIP:2000`
+5. **Access Dashboard:**
+   Open: `http://localhost:2000`
 
-### 🔄 **Auto-Update System**
+### � **Docker Deployment**
+1. **Configure tokens:**
+   Create `tokens.txt` in the project directory.
+
+2. **Run with Docker Compose:**
+   ```bash
+   docker-compose up -d
+   ```
+   
+3. **Access Dashboard:**
+   Open: `http://localhost:2000`
+
+### �🔄 **Auto-Update System**
 ```bash
 # Update to latest version with settings preservation
 python updater.py
