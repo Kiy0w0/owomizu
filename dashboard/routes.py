@@ -9,9 +9,12 @@ import asyncio
 from datetime import datetime
 
 # Third-Party Libraries
-from flask import jsonify, render_template, request
-from . import app
+# Third-Party Libraries
+from flask import jsonify, render_template, request, Blueprint
 from utils import state
+
+# Create Blueprint
+bp = Blueprint('dashboard', __name__)
 
 # Helper Functions
 async def get_from_db(command):
@@ -54,15 +57,16 @@ def get_weekday():
 version = "1.3.0"  # Ideally imported from main config
 
 # Routes
-@app.route("/")
+@bp.route("/")
 def home():
     return render_template("index.html", version=version)
 
-@app.route("/dashboard")
+@bp.route("/dashboard")
 def dashboard():
     return render_template("index.html", version=version)
 
-@app.route('/api/console', methods=['GET'])
+
+@bp.route('/api/console', methods=['GET'])
 def get_console_logs():
     global_settings = load_global_settings()
 
@@ -73,7 +77,7 @@ def get_console_logs():
         print(f"Error fetching logs: {e}")
         return jsonify({"status": "error", "message": "An error occurred while fetching logs"}), 500
 
-@app.route('/api/fetch_gamble_data', methods=['GET'])
+@bp.route('/api/fetch_gamble_data', methods=['GET'])
 async def fetch_gamble_data():
     global_settings = load_global_settings()
 
@@ -90,7 +94,7 @@ async def fetch_gamble_data():
         print(f"Error fetching gamble data: {e}")
         return jsonify({"status": "error", "message": "An error occurred"}), 500
 
-@app.route('/api/fetch_cowoncy_data', methods=['GET'])
+@bp.route('/api/fetch_cowoncy_data', methods=['GET'])
 async def fetch_cowoncy_data():
     global_settings = load_global_settings()
 
@@ -140,7 +144,7 @@ async def fetch_cowoncy_data():
         print(f"Error fetching cowoncy data: {e}")
         return jsonify({"status": "error", "message": "An error occurred"}), 500
 
-@app.route('/api/fetch_cmd_data', methods=['GET'])
+@bp.route('/api/fetch_cmd_data', methods=['GET'])
 async def fetch_cmd_data():
     global_settings = load_global_settings()
 
@@ -159,7 +163,7 @@ async def fetch_cmd_data():
         print(f"Error fetching command data: {e}")
         return jsonify({"status": "error", "message": "An error occurred"}), 500
 
-@app.route('/api/fetch_weekly_runtime', methods=['GET'])
+@bp.route('/api/fetch_weekly_runtime', methods=['GET'])
 def fetch_weekly_runtime():
     global_settings = load_global_settings()
 
@@ -179,7 +183,7 @@ def fetch_weekly_runtime():
         print(f"Error fetching weekly runtime: {e}")
         return jsonify({"status": "error", "message": "An error occurred"}), 500
 
-@app.route('/api/settings', methods=['GET'])
+@bp.route('/api/settings', methods=['GET'])
 def get_settings():
     try:
         return jsonify(load_settings())
@@ -187,7 +191,7 @@ def get_settings():
         print(f"Error fetching settings: {e}")
         return jsonify({"status": "error", "message": "Failed to fetch settings"}), 500
 
-@app.route('/api/dashboard/status', methods=['GET'])
+@bp.route('/api/dashboard/status', methods=['GET'])
 def get_dashboard_status():
     try:
         # Simple status based on active user IDs from loaded bot instances
@@ -240,7 +244,7 @@ def get_dashboard_status():
             "timestamp": time.time()
         }), 500
 
-@app.route('/api/dashboard/stats', methods=['GET'])
+@bp.route('/api/dashboard/stats', methods=['GET'])
 async def get_dashboard_stats():
     try:
         stats_data = {
@@ -309,7 +313,7 @@ async def get_dashboard_stats():
             "captchas_solved": 0
         })
 
-@app.route('/api/dashboard/logs', methods=['GET'])
+@bp.route('/api/dashboard/logs', methods=['GET'])
 def get_dashboard_logs():
     try:
         recent_logs = state.website_logs[-100:] if len(state.website_logs) > 100 else state.website_logs
@@ -334,7 +338,7 @@ def get_dashboard_logs():
         print(f"Error fetching dashboard logs: {e}")
         return jsonify([])
 
-@app.route('/api/dashboard/activity', methods=['GET'])
+@bp.route('/api/dashboard/activity', methods=['GET'])
 async def get_dashboard_activity():
     try:
         activities = []
@@ -387,7 +391,7 @@ async def get_dashboard_activity():
         print(f"Error fetching dashboard activity: {e}")
         return jsonify([])
 
-@app.route('/api/dashboard/analytics', methods=['GET'])
+@bp.route('/api/dashboard/analytics', methods=['GET'])
 def get_dashboard_analytics():
     try:
         now_ts = time.time()
@@ -469,7 +473,7 @@ def get_dashboard_analytics():
         print(f"Error fetching analytics: {e}")
         return jsonify({"global": {"cpm": 0, "active_accounts": 0, "session_total": 0, "net_earnings": 0}, "accounts": []})
 
-@app.route('/api/settings', methods=['POST'])
+@bp.route('/api/settings', methods=['POST'])
 def update_settings():
     try:
         new_settings = request.get_json()
@@ -485,7 +489,7 @@ def update_settings():
         print(f"Error updating settings: {e}")
         return jsonify({"status": "error", "message": "Failed to update settings"}), 500
 
-@app.route('/api/stats', methods=['GET'])
+@bp.route('/api/stats', methods=['GET'])
 async def get_stats():
     try:
         stats_data = {}
@@ -516,7 +520,7 @@ async def get_stats():
         print(f"Error fetching stats: {e}")
         return jsonify({"status": "error", "message": "Failed to fetch stats"}), 500
 
-@app.route('/api/logs', methods=['GET'])
+@bp.route('/api/logs', methods=['GET'])
 def get_logs():
     try:
         recent_logs = state.website_logs[-50:] if len(state.website_logs) > 50 else state.website_logs
@@ -533,7 +537,7 @@ def get_logs():
         print(f"Error fetching logs: {e}")
         return jsonify([])
 
-@app.route('/api/dashboard/quick-toggle', methods=['POST'])
+@bp.route('/api/dashboard/quick-toggle', methods=['POST'])
 def toggle_quick_setting():
     try:
         data = request.get_json()
@@ -595,7 +599,7 @@ def toggle_quick_setting():
         print(f"Error toggling setting: {e}")
         return jsonify({"status": "error", "message": f"Failed to toggle {command}"}), 500
 
-@app.route('/api/dashboard/autoenhance-settings', methods=['GET'])
+@bp.route('/api/dashboard/autoenhance-settings', methods=['GET'])
 def get_autoenhance_settings():
     try:
         settings = load_settings()
@@ -604,7 +608,7 @@ def get_autoenhance_settings():
         print(f"Error fetching AutoEnhance settings: {e}")
         return jsonify({"status": "error", "message": "Failed to fetch AutoEnhance settings"}), 500
 
-@app.route('/api/dashboard/autoenhance-settings', methods=['POST'])
+@bp.route('/api/dashboard/autoenhance-settings', methods=['POST'])
 def save_autoenhance_settings():
     try:
         new_settings = request.get_json()

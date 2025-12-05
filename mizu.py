@@ -72,7 +72,19 @@ from utils import helpers
 from utils.helpers import compare_versions, printBox, resource_path, get_weekday, get_hour, get_date, get_local_ip, console, lock
 from utils.state import list_user_ids as listUserIds
 from bot.client import MyClient
-from dashboard import app
+from dashboard import create_app
+
+app = create_app() # Initialize Flask app
+
+def run_flask():
+    try:
+        if global_settings_dict["website"]["enabled"]:
+             # Suppress Flask logging
+            log = logging.getLogger('werkzeug')
+            log.setLevel(logging.ERROR)
+            app.run(host='0.0.0.0', port=global_settings_dict["website"]["port"])
+    except Exception as e:
+        print(f"Error starting Flask: {e}")
 
 """Cntrl+c detect"""
 def handle_sigint(signal_number, frame):
@@ -1135,6 +1147,11 @@ if __name__ == "__main__":
             # curl_cffi not available (Termux/ARM), use fallback
             CurlError = Exception
     
+    # Start Flask thread (Always run dashboard)
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.daemon = True
+    flask_thread.start()
+
     if global_settings_dict["captcha"]["toastOrPopup"] and not on_mobile and not misc_dict["hostMode"]:
         try:
             import tkinter as tk
