@@ -595,3 +595,30 @@ def toggle_quick_setting():
     except Exception as e:
         print(f"Error toggling setting: {e}")
         return jsonify({"status": "error", "message": f"Failed to toggle {command}"}), 500
+
+@app.route('/api/dashboard/autoenhance-settings', methods=['GET'])
+def get_autoenhance_settings():
+    try:
+        settings = load_settings()
+        return jsonify(settings.get("autoEnhance", {}))
+    except Exception as e:
+        print(f"Error fetching AutoEnhance settings: {e}")
+        return jsonify({"status": "error", "message": "Failed to fetch AutoEnhance settings"}), 500
+
+@app.route('/api/dashboard/autoenhance-settings', methods=['POST'])
+def save_autoenhance_settings():
+    try:
+        new_settings = request.get_json()
+        settings = load_settings()
+        
+        # Update autoEnhance section
+        settings["autoEnhance"] = new_settings
+        
+        with open("config/settings.json", "w") as f:
+            json.dump(settings, f, indent=4)
+            
+        state.config_updated = True
+        return jsonify({"status": "success", "message": "AutoEnhance settings saved successfully"})
+    except Exception as e:
+        print(f"Error saving AutoEnhance settings: {e}")
+        return jsonify({"status": "error", "message": "Failed to save AutoEnhance settings"}), 500
