@@ -60,13 +60,14 @@ except ImportError as e:
 
 import pytz
 import requests
-from flask import Flask, jsonify, render_template, request
 from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
+
 # Local
 from utils.misspell import misspell_word
-
+from utils import state
+from dashboard import app
 
 """Cntrl+c detect"""
 def handle_sigint(signal_number, frame):
@@ -133,21 +134,6 @@ mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
 version = "1.3.0"
 debug_print = True
 
-
-"""FLASK APP"""
-
-app = Flask(__name__)
-website_logs = []
-config_updated = None
-
-# Global variables for bot management
-bot_instances = []
-command_logs = []
-
-
-# Track bot start time for uptime calculation
-app.start_time = time.time()
-
 def merge_dicts(main, small):
     for key, value in small.items():
         if key in main and isinstance(main[key], dict) and isinstance(value, dict):
@@ -170,581 +156,12 @@ def get_from_db(command):
         item = cur.fetchall()
         return item
 
-
-@app.route("/")
-def home():
-    return render_template("index.html", version=version)
-
-# Dashboard route (alternative access)
-@app.route("/dashboard")
-def dashboard():
-    """Alternative route to access dashboard"""
-    return render_template("index.html", version=version)
-
-
-@app.route('/api/console', methods=['GET'])
-def get_console_logs():
-    password = request.headers.get('password')
-    if not password or password != global_settings_dict["website"]["password"]:
-        return "Invalid Password", 401
-    try:
-        log_string = '\n'.join(website_logs)
-        return log_string
-    except Exception as e:
-        print(f"Error fetching logs: {e}")
-        return jsonify({"status": "error", "message": "An error occurred while fetching logs"}), 500
-
-@app.route('/api/fetch_gamble_data', methods=['GET'])
-def fetch_gamble_data():
-    password = request.headers.get('password')
-    if not password or password != global_settings_dict["website"]["password"]:
-        return "Invalid Password", 401
-    try:
-        # Fetch table data
-        rows = get_from_db("SELECT hour, wins, losses FROM gamble_winrate ORDER BY hour")
-
-        # Extract columns as lists
-        win_data = [row["wins"] for row in rows]
-        lose_data = [row["losses"] for row in rows]
-
-        # Return Data
-        return jsonify({
-            "status": "success",
-            "win_data": win_data,
-            "lose_data": lose_data
-        })
-        
-    except Exception as e:
-        print(f"Error fetching gamble data: {e}")
-        return jsonify({"status": "error", "message": "An error occurred while fetching gamble data"}), 500
-
-@app.route('/api/fetch_cowoncy_data', methods=['GET'])
-def fetch_cowoncy_data():
-    password = request.headers.get('password')
-    if not password or password != global_settings_dict["website"]["password"]:
-        return "Invalid Password", 401
-
-    try:
-        rows = get_from_db("SELECT user_id, hour, earnings FROM cowoncy_earnings ORDER BY hour")
-        user_data = {}
-        for row in rows:
-            user_id = row["user_id"]
-            hour = row["hour"]
-            earnings = row["earnings"]
-
-            if user_id not in user_data:
-                # Create dummy data
-                user_data[user_id] = {i: 0 for i in range(24)}
-            # populate
-            user_data[user_id][hour] = earnings
-
-        # Base data
-        base_data = {
-            "labels": [f"Hour {i}" for i in range(24)],
-            "datasets": []
-        }
-
-        for user_id, hourly_data in user_data.items():
-            color_hue = random.randint(0, 360)
-            dataset = {
-                "label": user_id,
-                "data": [hourly_data[i] for i in range(24)],
-                "borderColor": f"hsl({color_hue}, 100%, 50%)",
-                "backgroundColor": f"hsl({color_hue}, 100%, 70%)",
-                "fill": True,
-                "tension": 0.4,
-                "pointRadius": 0,
-            }
-            base_data["datasets"].append(dataset)
-
-        
-        rows = get_from_db("SELECT cowoncy, captchas FROM user_stats")
-        total_cowoncy = sum(row["cowoncy"] for row in rows)
-        # I understand this area is for cowoncy, but accessing thro here since lazy lol.
-        total_captchas = sum(row["captchas"] for row in rows)
-
-
-        return jsonify({
-            "status": "success",
-            "data": base_data,
-            "total_cash": total_cowoncy,
-            "total_captchas": total_captchas
-        }), 200
-
-    except Exception as e:
-        print(f"Error fetching cowoncy data: {e}")
-        return jsonify({
-            "status": "error",
-            "message": "An error occurred while fetching cowoncy data"
-        }), 500
-
-@app.route('/api/fetch_cmd_data', methods=['GET'])
-def fetch_cmd_data():
-    password = request.headers.get('password')
-    if not password or password != global_settings_dict["website"]["password"]:
-        return "Invalid Password", 401
-    try:
-        rows = get_from_db("SELECT * FROM commands")
-
-        filtered_rows = [row for row in rows if row["count"] != 0]
-
-        command_names = [row["name"] for row in filtered_rows]
-        count = [row["count"] for row in filtered_rows]
-
-        for idx, item in enumerate(count):
-            if item == 0:
-                command_names.pop(idx)
-                count.pop(idx)
-
-
-        # Return Data
-        return jsonify({
-            "status": "success",
-            "command_names": command_names,
-            "count": count
-        })
-        
-    except Exception as e:
-        print(f"Error fetching command data: {e}")
-        return jsonify({"status": "error", "message": "An error occurred while fetching command data"}), 500
-
-@app.route('/api/fetch_weekly_runtime', methods=['GET'])
-def fetch_weekly_runtime():
-    password = request.headers.get('password')
-    if not password or password != global_settings_dict["website"]["password"]:
-        return "Invalid Password", 401
-    try:
-        # Fetch json data
-        with open("utils/data/weekly_runtime.json", "r") as config_file:
-            data_dict = json.load(config_file)
-        
-        runtime_data = [(val[1] - val[0]) / 60 for val in data_dict.values() if isinstance(val, list)]
-
-        cur_hour = get_weekday()
-
-        # Return Data
-        return jsonify({
-            "status": "success",
-            "runtime_data": runtime_data,
-            "current_uptime": data_dict[cur_hour]
-        })
-        
-    except Exception as e:
-        print(f"Error fetching weekly runtime: {e}")
-        return jsonify({"status": "error", "message": "An error occurred while fetching weekly runtime"}), 500
-
-# New Dashboard API Routes
-@app.route('/api/settings', methods=['GET'])
-def get_settings():
-    """Get current bot settings"""
-    try:
-        with open("config/settings.json", "r") as config_file:
-            settings = json.load(config_file)
-        return jsonify(settings)
-    except Exception as e:
-        print(f"Error fetching settings: {e}")
-        return jsonify({"status": "error", "message": "Failed to fetch settings"}), 500
-
-# Dashboard-specific API routes
-@app.route('/api/dashboard/status', methods=['GET'])
-def get_dashboard_status():
-    """Get real-time bot status for dashboard"""
-    try:
-        global listUserIds, tokens_and_channels
-        
-        # Simple status based on active user IDs
-        active_accounts = len(listUserIds) if listUserIds else 0
-        
-        # Check captcha status from active bot instances
-        captcha_status = False
-        sleep_status = False
-        
-        for bot_instance in bot_instances:
-            if hasattr(bot_instance, 'command_handler_status'):
-                if bot_instance.command_handler_status.get("captcha", False):
-                    captcha_status = True
-                if bot_instance.command_handler_status.get("sleep", False):
-                    sleep_status = True
-                    
-        # Determine bot status based on active accounts and captcha status
-        if active_accounts > 0:
-            if captcha_status:
-                bot_status = "captcha"
-            elif sleep_status:
-                bot_status = "paused"
-            else:
-                bot_status = "online"
-        else:
-            bot_status = "offline"
-        
-        return jsonify({
-            "status": bot_status,
-            "active_accounts": active_accounts,
-            "total_accounts": len(tokens_and_channels) if 'tokens_and_channels' in globals() else 0,
-            "captcha_detected": captcha_status,
-            "is_sleeping": sleep_status,
-            "timestamp": time.time()
-        })
-    except Exception as e:
-        print(f"Error fetching dashboard status: {e}")
-        return jsonify({
-            "status": "error",
-            "active_accounts": 0,
-            "total_accounts": 0,
-            "captcha_detected": False,
-            "is_sleeping": False,
-            "timestamp": time.time()
-        }), 500
-
-@app.route('/api/dashboard/stats', methods=['GET'])
-def get_dashboard_stats():
-    """Get real-time statistics for dashboard"""
-    try:
-        stats_data = {
-            "balance": 0,
-            "hunts_today": 0,
-            "battles_today": 0,
-            "uptime": 0,
-            "commands_executed": 0,
-            "captchas_solved": 0,
-            "accounts": []
-        }
-        
-        # Get data from database
-        try:
-            # Get account-specific data
-            account_rows = get_from_db("SELECT user_id, cowoncy, captchas FROM user_stats")
-            total_cowoncy = 0
-            total_captchas = 0
-            
-            for row in account_rows:
-                user_id = row["user_id"]
-                cowoncy = row["cowoncy"] or 0
-                captchas = row["captchas"] or 0
-                
-                total_cowoncy += cowoncy
-                total_captchas += captchas
-                
-                # Format user ID for display (show last 4 digits)
-                user_display = f"User-{str(user_id)[-4:]}"
-                
-                stats_data["accounts"].append({
-                    "user_id": user_id,
-                    "user_display": user_display,
-                    "cowoncy": cowoncy,
-                    "cowoncy_formatted": f"{cowoncy:,}",
-                    "captchas": captchas
-                })
-            
-            stats_data["balance"] = total_cowoncy
-            stats_data["balance_formatted"] = f"{total_cowoncy:,}"
-            stats_data["captchas_solved"] = total_captchas
-            
-            # Get command counts
-            hunt_rows = get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
-            battle_rows = get_from_db("SELECT count FROM commands WHERE name = 'battle'")
-            
-            stats_data["hunts_today"] = hunt_rows[0]["count"] if hunt_rows else 0
-            stats_data["battles_today"] = battle_rows[0]["count"] if battle_rows else 0
-            
-            # Get total commands executed
-            all_commands = get_from_db("SELECT SUM(count) as total FROM commands")
-            stats_data["commands_executed"] = all_commands[0]["total"] if all_commands and all_commands[0]["total"] else 0
-            
-        except Exception as db_error:
-            print(f"Database error in dashboard stats: {db_error}")
-        
-        # Calculate uptime (time since bot started)
-        if hasattr(app, 'start_time'):
-            stats_data["uptime"] = int(time.time() - app.start_time)
-        
-        return jsonify(stats_data)
-        
-    except Exception as e:
-        print(f"Error fetching dashboard stats: {e}")
-        return jsonify({
-            "balance": 0,
-            "hunts_today": 0,
-            "battles_today": 0,
-            "uptime": 0,
-            "commands_executed": 0,
-            "captchas_solved": 0
-        })
-
-@app.route('/api/dashboard/logs', methods=['GET'])
-def get_dashboard_logs():
-    """Get recent logs for dashboard"""
-    try:
-        # Get recent website logs
-        recent_logs = website_logs[-100:] if len(website_logs) > 100 else website_logs
-        
-        # Format logs for dashboard
-        formatted_logs = []
-        for i, log in enumerate(recent_logs):
-            # Determine log level based on content
-            level = "info"
-            if "error" in log.lower() or "failed" in log.lower():
-                level = "error"
-            elif "warning" in log.lower() or "captcha" in log.lower():
-                level = "warning"
-            elif "success" in log.lower() or "completed" in log.lower() or "won" in log.lower():
-                level = "success"
-            
-            formatted_logs.append({
-                "id": i,
-                "timestamp": datetime.now().strftime("%H:%M:%S"),
-                "level": level,
-                "message": log
-            })
-        
-        return jsonify(formatted_logs)
-    except Exception as e:
-        print(f"Error fetching dashboard logs: {e}")
-        return jsonify([])
-
-@app.route('/api/dashboard/activity', methods=['GET'])
-def get_dashboard_activity():
-    """Get recent activity for dashboard"""
-    try:
-        activities = []
-        
-        # Get recent database entries for activity
-        try:
-            # Recent commands
-            recent_commands = get_from_db("""
-                SELECT name, count, MAX(rowid) as latest 
-                FROM commands 
-                WHERE count > 0 
-                GROUP BY name 
-                ORDER BY latest DESC 
-                LIMIT 10
-            """)
-            
-            for cmd in recent_commands:
-                activities.append({
-                    "time": "Recently",
-                    "message": f"{cmd['name'].title()} command executed {cmd['count']} times",
-                    "type": "info",
-                    "icon": "fas fa-terminal"
-                })
-                
-        except Exception as db_error:
-            print(f"Database error in activity: {db_error}")
-            
-        # Add some recent log activities
-        recent_website_logs = website_logs[-5:] if website_logs else []
-        for log in recent_website_logs:
-            activity_type = "info"
-            icon = "fas fa-info-circle"
-            
-            if "hunt" in log.lower():
-                activity_type = "success"
-                icon = "fas fa-paw"
-            elif "battle" in log.lower():
-                activity_type = "success" 
-                icon = "fas fa-sword"
-            elif "captcha" in log.lower():
-                activity_type = "warning"
-                icon = "fas fa-exclamation-triangle"
-            elif "error" in log.lower():
-                activity_type = "error"
-                icon = "fas fa-exclamation-circle"
-                
-            activities.append({
-                "time": "Just now",
-                "message": log,
-                "type": activity_type,
-                "icon": icon
-            })
-        
-        return jsonify(activities[-10:])  # Return last 10 activities
-        
-    except Exception as e:
-        print(f"Error fetching dashboard activity: {e}")
-        return jsonify([])
-
-@app.route('/api/dashboard/analytics', methods=['GET'])
-def get_dashboard_analytics():
-    """Return real-time analytics per account and global aggregates."""
-    try:
-        # Time window for commands per minute
-        now_ts = time.time()
-        one_min_ago = now_ts - 60
-
-        # Build account base list from active clients
-        active_accounts = {}
-        try:
-            for client in bot_instances:
-                if hasattr(client, 'user') and client.user:
-                    acc_id = str(client.user.id)
-                    active_accounts[acc_id] = {
-                        "account_id": acc_id,
-                        "account_display": getattr(client, 'username', None) or getattr(getattr(client, 'user', None), 'name', None) or f"User-{acc_id[-4:]}",
-                        "active": True,
-                        "net_earnings": getattr(client, 'user_status', {}).get('net_earnings', 0)
-                    }
-        except Exception:
-            pass
-
-        # Also include accounts seen in logs
-        for log in command_logs:
-            acc_id = log.get('account_id')
-            if not acc_id:
-                continue
-            active_accounts.setdefault(acc_id, {
-                "account_id": acc_id,
-                "account_display": log.get('account_display') or f"User-{acc_id[-4:]}",
-                "active": False,
-                "net_earnings": 0
-            })
-
-        # Initialize per-account metrics
-        for acc in active_accounts.values():
-            acc.update({
-                "cpm": 0,
-                "session_total": 0,
-                "hunt": 0,
-                "battle": 0,
-                "daily": 0,
-                "owo": 0,
-                "last_command_ts": None
-            })
-
-        # Compute metrics from logs
-        global_cpm = 0
-        for log in command_logs:
-            ts = log.get('timestamp', 0)
-            if ts >= one_min_ago:
-                global_cpm += 1
-            acc_id = log.get('account_id')
-            if acc_id in active_accounts:
-                acc = active_accounts[acc_id]
-                acc['session_total'] += 1
-                if ts >= one_min_ago:
-                    acc['cpm'] += 1
-                ctype = (log.get('command_type') or '').lower()
-                if 'hunt' in ctype:
-                    acc['hunt'] += 1
-                elif 'battle' in ctype:
-                    acc['battle'] += 1
-                elif 'daily' in ctype:
-                    acc['daily'] += 1
-                elif ctype in {'owo', 'uwu'} or 'owo' in ctype:
-                    acc['owo'] += 1
-                # Update last timestamp
-                if ts and (not acc['last_command_ts'] or ts > acc['last_command_ts']):
-                    acc['last_command_ts'] = ts
-
-        # Global aggregates
-        global_session_total = sum(a['session_total'] for a in active_accounts.values())
-        global_net = sum(a.get('net_earnings', 0) for a in active_accounts.values())
-
-        return jsonify({
-            "global": {
-                "cpm": global_cpm,
-                "active_accounts": sum(1 for a in active_accounts.values() if a['active']),
-                "session_total": global_session_total,
-                "net_earnings": global_net,
-                "timestamp": now_ts
-            },
-            "accounts": list(active_accounts.values())
-        })
-    except Exception as e:
-        print(f"Error fetching analytics: {e}")
-        return jsonify({"global": {"cpm": 0, "active_accounts": 0, "session_total": 0, "net_earnings": 0}, "accounts": []})
-
-
-@app.route('/api/settings', methods=['POST'])
-def update_settings():
-    """Update bot settings"""
-    try:
-        new_settings = request.get_json()
-        
-        # Load current settings
-        with open("config/settings.json", "r") as config_file:
-            current_settings = json.load(config_file)
-        
-        # Merge new settings with current ones
-        merge_dicts(current_settings, new_settings)
-        
-        # Save updated settings
-        with open("config/settings.json", "w") as config_file:
-            json.dump(current_settings, config_file, indent=4)
-        
-        # Mark config as updated for bot to reload
-        global config_updated
-        config_updated = True
-        
-        return jsonify({"status": "success", "message": "Settings updated successfully"})
-    except Exception as e:
-        print(f"Error updating settings: {e}")
-        return jsonify({"status": "error", "message": "Failed to update settings"}), 500
-
-@app.route('/api/stats', methods=['GET'])
-def get_stats():
-    """Get bot statistics"""
-    try:
-        # Get stats from database
-        stats_data = {}
-        
-        try:
-            rows = get_from_db("SELECT cowoncy FROM user_stats")
-            total_cowoncy = sum(row["cowoncy"] for row in rows) if rows else 0
-            stats_data["balance"] = total_cowoncy
-        except:
-            stats_data["balance"] = 0
-        
-        try:
-            rows = get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
-            hunt_count = rows[0]["count"] if rows else 0
-            stats_data["hunts_today"] = hunt_count
-        except:
-            stats_data["hunts_today"] = 0
-        
-        try:
-            rows = get_from_db("SELECT count FROM commands WHERE name = 'battle'")
-            battle_count = rows[0]["count"] if rows else 0
-            stats_data["battles_today"] = battle_count
-        except:
-            stats_data["battles_today"] = 0
-        
-        # Calculate uptime (simplified)
-        stats_data["uptime"] = int(time.time() % 86400)
-        
-        return jsonify(stats_data)
-    except Exception as e:
-        print(f"Error fetching stats: {e}")
-        return jsonify({"status": "error", "message": "Failed to fetch stats"}), 500
-
-@app.route('/api/logs', methods=['GET'])
-def get_logs():
-    """Get recent logs for dashboard"""
-    try:
-        # Return recent website logs
-        recent_logs = website_logs[-50:] if len(website_logs) > 50 else website_logs
-        
-        # Format logs for dashboard
-        formatted_logs = []
-        for i, log in enumerate(recent_logs):
-            formatted_logs.append({
-                "id": i,
-                "timestamp": datetime.now().strftime("%H:%M:%S"),
-                "level": "info",
-                "message": log
-            })
-        
-        return jsonify(formatted_logs)
-    except Exception as e:
-        print(f"Error fetching logs: {e}")
-        return jsonify([])
-
 # Global list to store real-time command logs (declared at top of file)
 max_command_logs = 500  # Keep only the last 500 commands
 
 def add_command_log(account_id, command_type, message, status="info"):
     """Add a command log entry"""
-    global command_logs
-    
+    # Use shared state
     log_entry = {
         "timestamp": time.time(),
         "account_id": str(account_id),
@@ -754,22 +171,22 @@ def add_command_log(account_id, command_type, message, status="info"):
         "status": status
     }
     
-    command_logs.append(log_entry)
+    state.command_logs.append(log_entry)
     
     # Keep only the last max_command_logs entries
-    if len(command_logs) > max_command_logs:
-        command_logs = command_logs[-max_command_logs:]
+    if len(state.command_logs) > state.max_command_logs:
+        state.command_logs = state.command_logs[-state.max_command_logs:]
 
 def refresh_bot_settings(changed_command=None, enabled=None):
     """Refresh settings for all active bot instances and apply immediate toggle if provided."""
-    global bot_instances
+    # Use shared state
     try:
-        if not bot_instances:
+        if not state.bot_instances:
             print("No active bot instances to refresh")
             return
 
         active_clients = []
-        for client in bot_instances:
+        for client in state.bot_instances:
             try:
                 if hasattr(client, 'refresh_settings') and hasattr(client, 'user') and client.user:
                     client.refresh_settings()
@@ -786,18 +203,11 @@ def refresh_bot_settings(changed_command=None, enabled=None):
                 print(f"Error refreshing individual client: {client_error}")
                 continue
 
-        bot_instances = active_clients
+        state.bot_instances = active_clients
         print(f"Refreshed settings for {len(active_clients)} active bot instances")
 
     except Exception as e:
         print(f"Error refreshing bot settings: {e}")
-
-@app.route('/api/dashboard/quick-toggle', methods=['POST'])
-def toggle_quick_setting():
-    """Toggle quick settings (hunt, battle, daily, owo)"""
-    try:
-        data = request.get_json()
-        command = data.get('command')
         enabled = data.get('enabled', False)
         
         if not command:

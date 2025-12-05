@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  owomizu:
+    build: .
+    container_name: owomizu
+    restart: unless-stopped
+    ports:
+      - "2000:2000"
+    volumes:
+      - ./config:/app/config
+      - ./utils/data:/app/utils/data
+      - ./tokens.txt:/app/tokens.txt
+    environment:
+      - PYTHONUNBUFFERED=1
