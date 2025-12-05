@@ -13,3 +13,11 @@ config_updated = False
 
 # App start time
 start_time = time.time()
+
+# Active User IDs
+list_user_ids = []
+
+# Global Settings (loaded later)
+settings = {}
+misc = {}
+

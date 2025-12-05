@@ -3,7 +3,8 @@ import json
 import random
 import time
 import os
-import sqlite3
+
+import aiosqlite
 import asyncio
 from datetime import datetime
 
@@ -13,16 +14,14 @@ from . import app
 from utils import state
 
 # Helper Functions
-def get_from_db(command):
-    # This should be moved to a shared database utility in the future
+async def get_from_db(command):
+    # Async database utility
     try:
-        with sqlite3.connect("utils/data/db.sqlite") as conn:
-            conn.row_factory = sqlite3.Row 
-            cur = conn.cursor()
-            cur.execute("PRAGMA journal_mode=WAL;")
-            cur.execute(command)
-            item = cur.fetchall()
-            return item
+        async with aiosqlite.connect("utils/data/db.sqlite") as db:
+            db.row_factory = aiosqlite.Row
+            await db.execute("PRAGMA journal_mode=WAL;")
+            async with db.execute(command) as cursor:
+                return await cursor.fetchall()
     except Exception as e:
         print(f"Database error: {e}")
         return []
@@ -75,11 +74,11 @@ def get_console_logs():
         return jsonify({"status": "error", "message": "An error occurred while fetching logs"}), 500
 
 @app.route('/api/fetch_gamble_data', methods=['GET'])
-def fetch_gamble_data():
+async def fetch_gamble_data():
     global_settings = load_global_settings()
 
     try:
-        rows = get_from_db("SELECT hour, wins, losses FROM gamble_winrate ORDER BY hour")
+        rows = await get_from_db("SELECT hour, wins, losses FROM gamble_winrate ORDER BY hour")
         win_data = [row["wins"] for row in rows]
         lose_data = [row["losses"] for row in rows]
         return jsonify({
@@ -92,12 +91,12 @@ def fetch_gamble_data():
         return jsonify({"status": "error", "message": "An error occurred"}), 500
 
 @app.route('/api/fetch_cowoncy_data', methods=['GET'])
-def fetch_cowoncy_data():
+async def fetch_cowoncy_data():
     global_settings = load_global_settings()
 
 
     try:
-        rows = get_from_db("SELECT user_id, hour, earnings FROM cowoncy_earnings ORDER BY hour")
+        rows = await get_from_db("SELECT user_id, hour, earnings FROM cowoncy_earnings ORDER BY hour")
         user_data = {}
         for row in rows:
             user_id = row["user_id"]
@@ -126,7 +125,7 @@ def fetch_cowoncy_data():
             }
             base_data["datasets"].append(dataset)
 
-        rows = get_from_db("SELECT cowoncy, captchas FROM user_stats")
+        rows = await get_from_db("SELECT cowoncy, captchas FROM user_stats")
         total_cowoncy = sum(row["cowoncy"] for row in rows) if rows else 0
         total_captchas = sum(row["captchas"] for row in rows) if rows else 0
 
@@ -142,11 +141,11 @@ def fetch_cowoncy_data():
         return jsonify({"status": "error", "message": "An error occurred"}), 500
 
 @app.route('/api/fetch_cmd_data', methods=['GET'])
-def fetch_cmd_data():
+async def fetch_cmd_data():
     global_settings = load_global_settings()
 
     try:
-        rows = get_from_db("SELECT * FROM commands")
+        rows = await get_from_db("SELECT * FROM commands")
         filtered_rows = [row for row in rows if row["count"] != 0]
         command_names = [row["name"] for row in filtered_rows]
         count = [row["count"] for row in filtered_rows]
@@ -242,7 +241,7 @@ def get_dashboard_status():
         }), 500
 
 @app.route('/api/dashboard/stats', methods=['GET'])
-def get_dashboard_stats():
+async def get_dashboard_stats():
     try:
         stats_data = {
             "balance": 0,
@@ -256,7 +255,7 @@ def get_dashboard_stats():
         
         # Get data from database
         try:
-            account_rows = get_from_db("SELECT user_id, cowoncy, captchas FROM user_stats")
+            account_rows = await get_from_db("SELECT user_id, cowoncy, captchas FROM user_stats")
             total_cowoncy = 0
             total_captchas = 0
             
@@ -282,13 +281,13 @@ def get_dashboard_stats():
             stats_data["balance_formatted"] = f"{total_cowoncy:,}"
             stats_data["captchas_solved"] = total_captchas
             
-            hunt_rows = get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
-            battle_rows = get_from_db("SELECT count FROM commands WHERE name = 'battle'")
+            hunt_rows = await get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
+            battle_rows = await get_from_db("SELECT count FROM commands WHERE name = 'battle'")
             
             stats_data["hunts_today"] = hunt_rows[0]["count"] if hunt_rows else 0
             stats_data["battles_today"] = battle_rows[0]["count"] if battle_rows else 0
             
-            all_commands = get_from_db("SELECT SUM(count) as total FROM commands")
+            all_commands = await get_from_db("SELECT SUM(count) as total FROM commands")
             stats_data["commands_executed"] = all_commands[0]["total"] if all_commands and all_commands[0]["total"] else 0
             
         except Exception as db_error:
@@ -336,11 +335,11 @@ def get_dashboard_logs():
         return jsonify([])
 
 @app.route('/api/dashboard/activity', methods=['GET'])
-def get_dashboard_activity():
+async def get_dashboard_activity():
     try:
         activities = []
         try:
-            recent_commands = get_from_db("""
+            recent_commands = await get_from_db("""
                 SELECT name, count, MAX(rowid) as latest 
                 FROM commands 
                 WHERE count > 0 
@@ -487,25 +486,25 @@ def update_settings():
         return jsonify({"status": "error", "message": "Failed to update settings"}), 500
 
 @app.route('/api/stats', methods=['GET'])
-def get_stats():
+async def get_stats():
     try:
         stats_data = {}
         try:
-            rows = get_from_db("SELECT cowoncy FROM user_stats")
+            rows = await get_from_db("SELECT cowoncy FROM user_stats")
             total_cowoncy = sum(row["cowoncy"] for row in rows) if rows else 0
             stats_data["balance"] = total_cowoncy
         except:
             stats_data["balance"] = 0
         
         try:
-            rows = get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
+            rows = await get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
             hunt_count = rows[0]["count"] if rows else 0
             stats_data["hunts_today"] = hunt_count
         except:
             stats_data["hunts_today"] = 0
         
         try:
-            rows = get_from_db("SELECT count FROM commands WHERE name = 'battle'")
+            rows = await get_from_db("SELECT count FROM commands WHERE name = 'battle'")
             battle_count = rows[0]["count"] if rows else 0
             stats_data["battles_today"] = battle_count
         except:
