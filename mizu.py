@@ -940,9 +940,20 @@ def get_auth_config():
                 "cors_enabled": auth_config.get('security', {}).get('cors_enabled', True)
             }
         })
-    except Exception as e:
-        print(f"Error getting auth config: {e}")
         return jsonify({"status": "error", "message": "Failed to get config"}), 500
+
+
+def web_start():
+    flaskLog = logging.getLogger("werkzeug")
+    flaskLog.disabled = True
+    cli = sys.modules["flask.cli"]
+    cli.show_server_banner = lambda *x: None
+    app.run(
+        debug=False,
+        use_reloader=False,
+        port=global_settings_dict["website"]["port"],
+        host="0.0.0.0" if global_settings_dict["website"]["enableHost"] else "127.0.0.1",
+    )
 
 
 def web_start():
@@ -1470,7 +1481,6 @@ class MyClient(commands.Bot):
     def add_dashboard_log(self, command_type, message, status="info"):
         """Add a command log entry to the dashboard"""
         try:
-            global command_logs, max_command_logs
             log_entry = {
                 "timestamp": time.time(),
                 "account_id": str(self.user.id),
@@ -1479,11 +1489,11 @@ class MyClient(commands.Bot):
                 "message": message,
                 "status": status
             }
-            command_logs.append(log_entry)
+            state.command_logs.append(log_entry)
             
             # Keep only the last max_command_logs entries
-            if len(command_logs) > max_command_logs:
-                command_logs = command_logs[-max_command_logs:]
+            if len(state.command_logs) > state.max_command_logs:
+                state.command_logs = state.command_logs[-state.max_command_logs:]
         except Exception as e:
             print(f"Error adding dashboard log: {e}")
     
@@ -1739,7 +1749,7 @@ class MyClient(commands.Bot):
             )
 
     async def log(self, text, color="#ffffff", bold=False, web_log=global_settings_dict["website"]["enabled"], webhook_useless_log=global_settings_dict["webhook"]["webhookUselessLog"]):
-        global website_logs
+        # Use shared state
         current_time = datetime.now().strftime("%H:%M:%S")
         if self.misc["debug"]["enabled"]:
             frame_info = traceback.extract_stack()[-2]
@@ -1760,9 +1770,9 @@ class MyClient(commands.Bot):
             console.print(f"{self.username}| {text}".center(console_width - 2), style=color)
         if web_log:
             with lock:
-                website_logs.append(f"<div class='message'><span class='timestamp'>[{current_time}]</span><span class='text'>{self.username}| {text}</span></div>")
-                if len(website_logs) > 300:
-                    website_logs.pop(0)
+                state.website_logs.append(f"<div class='message'><span class='timestamp'>[{current_time}]</span><span class='text'>{self.username}| {text}</span></div>")
+                if len(state.website_logs) > 300:
+                    state.website_logs.pop(0)
         if webhook_useless_log:
             await self.webhookSender(footer=f"[{current_time}] {self.username} - {text}", colors=color)
 
@@ -2347,35 +2357,12 @@ def run_bots(tokens_and_channels):
     for thread in threads:
         thread.join()
 
-def run_bot(token, channel_id, global_settings_dict):
-    global bot_instances
-    try:
-        logging.getLogger("discord.client").setLevel(logging.ERROR)
-        client = MyClient(token, channel_id, global_settings_dict)
-        
-        # Add client to global instances list
-        bot_instances.append(client)
 
-        if not on_mobile:
-            try:
-                client.run(token, log_level=logging.ERROR)
-
-            except CurlError as e:
-                if "WS_SEND" in str(e) and "55" in str(e):
-                    printBox("Broken pipe error detected. Restarting bot...", "bold red")
-                    # add a restart of client.run after exiting cleanly here!
-                else:
-                    printBox(f"Curl error: {e}", "bold red")
-        else:
-            client.run(token, log_level=logging.ERROR)
-
-    except Exception as e:
-        printBox(f"Error starting bot: {e}", "bold red")
 
 
 def run_bot(token, channel_id, global_settings_dict):
     """Original run_bot function for backwards compatibility"""
-    global bot_instances
+    # Use shared state
     
     # Create and set event loop for this thread (required for Termux compatibility)
     # In some environments (especially Termux), threads don't have an event loop by default
@@ -2392,7 +2379,7 @@ def run_bot(token, channel_id, global_settings_dict):
             client = MyClient(token, channel_id, global_settings_dict)
             
             # Add client to global instances list
-            bot_instances.append(client)
+            state.bot_instances.append(client)
 
             if not on_mobile:
                 try:
