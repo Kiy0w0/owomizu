@@ -106,6 +106,7 @@ Desktop.ini
 # dotenv
 .env
 .env.*
+!.env.example
 
 # Jupyter Notebook
 .ipynb_checkpoints/

@@ -1994,10 +1994,26 @@ if __name__ == "__main__":
     # else:
     #     printBox("⚠️ Could not check for updates - API unavailable", "bold yellow")
 
-    tokens_and_channels = [line.strip().split() for line in open("tokens.txt", "r")]
+    # Load environment variables
+    from dotenv import load_dotenv
+    load_dotenv()
+
+    # Try loading tokens from environment variable first
+    tokens_env = os.getenv("TOKENS")
+    if tokens_env:
+        # Format: "token1 channel1;token2 channel2"
+        tokens_and_channels = [entry.strip().split() for entry in tokens_env.split(';') if entry.strip()]
+        printBox("Loaded tokens from .env file", "bold green")
+    elif os.path.exists("tokens.txt"):
+        tokens_and_channels = [line.strip().split() for line in open("tokens.txt", "r") if line.strip()]
+        printBox(f"WARNING: Using tokens.txt is deprecated. Please migrate to .env", "bold yellow")
+    else:
+        printBox("No tokens found! Check .env or tokens.txt", "bold red")
+        tokens_and_channels = []
+
     token_len = len(tokens_and_channels)
 
-    printBox(f'-Recieved {token_len} tokens.'.center(console_width - 2 ),'bold cyan' )
+    printBox(f'-Received {token_len} tokens.'.center(console_width - 2 ),'bold cyan' )
 
     # Create database or modify if required
     create_database()

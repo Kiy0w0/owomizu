@@ -97,6 +97,19 @@ python updater.py
 - 🌐 **Global Settings** - `config/global_settings.json` system settings
 - 🎯 **Command Configuration** - Individual command customization
 
+### ⚙️ **Configuration**
+
+#### 🔒 Security & Tokens
+We prioritize security. Instead of plain text files, we recommend using Environment Variables.
+
+1.  Rename `.env.example` to `.env` (or create a new `.env` file).
+2.  Add your tokens in the format:
+    ```env
+    TOKENS="YOUR_TOKEN_1 CHANNEL_ID_1;YOUR_TOKEN_2 CHANNEL_ID_2"
+    ```
+    *Note: Multiple accounts are separated by semicolons (;)*
+3.  **Legacy Support:** `tokens.txt` is still supported but **deprecated**. Please migrate to `.env`.
+
 ### 🔧 **Advanced Features**
 - 💎 **AutoEnhance** - Automatic gem usage and essence investment
 - 🎯 **AutoHuntBot** - Huntbot automation and upgrades
