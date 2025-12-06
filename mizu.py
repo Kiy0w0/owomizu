@@ -584,22 +584,26 @@ def run_bot(token, channel_id, global_settings_dict):
 
             if not on_mobile:
                 try:
-                    client.run(token, log_level=logging.ERROR)
+                    # Remove log_level argument for compatibility with older discord.py versions
+                    client.run(token)
 
                 except Exception as e:
                     # Check for CurlError if defined (imported in main)
                     if 'CurlError' in globals() and isinstance(e, globals()['CurlError']):
                          if "WS_SEND" in str(e) and "55" in str(e):
                             printBox("Broken pipe error detected. Restarting bot...", "bold red")
-                            if client in state.bot_instances: state.bot_instances.remove(client)
+                            try: state.bot_instances.remove(client)
+                            except ValueError: pass
                             continue 
                          else:
                             printBox(f"Curl error: {e}", "bold red")
-                            if client in state.bot_instances: state.bot_instances.remove(client)
+                            try: state.bot_instances.remove(client)
+                            except ValueError: pass
                             break
                     
                     printBox(f"Unknown error when running bot: {e}", "bold red")
-                    if client in state.bot_instances: state.bot_instances.remove(client)
+                    try: state.bot_instances.remove(client)
+                    except ValueError: pass
 
             else:
                 # Mobile (Termux) uses an older version without curl_cffi.
@@ -608,7 +612,8 @@ def run_bot(token, channel_id, global_settings_dict):
                 except Exception as e:
                     printBox(f"Unknown error when running bot: {e}", "bold red")
                 finally:
-                    if client in state.bot_instances: state.bot_instances.remove(client)
+                    try: state.bot_instances.remove(client)
+                    except ValueError: pass
                 break 
             
             # Ensure removal if loop continues naturally
