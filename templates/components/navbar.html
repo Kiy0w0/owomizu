@@ -1,0 +1,46 @@
+<header class="navbar">
+    <div class="navbar-container">
+        <!-- Drawer Toggle Button -->
+        <button class="drawer-toggle" id="drawer-toggle" aria-label="Toggle Menu">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <div class="navbar-brand">
+            <i class="fas fa-water brand-icon"></i>
+            <span class="brand-text">Mizu Network</span>
+            <span class="brand-subtitle">Dashboard</span>
+        </div>
+
+        <div class="navbar-center">
+            <div class="status-indicator" id="bot-status-indicator">
+                <div class="status-dot" id="status-dot"></div>
+                <span class="status-text" id="status-text">Connecting...</span>
+            </div>
+        </div>
+
+        <div class="navbar-right">
+            <div class="navbar-stats">
+                <div class="stat-item">
+                    <i class="fas fa-coins"></i>
+                    <span id="navbar-balance">0</span>
+                </div>
+                <div class="stat-item">
+                    <i class="fas fa-clock"></i>
+                    <span id="navbar-uptime">00:00:00</span>
+                </div>
+            </div>
+
+            <div class="navbar-actions">
+                <button class="navbar-btn" id="notifications-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge" id="notification-count">0</span>
+                </button>
+                <button class="navbar-btn" id="settings-btn" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</header>

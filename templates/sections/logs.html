@@ -1,0 +1,69 @@
+<section id="logs" class="content-section">
+    <div class="section-header">
+        <h1 class="section-title">
+            <i class="fas fa-file-alt"></i>
+            Live Logs
+        </h1>
+        <div class="section-actions">
+            <button class="btn btn-outline" id="clear-logs">
+                <i class="fas fa-trash"></i>
+                Clear
+            </button>
+            <button class="btn btn-outline" id="export-logs">
+                <i class="fas fa-download"></i>
+                Export
+            </button>
+        </div>
+    </div>
+
+    <div class="logs-container">
+        <div class="logs-controls">
+            <div class="log-filters">
+                <select id="log-type-filter" class="form-select">
+                    <option value="all">All Activities</option>
+                    <option value="command">Commands</option>
+                    <option value="hunt">Hunt</option>
+                    <option value="battle">Battle</option>
+                    <option value="owo">OwO</option>
+                    <option value="daily">Daily</option>
+                    <option value="system">System</option>
+                    <option value="error">Errors</option>
+                </select>
+                <select id="account-filter" class="form-select">
+                    <option value="all">All Accounts</option>
+                    <!-- Account options will be populated dynamically -->
+                </select>
+            </div>
+            <div class="log-options">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="auto-scroll" checked>
+                    <span class="checkmark"></span>
+                    Auto Scroll
+                </label>
+                <label class="checkbox-label">
+                    <input type="checkbox" id="show-timestamps" checked>
+                    <span class="checkmark"></span>
+                    Show Timestamps
+                </label>
+            </div>
+            <div class="log-stats">
+                <span class="log-stat">
+                    <i class="fas fa-terminal"></i>
+                    <span id="total-commands">0</span> Commands
+                </span>
+                <span class="log-stat">
+                    <i class="fas fa-clock"></i>
+                    <span id="session-time">00:00:00</span>
+                </span>
+            </div>
+        </div>
+
+        <div class="logs-output" id="logs-output">
+            <div class="logs-welcome">
+                <i class="fas fa-terminal"></i>
+                <h3>Real-time Command Activity</h3>
+                <p>Live feed of all OwO bot commands and activities</p>
+            </div>
+        </div>
+    </div>
+</section>

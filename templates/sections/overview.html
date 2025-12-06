@@ -1,0 +1,104 @@
+<!-- Overview Section -->
+<section id="overview" class="content-section active">
+    <div class="section-header">
+        <h1 class="section-title">
+            <i class="fas fa-home"></i>
+            Dashboard Overview
+        </h1>
+        <div class="section-actions">
+            <button class="btn btn-primary" id="refresh-stats">
+                <i class="fas fa-sync-alt"></i>
+                Refresh
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card primary">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-coins"></i>
+                </div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+12.5%</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="total-cowoncy">0</h3>
+                <p class="stat-label">Total Cowoncy</p>
+                <small class="stat-subtitle">Current balance</small>
+            </div>
+        </div>
+
+        <div class="stat-card success">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-paw"></i>
+                </div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+8</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="hunts-today">0</h3>
+                <p class="stat-label">Hunts Today</p>
+                <small class="stat-subtitle">Successful hunts</small>
+            </div>
+        </div>
+
+        <div class="stat-card warning">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-sword"></i>
+                </div>
+                <div class="stat-trend positive">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>+5</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="battles-today">0</h3>
+                <p class="stat-label">Battles Today</p>
+                <small class="stat-subtitle">Battle victories</small>
+            </div>
+        </div>
+
+        <div class="stat-card info">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-trend neutral">
+                    <i class="fas fa-minus"></i>
+                    <span>Live</span>
+                </div>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-value" id="uptime-display">00:00:00</h3>
+                <p class="stat-label">Uptime</p>
+                <small class="stat-subtitle">Current session</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Account Breakdown -->
+    <div class="accounts-section">
+        <div class="section-header">
+            <h2>
+                <i class="fas fa-users"></i>
+                Account Statistics
+            </h2>
+            <div class="refresh-indicator" id="accounts-refresh">
+                <i class="fas fa-sync-alt"></i>
+            </div>
+        </div>
+        <div class="accounts-grid" id="accounts-breakdown">
+            <!-- Account cards will be loaded here -->
+        </div>
+    </div>
+
+
+</section>

@@ -1,0 +1,99 @@
+<!-- Commands Section -->
+<section id="commands" class="content-section">
+    <div class="section-header">
+        <h1 class="section-title">
+            <i class="fas fa-terminal"></i>
+            Command Settings
+        </h1>
+        <div class="section-actions">
+            <button class="btn btn-success" id="save-commands">
+                <i class="fas fa-save"></i>
+                Save Settings
+            </button>
+            <button class="btn btn-outline" id="reset-commands">
+                <i class="fas fa-undo"></i>
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <!-- Quick Settings -->
+    <div class="action-grid" style="margin-bottom: var(--spacing-2xl);">
+        <div class="action-card">
+            <div class="action-header">
+                <h3>Quick Settings</h3>
+                <p>Toggle main features</p>
+            </div>
+            <div class="toggle-grid">
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="hunt-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Hunt</span>
+                </div>
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="battle-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Battle</span>
+                </div>
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="daily-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">Daily</span>
+                </div>
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="owo-toggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">OwO</span>
+                </div>
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="slash-commands-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">
+                        <i class="fas fa-slash"></i>
+                        Slash Commands
+                    </span>
+                </div>
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="channel-switcher-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">
+                        <i class="fas fa-random"></i>
+                        Channel Switcher
+                    </span>
+                </div>
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="stop-hunt-no-gems-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <span class="toggle-label">
+                        <i class="fas fa-gem"></i>
+                        Stop Hunt (No Gems)
+                    </span>
+                </div>
+                <div class="toggle-item">
+                    <button class="btn btn-danger" id="terminate-bot">
+                        <i class="fas fa-power-off"></i>
+                        Terminate Bot
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="settings-container">
+        <!-- Command categories will be loaded here -->
+    </div>
+</section>

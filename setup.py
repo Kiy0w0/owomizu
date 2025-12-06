@@ -179,18 +179,6 @@ if scratchSetup:
         #         print(f'\033[1;33m[!]API Status: {api_status.get("message", "Unknown status")}\033[m')
         # except Exception as e:
         #     print(f'\033[1;33m[!]Could not check API status: {e}\033[m')
-        # 
-        # # Check version
-        # try:
-        #     ver_check_response = requests.get("https://api.ive.my.id/version.json", timeout=10)
-        #     ver_check = ver_check_response.json()["version"]
-        #     print(f'\033[1;36m[0]--received current latest version for Mizu OwO - v{ver_check}\033[m')
-        #     version = "1.3.0"
-        #     print(f'\033[1;36m[0]current version of Mizu OwO - v{version}\033[m')
-        #
-        #     if compare_versions(version, ver_check):
-        #         print(
-        #             "\033[1;33m[0]seems like there is a new version for Mizu OwO available!\033[m"
         #         )
         #         while True:
         #             o = input(

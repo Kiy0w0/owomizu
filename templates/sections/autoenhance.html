@@ -1,0 +1,236 @@
+<!-- AutoEnhance Settings Section -->
+<section id="autoenhance" class="content-section">
+    <div class="section-header">
+        <h1 class="section-title">
+            <i class="fas fa-magic"></i>
+            AutoEnhance Settings
+        </h1>
+        <div class="section-actions">
+            <button class="btn btn-success" id="save-autoenhance">
+                <i class="fas fa-save"></i>
+                Save Settings
+            </button>
+            <button class="btn btn-outline" id="reset-autoenhance">
+                <i class="fas fa-undo"></i>
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <div class="autoenhance-container">
+        <!-- Master Toggle -->
+        <div class="card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-power-off"></i>
+                    Master Control
+                </h3>
+            </div>
+            <div class="card-content">
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoenhance-master-toggle">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div class="toggle-info">
+                        <span class="toggle-label">Enable AutoEnhance System</span>
+                        <small class="toggle-description">Master switch for all enhancement features</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto Use Gems Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-gem"></i>
+                    Auto Use Gems
+                </h3>
+            </div>
+            <div class="card-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="auto-gems-enabled">
+                            Enable Auto Gem Usage
+                        </label>
+                        <small class="form-hint">Automatically use gems when hunting</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gems-cooldown">Cooldown (Minutes)</label>
+                        <input type="number" id="gems-cooldown" class="form-input" min="5" max="60" value="15">
+                        <small class="form-hint">Time between gem usage checks</small>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="gems-lowest-first">
+                            Use Lowest Tier First
+                        </label>
+                        <small class="form-hint">Start with common gems before rare ones</small>
+                    </div>
+                </div>
+
+                <!-- Gem Tiers -->
+                <div class="form-group">
+                    <label class="form-section-label">Gem Tiers to Use</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-tier-common" checked>
+                            <span class="checkmark"></span>
+                            Common
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-tier-uncommon" checked>
+                            <span class="checkmark"></span>
+                            Uncommon
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-tier-rare" checked>
+                            <span class="checkmark"></span>
+                            Rare
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-tier-epic" checked>
+                            <span class="checkmark"></span>
+                            Epic
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-tier-mythical">
+                            <span class="checkmark"></span>
+                            Mythical
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-tier-legendary">
+                            <span class="checkmark"></span>
+                            Legendary
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-tier-fabled">
+                            <span class="checkmark"></span>
+                            Fabled
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Gem Types -->
+                <div class="form-group">
+                    <label class="form-section-label">Gem Types to Use</label>
+                    <div class="checkbox-grid">
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-type-hunt" checked>
+                            <span class="checkmark"></span>
+                            Hunt Gems
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-type-empowered" checked>
+                            <span class="checkmark"></span>
+                            Empowered Gems
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-type-lucky" checked>
+                            <span class="checkmark"></span>
+                            Lucky Gems
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" id="gems-type-special">
+                            <span class="checkmark"></span>
+                            Special Gems
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auto Invest Essence Settings -->
+        <div class="card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-flask"></i>
+                    Auto Invest Essence
+                </h3>
+            </div>
+            <div class="card-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="auto-essence-enabled">
+                            Enable Auto Essence Investment
+                        </label>
+                        <small class="form-hint">Automatically invest essence in efficiency & duration</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="essence-cooldown">Cooldown (Minutes)</label>
+                        <input type="number" id="essence-cooldown" class="form-input" min="15" max="120" value="30">
+                        <small class="form-hint">Time between essence investment checks</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="essence-min-required">Min Essence Required</label>
+                        <input type="number" id="essence-min-required" class="form-input" min="50" max="500"
+                            value="100">
+                        <small class="form-hint">Minimum essence needed before investing</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="essence-max-investment">Max Investment Per Time</label>
+                        <input type="number" id="essence-max-investment" class="form-input" min="10" max="200"
+                            value="50">
+                        <small class="form-hint">Maximum essence to invest at once</small>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="essence-max-efficiency">Max Efficiency Level</label>
+                        <input type="number" id="essence-max-efficiency" class="form-input" min="10" max="100"
+                            value="50">
+                        <small class="form-hint">Stop investing in efficiency at this level</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="essence-max-duration">Max Duration Level</label>
+                        <input type="number" id="essence-max-duration" class="form-input" min="10" max="100" value="50">
+                        <small class="form-hint">Stop investing in duration at this level</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div class="card">
+            <div class="card-header">
+                <h3>
+                    <i class="fas fa-info-circle"></i>
+                    Status Information
+                </h3>
+            </div>
+            <div class="card-content">
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Last Gem Usage:</span>
+                        <span class="status-value" id="gems-last-used">Never</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Last Essence Investment:</span>
+                        <span class="status-value" id="essence-last-invested">Never</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Available Gems:</span>
+                        <span class="status-value" id="gems-available">Loading...</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Current Essence:</span>
+                        <span class="status-value" id="essence-current">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
