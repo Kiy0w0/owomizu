@@ -88,7 +88,20 @@ def run_flask():
 
 """Cntrl+c detect"""
 def handle_sigint(signal_number, frame):
-    print("\nCtrl+C detected. stopping code!")
+    print("\nCtrl+C detected. Initiating graceful shutdown...")
+    
+    # Attempt to close all active bot instances
+    for client in state.bot_instances:
+        try:
+            if client.loop.is_running():
+                # Schedule client.close() in the client's event loop
+                asyncio.run_coroutine_threadsafe(client.close(), client.loop)
+        except Exception as e:
+            print(f"Error closing client: {e}")
+            
+    print("Waiting for connections to close...")
+    time.sleep(1.5) # Give asyncio time to clean up SSL transports
+    print("Exiting.")
     os._exit(0)
 
 signal.signal(signal.SIGINT, handle_sigint)
@@ -522,31 +535,6 @@ def fetch_mizu_api(endpoint):
         printBox(f"Failed to fetch from Mizu API ({endpoint}): {e}", "bold red")
         return {}
 
-def check_api_status():
-    """Check if Mizu OwO API is accessible"""
-    try:
-        response = requests.get(mizu_network_api, timeout=5)
-        return response.status_code == 200
-    except:
-        return False
-
-def get_api_announcements():
-    """Get current announcements from API"""
-    return fetch_mizu_api("announcements.json")
-
-def get_api_features():
-    """Get available features from API"""
-    return fetch_mizu_api("features.json")
-
-def get_api_themes():
-    """Get available themes from API"""
-    return fetch_mizu_api("themes.json")
-
-def get_api_status():
-    """Get system status from API"""
-    return fetch_mizu_api("status.json")
-
-
 
 def run_bots(tokens_and_channels):
     threads = []
@@ -557,15 +545,11 @@ def run_bots(tokens_and_channels):
     for thread in threads:
         thread.join()
 
-
-
-
 def run_bot(token, channel_id, global_settings_dict):
     """Original run_bot function for backwards compatibility"""
     # Use shared state
     
     # Create and set event loop for this thread (required for Termux compatibility)
-    # In some environments (especially Termux), threads don't have an event loop by default
     try:
         loop = asyncio.get_event_loop()
     except RuntimeError:
@@ -585,32 +569,36 @@ def run_bot(token, channel_id, global_settings_dict):
                 try:
                     client.run(token, log_level=logging.ERROR)
 
-                except CurlError as e:
-                    if "WS_SEND" in str(e) and "55" in str(e):
-                        printBox("Broken pipe error detected. Restarting bot...", "bold red")
-                        # Restart the loop with a new client instance.
-                        continue 
-                    else:
-                        printBox(f"Curl error: {e}", "bold red")
-                        # Don't retry unknown curl errors.
-                        break 
                 except Exception as e:
+                    # Check for CurlError if defined (imported in main)
+                    if 'CurlError' in globals() and isinstance(e, globals()['CurlError']):
+                         if "WS_SEND" in str(e) and "55" in str(e):
+                            printBox("Broken pipe error detected. Restarting bot...", "bold red")
+                            if client in state.bot_instances: state.bot_instances.remove(client)
+                            continue 
+                         else:
+                            printBox(f"Curl error: {e}", "bold red")
+                            if client in state.bot_instances: state.bot_instances.remove(client)
+                            break
+                    
                     printBox(f"Unknown error when running bot: {e}", "bold red")
+                    if client in state.bot_instances: state.bot_instances.remove(client)
 
             else:
                 # Mobile (Termux) uses an older version without curl_cffi.
-                # No need to handle error in such cases.
                 try:
                     client.run(token, log_level=logging.ERROR)
                 except Exception as e:
                     printBox(f"Unknown error when running bot: {e}", "bold red")
+                finally:
+                    if client in state.bot_instances: state.bot_instances.remove(client)
                 break 
+            
+            # Ensure removal if loop continues naturally
+                state.bot_instances.remove(client)
 
     except Exception as e:
         printBox(f"Error starting bot: {e}", "bold red")
-
-def install_package(package_name):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--break-system-packages", package_name])
 
 if __name__ == "__main__":
     setup_logging()

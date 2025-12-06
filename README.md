@@ -65,7 +65,7 @@
 
 ### � **Docker Deployment**
 1. **Configure tokens:**
-   Create `tokens.txt` in the project directory.
+   Create `.env` in the project directory.
 
 2. **Run with Docker Compose:**
    ```bash
