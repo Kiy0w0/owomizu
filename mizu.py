@@ -535,6 +535,23 @@ def fetch_mizu_api(endpoint):
         printBox(f"Failed to fetch from Mizu API ({endpoint}): {e}", "bold red")
         return {}
 
+def get_api_announcements():
+    """Get current announcements from API"""
+    return fetch_mizu_api("announcements.json")
+
+def get_api_features():
+    """Get available features from API"""
+    return fetch_mizu_api("features.json")
+
+def get_api_themes():
+    """Get available themes from API"""
+    return fetch_mizu_api("themes.json")
+
+def get_api_status():
+    """Get system status from API"""
+    return fetch_mizu_api("status.json")
+
+
 
 def run_bots(tokens_and_channels):
     threads = []
@@ -595,7 +612,10 @@ def run_bot(token, channel_id, global_settings_dict):
                 break 
             
             # Ensure removal if loop continues naturally
-                state.bot_instances.remove(client)
+            state.bot_instances.remove(client)
+            
+            if getattr(client, "should_exit", False):
+                break
 
     except Exception as e:
         printBox(f"Error starting bot: {e}", "bold red")
