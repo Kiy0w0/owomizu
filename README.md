@@ -251,8 +251,4 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 
 ---
 
-<div align="center">
 
-<sub>Based on [owo-dusk](https://github.com/EchoQuill/owo-dusk) by [@EchoQuill](https://github.com/EchoQuill) • Licensed under GPL-3.0</sub>
-
-</div>

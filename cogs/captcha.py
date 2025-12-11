@@ -121,7 +121,7 @@ class Captcha(commands.Cog):
         """Play audio file"""
         """
         TASK: add two checks, check the path for the file in both outside utils folder
-        and in owo-dusk folder
+        and in bot folder
         +
         better error handling for missing PATH
         """

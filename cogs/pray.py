@@ -67,7 +67,7 @@ class Pray(commands.Cog):
         if self.startup:
             """
             Sometimes the pray/curse may have already ran twice within 5 mins after a successful run
-            before owo-dusk is ran, this check is to fix it getting the code stuck.
+            before bot is ran, this check is to fix it getting the code stuck.
             """
             await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["shortCooldown"])
             if self.startup:
