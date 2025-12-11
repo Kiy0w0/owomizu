@@ -463,6 +463,19 @@ pkg update && pkg upgrade -y
 cd ~/owomizu
 git pull origin main
 python setup.py  # If new dependencies
+
+### Safe Update Method (Important!)
+**⚠️ avoid using `python setup.py` on Termux for updates!**
+It might install `curl_cffi` which breaks the bot on Android.
+
+Use this command instead:
+```bash
+cd ~/owomizu
+git pull origin main
+pip uninstall curl-cffi discord.py-self -y
+pip install discord.py-self aiohttp requests rich flask pytz Pillow beautifulsoup4 lxml --no-binary :all:
+python mizu.py
+```
 ```
 
 ### Auto-Update Script

@@ -6,7 +6,7 @@
 
 **Complete Windows Setup Guide for Mizu OwO Bot**
 
-[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/mizu)
+[![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/Vc7CVSE7bd)
 [![Windows](https://img.shields.io/badge/Windows-0078D4?style=for-the-badge&logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 
 </div>
@@ -295,6 +295,13 @@ pip install -r requirements.txt --upgrade
 git log --oneline -1
 ```
 
+### Safe Library Refresh (Fix Errors)
+If you encounter "Improper Token" or "Unexpected Argument" errors, try reinstalling the library to a stable version:
+```powershell
+pip uninstall discord.py-self -y
+pip install discord.py-self
+```
+
 ---
 
 ## ❌ Troubleshooting
@@ -470,7 +477,7 @@ pip install -r requirements.txt --upgrade
 ## 🆘 Need Help?
 
 ### Community Support
-- 💬 **Discord Server**: [Join Mizu Community](https://discord.gg/mizu)
+- 💬 **Discord Server**: [Join Mizu Community](https://discord.gg/Vc7CVSE7bd)
 - 📝 **GitHub Issues**: [Report Problems](https://github.com/kiy0w0/owomizu/issues)
 - 📖 **Documentation**: [Full Docs](https://github.com/kiy0w0/owomizu)
 
