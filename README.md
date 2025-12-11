@@ -46,7 +46,6 @@
 
 ### 🛡️ **Safety & Security**
 - 🔒 **Token Protection** - Secure credential management
-- 🔒 **Token Protection** - Secure credential management
 - 🛡️ **Anti-Detection** - Human-like behavior patterns
 - ⏱️ **Smart Delay System** - Randomized timing to avoid detection
 - 📡 **API Status Monitoring** - Real-time service health checks
@@ -60,10 +59,10 @@
    ```
    - Bot will start immediately
 
-5. **Access Dashboard:**
+2. **Access Dashboard:**
    Open: `http://localhost:2000`
 
-### � **Docker Deployment**
+### 🐳 **Docker Deployment**
 1. **Configure tokens:**
    Create `.env` in the project directory.
 
@@ -75,7 +74,7 @@
 3. **Access Dashboard:**
    Open: `http://localhost:2000`
 
-### �🔄 **Auto-Update System**
+### 🔄 **Auto-Update System**
 ```bash
 # Update to latest version with settings preservation
 python updater.py
@@ -96,8 +95,6 @@ python updater.py
 - ⚙️ **Settings** - `config/settings.json` configuration options
 - 🌐 **Global Settings** - `config/global_settings.json` system settings
 - 🎯 **Command Configuration** - Individual command customization
-
-### ⚙️ **Configuration**
 
 #### 🔒 Security & Tokens
 We prioritize security. Instead of plain text files, we recommend using Environment Variables.
@@ -215,7 +212,7 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 <div align="center">
 
 ### 💬 **Get Help**
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://mizu)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/4NsdaRWD2K)
 [![GitHub Issues](https://img.shields.io/badge/GitHub-Report%20Issues-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/kiy0w0/owomizu/issues)
 
 ### 🎯 **Quick Links**
@@ -250,5 +247,3 @@ This bot is for educational purposes only. Use at your own risk. The developers 
 </div>
 
 ---
-
-
