@@ -866,9 +866,16 @@ class MyClient(commands.Bot):
 
         # Fetch slash commands
         self.slash_commands = []
-        for command in await self.cm.application_commands():
-            if command.application.id == self.owo_bot_id:
-                self.slash_commands.append(command)
+        try:
+            if hasattr(self.cm, 'application_commands'):
+                commands_found = await self.cm.application_commands()
+                for command in commands_found:
+                    if command.application.id == self.owo_bot_id:
+                        self.slash_commands.append(command)
+            else:
+                 await self.log("Warning: This discord.py version doesn't support slash command fetching. Slash commands disabled.", "#ff9800")
+        except Exception as e:
+            await self.log(f"Failed to fetch slash commands (Slash cmds disabled): {e}", "#ff9800")
 
         # Add account to stats.json
         self.default_config = {
