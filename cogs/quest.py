@@ -132,11 +132,70 @@ class Quest(commands.Cog):
                             self.quests[quest_type]["progress"] = self.quests[quest_type]["target"]
                             
             self.quest_detected = True
+            
+            # Trigger automation if enabled
+            await self.process_quest_automation()
             return True
             
         except Exception as e:
             await self.bot.log(f"Error parsing quest checklist: {e}", "#c25560")
             return False
+
+    async def process_quest_automation(self):
+        """Enable/Disable modules based on active quests."""
+        try:
+            config = self.bot.settings_dict.get("questTracker", {})
+            if not config.get("autoCompleteQuests", False):
+                return
+
+            changes_made = False
+            
+            # Gamble Quest (Slots/Coinflip)
+            gamble_quest = self.quests["gamble"]
+            if gamble_quest["target"] > gamble_quest["progress"] and not gamble_quest["completed"]:
+                # Enable slots if not enabled
+                if not self.bot.commands_dict.get("slots", False) and not self.bot.commands_dict.get("coinflip", False):
+                     # Prefer coinflip as it's faster usually, or slots. Let's use coinflip default.
+                     # Actually slots is safer? No, coinflip is 50/50. 
+                     # Let's enable slots as it's often more standard for automation.
+                     if not self.bot.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False):
+                         # We need to update settings dict then apply toggle
+                         self.bot.settings_dict["gamble"]["slots"]["enabled"] = True
+                         await self.bot.apply_toggle("slots", True)
+                         await self.bot.log("Quest Automation: Enabled Slots for Gamble Quest", "#00d7af")
+            
+            # Action Quest (Run/Pup/Piku -> RPP)
+            action_quest = self.quests["action"]
+            if action_quest["target"] > action_quest["progress"] and not action_quest["completed"]:
+                if not self.bot.commands_dict.get("rpp", False):
+                    # RPP is 'autoRandomCommands' in settings usually? 
+                    # dict key is 'rpp' in commands_dict? 
+                    # client.py refresh_commands_dict says: "rpp": self.settings_dict.get("autoRandomCommands", {}).get("enabled", False)
+                    self.bot.settings_dict.setdefault("autoRandomCommands", {})["enabled"] = True
+                    await self.bot.apply_toggle("rpp", True)
+                    await self.bot.log("Quest Automation: Enabled RPP/Random Commands for Action Quest", "#00d7af")
+
+            # Pray/Curse Quest
+            pray_quest = self.quests["pray"]
+            if pray_quest["target"] > pray_quest["progress"] and not pray_quest["completed"]:
+                 if not self.bot.commands_dict.get("pray", False):
+                     self.bot.settings_dict["commands"]["pray"]["enabled"] = True
+                     await self.bot.apply_toggle("pray", True)
+                     await self.bot.log("Quest Automation: Enabled Pray for Pray Quest", "#00d7af")
+
+            curse_quest = self.quests["curse"]
+            if curse_quest["target"] > curse_quest["progress"] and not curse_quest["completed"]:
+                 if not self.bot.commands_dict.get("curse", False): # Note: curse might not have a toggle in apply_toggle mapping?
+                     # client.py apply_toggle map: hunt, battle, daily, owo. Others might need manual reload?
+                     # client.py refresh_bot_settings() reloads everything.
+                     # But apply_toggle handles specific logic.
+                     # For now, let's just update dict and hope auto-reload/refresh picks it up or we force it.
+                     self.bot.settings_dict["commands"]["curse"]["enabled"] = True
+                     self.bot.refresh_settings() # Force refresh
+                     await self.bot.log("Quest Automation: Enabled Curse for Curse Quest", "#00d7af")
+
+        except Exception as e:
+             await self.bot.log(f"Error in quest automation: {e}", "#c25560")
             
     async def update_quest_progress(self, quest_type, amount=1):
         """Update quest progress and check if completed."""
@@ -163,10 +222,41 @@ class Quest(commands.Cog):
                         f"🎉 Quest Completed: {quest_type.upper()} ({quest['progress']}/{quest['target']})",
                         "#00ff00"
                     )
-                    
+                
+                # Check cancellation if automation is on
+                if config.get("autoCompleteQuests", False):
+                    await self.check_and_disable_finished_quest_modules(quest_type)
+
         except Exception as e:
             await self.bot.log(f"Error updating quest progress: {e}", "#c25560")
             
+    async def check_and_disable_finished_quest_modules(self, quest_type):
+        """Disable modules that were likely enabled for quests."""
+        try:
+            if quest_type == "gamble":
+                # Disable slots/coinflip if they were enabled (and user didn't explicitly want them on 24/7? 
+                # Hard to tell, but usually safer to turn off to save money).
+                # Assumption: If autoQuest is on, user implies they want bot to handle it.
+                if self.bot.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False):
+                     self.bot.settings_dict["gamble"]["slots"]["enabled"] = False
+                     await self.bot.apply_toggle("slots", False)
+                     await self.bot.log("Quest Automation: Disabled Slots (Quest Completed)", "#ff9800")
+                     
+            elif quest_type == "action":
+                if self.bot.settings_dict.get("autoRandomCommands", {}).get("enabled", False):
+                    self.bot.settings_dict["autoRandomCommands"]["enabled"] = False
+                    await self.bot.apply_toggle("rpp", False)
+                    await self.bot.log("Quest Automation: Disabled RPP (Quest Completed)", "#ff9800")
+            
+            elif quest_type == "pray":
+                if self.bot.settings_dict.get("commands", {}).get("pray", {}).get("enabled", False):
+                    self.bot.settings_dict["commands"]["pray"]["enabled"] = False
+                    self.bot.refresh_settings()
+                    await self.bot.log("Quest Automation: Disabled Pray (Quest Completed)", "#ff9800")
+
+        except Exception as e:
+             await self.bot.log(f"Error disabling quest module: {e}", "#c25560")
+
     def log_rare_catch(self, rarity, animal_name):
         """Log rare animal catches."""
         try:
@@ -213,7 +303,7 @@ class Quest(commands.Cog):
                     active_quests = [
                         f"{qt}: {qd['target']}" 
                         for qt, qd in self.quests.items() 
-                        if qd['target'] > 0
+                        if qd['target'] > 0 and not qd['completed']
                     ]
                     if active_quests:
                         await self.bot.log(

@@ -1,390 +1,181 @@
-# This file is part of Mizu Network.
-#
-# Copyright (c) 2025-present Mizu Network
-#
-# This program is licensed under the MIT License.
-# 
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
 
 import os
-import sys
 import json
+import time
+import sys
 import subprocess
+import shutil
 
-try:
-    os.system("cls") if os.name == "nt" else os.system("clear")
-except:
-    pass
-print(
-    "\033[1;32mWelcome to Mizu OwO 水\nThis setup will guide you through the setup of Mizu OwO Bot\nThank you for choosing Mizu OwO - The most advanced OwO farming bot!\033[m"
-)
+# Color codes
+CYAN = "\033[1;36m"
+GREEN = "\033[1;32m"
+YELLOW = "\033[1;33m"
+RED = "\033[1;31m"
+RESET = "\033[m"
+
+def clear():
+    os.system("cls" if os.name == "nt" else "clear")
 
 def is_termux():
-    termux_prefix = os.environ.get("PREFIX")
-    termux_home = os.environ.get("HOME")
-    
-    if termux_prefix and "com.termux" in termux_prefix:
-        return True
-    elif termux_home and "com.termux" in termux_home:
-        return True
-    else:
-        return os.path.isdir("/data/data/com.termux")
-    
+    return os.path.isdir("/data/data/com.termux")
 
-"""while True:
-    user_input = input("[?]Do you want help setting this up from scratch? (Y/N):-\n").lower()
-    if user_input in ["y", "n"]:
-        scratchSetup = True if user_input == "y" else False
-        break
-    else:
-        print("[!]Please enter 'Y' or 'N'.")"""
-
-scratchSetup = True
-if scratchSetup:
-    # print('[0]Alright, got it!')
-
-    # ---INSTALL REQUIREMENTS--#
-    print("\033[1;36m[0]attempting to install requirements.txt\033[m")
+def install_dependencies():
+    print(f"{CYAN}[0] Checking dependencies...{RESET}")
     try:
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        except:
-            if is_termux():
-                print('\033[1;36m[0]attempting to retry installing requirements.txt, after ensuring pkgs are uptodate\033[m')
-                subprocess.check_call(["pkg", "update", "-y"])
-                subprocess.check_call(["pkg", "upgrade", "-y"])
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        print('\033[1;36m[0]Installed modules from requirements.txt successfully!\033[m')
-        print('\033[1;36m[0]attempting to install numpy and pil\033[m')
+        subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+        
+        # Termux specific
         if is_termux():
-            # Termux
-            print("\033[1;36m[0]installing for termux...\033[m")
-            print()
-            print("\033[1;36m[info]We are going to be making use of termux's version of numpy and pil as normal ones won't work with termux.\033[m")
-            #print("it may ask if you want to proceed with the installation...")
-            #print("please type and enter \"Y\" for all such!")
-            print()
-
-            """Numpy Installation"""
-            print("\033[1;36m[0]Attepmting to install numpy\033[m")
+            print(f"{CYAN}[0] Installing Termux specific dependencies...{RESET}")
             try:
-                subprocess.check_call(["pkg", "install", "python-numpy", "-y"])
-                print("\033[1;36m[0]installed numpy successfully!\033[m")
-            except Exception as e:
-                print(f"\033[1;31m[x]error when trying to install numpy:-\n {e}\033[m")
-
-            """PILL Installation"""
-            print("\033[1;36m[0]Attepmting to install PIL\033[m")
-            try:
-                subprocess.check_call(["pkg", "install", "python-pillow", "-y"])
-                print("\033[1;36m[0]installed PIL successfully!\033[m")
-            except Exception as e:
-                print(f"\033[1;31m[x]error when trying to install PIL:-\n {e}\033[m")
-            
-            """Termux-api Installation"""
-            print("\033[1;36m[0]Attepmting to install termux-api...\033[m")
-            try:
-                subprocess.check_call(["pkg", "install", "termux-api", "-y"])
-                print("\033[1;36m[0]installed termux-api successfully!\033[m")
-            except Exception as e:
-                print(f"\033[1;31m[x]error when trying to install termux-api:-\n {e}\033[m")
-
-            
-            
-        else:
-            print("\033[1;36minstalling normally...\033[m")
-            try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "numpy", "pillow", "playsound3", "plyer", "psutil"])
-                print("\033[1;36m[0]Installed numpy and PIL successfully!\033[m")
-            except Exception as e:
-                print(f"\033[1;31m[x]Error when trying to install numpy and PIL: {e}\033[m")
-
-        """Install discord.py-self"""
-        try:
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "discord.py-self", "--upgrade"])
-            print("\033[1;36m[0]installed discord.py-self successfully!\033[m")
-        except Exception as e:
-            print(f"\033[1;31m[x]error when trying to install discord.py-self:-\n {e}\033[m")
-            # Fallback to specific version if needed
-            try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "git+https://github.com/dolfies/discord.py-self.git"])
-                print("\033[1;36m[0]installed discord.py-self from git successfully!\033[m")
-            except Exception as e2:
-                print(f"\033[1;31m[x]fallback installation also failed:-\n {e2}\033[m")
-
+                subprocess.check_call(["pkg", "install", "python-numpy", "python-pillow", "termux-api", "-y"])
+            except:
+                pass
+                
+        print(f"{GREEN}[✓] Dependencies installed!{RESET}\n")
     except Exception as e:
-        print(f"\033[1;31m[x]error when trying to install requirements:-\n {e}\033[m")
+        print(f"{RED}[!] Error installing dependencies: {e}{RESET}")
+        print(f"{YELLOW}Continuing anyway...{RESET}\n")
 
-    print()
-    print()
+def print_banner():
+    clear()
+    print(f"{CYAN}")
+    print(r"""
+  ███╗   ███╗██╗███████╗██╗   ██╗
+  ████╗ ████║██║╚══███╔╝██║   ██║
+  ██╔████╔██║██║  ███╔╝ ██║   ██║  
+  ██║╚██╔╝██║██║ ███╔╝  ██║   ██║ 
+  ██║ ╚═╝ ██║██║███████╗╚██████╔╝ 
+  ╚═╝     ╚═╝╚═╝╚══════╝ ╚═════╝ 
+ M I Z U   N E T W O R K   水
+    """)
+    print(f"{RESET}")
+    print(f"{GREEN}Interactive Setup Wizard{RESET}\n")
+
+def main():
+    print_banner()
+    print("Welcome to Mizu OwO Setup!")
+    print("This wizard will help you configure your bot quickly.\n")
     
-    # Import discord with Termux compatibility
-    discord_available = True
-    try:
-        import discord
-        import asyncio
-    except ImportError as e:
-        if "curl" in str(e).lower() and is_termux():
-            print("\033[1;33m[!]Note: Some features unavailable on Termux (curl_cffi incompatibility)\033[m")
-            print("\033[1;33m[!]Token validation will be skipped - please ensure tokens are correct\033[m")
-            discord_available = False
-        else:
-            print(f"\033[1;31m[x]Failed to import discord: {e}\033[m")
-            discord_available = False
+    # 0. Dependencies
+    install_dependencies()
 
-    # version check
-    def compare_versions(current_version, latest_version):
-        current_version = current_version.lstrip("v")
-        latest_version = latest_version.lstrip("v")
-
-        current = list(map(int, current_version.split(".")))
-        latest = list(map(int, latest_version.split(".")))
-
-        for c, l in zip(current, latest):
-            if l > c:
-                return True
-            elif l < c:
-                return False
-
-        if len(latest) > len(current):
-            return any(x > 0 for x in latest[len(current):])
-        
-        return False
-
-    # ---CHECK VERSIONS AND API STATUS---#
-
-    print("\033[1;36m[0]attempting to check versions and API status\033[m")
-    try:
-        import requests
-        print('\033[1;36m[0]--imported requests module\033[m')
-        
-        # API features disabled (website down)
-        print('\033[1;33m[!]API checks disabled (website down)\033[m')
-        # # Check API status
-        # try:
-        #     api_status = requests.get("https://api.ive.my.id/status.json", timeout=10).json()
-        #     print(f'\033[1;36m[0]--API Status: {api_status.get("status", "Unknown")}\033[m')
-        #     
-        #     if api_status.get("status") == "online":
-        #         print('\033[1;32m[✓]Mizu OwO API is online and ready!\033[m')
-        #     else:
-        #         print(f'\033[1;33m[!]API Status: {api_status.get("message", "Unknown status")}\033[m')
-        # except Exception as e:
-        #     print(f'\033[1;33m[!]Could not check API status: {e}\033[m')
-        #         )
-        #         while True:
-        #             o = input(
-        #                 "\033[1;34mWould you like to stop the installation process or continue?\n(continue = c / stop = s):\n\033[m"
-        #             ).lower()
-        #
-        #             if o in ["c", "s"]:
-        #                 if o == "s":
-        #                     print("\033[1;36m[0]Stopping the installation process...\033[m")
-        #                     sys.exit(0)
-        #                 else:
-        #                     print(
-        #                         "\033[1;36m[0]Continuing the installation process...\033[m"
-        #                     )
-        #                     break
-        #             else:
-        #                 print(
-        #                     "\033[1;33m[!]Please enter 'c' for continue or 's' for stop.\033[m"
-        #                 )
-        #     else:
-        #         print('\033[1;32m[✓]You have the latest version of Mizu OwO!\033[m')
-        #         
-        # except Exception as e:
-        #     print(f'\033[1;33m[!]Could not check version: {e}\033[m')
-        #     
-        # # Check for announcements
-        # try:
-        #     announcements = requests.get("https://api.ive.my.id/announcements.json", timeout=10).json()
-        #     if announcements.get("announcements"):
-        #         print('\033[1;36m[0]--Fetching latest announcements...\033[m')
-        #         for announcement in announcements["announcements"][:3]:  # Show only first 3
-        #             print(f'\033[1;96m[📢] {announcement.get("title", "Announcement")}: {announcement.get("message", "No message")}\033[m')
-        # except Exception as e:
-        #     print(f'\033[1;33m[!]Could not fetch announcements: {e}\033[m')
-            
-    except Exception as e:
-        print(f"\033[1;31m[x]error when trying to import requests module:-\n {e}\033[m")
-
-    # ---EDIT TOKENS.TXT---#
+    # 1. Token Setup
+    print(f"{YELLOW}[1] Account Setup{RESET}")
+    tokens = []
     while True:
-        edit_tokens = input(
-            "\033[1;34mwould you like to edit tokens.txt?\n1) yes\n2) no\n:\033[m"
-        ).lower()
-        if edit_tokens in ["1", "2", "y", "n", "yes", "no"]:
-            if edit_tokens in ["1", "y", "yes"]:
-                print("\033[1;36m[0]attempting to edit tokens.txt\033[m")
-                try:
-                    """
-                    open('filename.txt', x)
-                    where if x is a then it adds while while preserving its content
-                    and if its w it basically selects all text...? and removes it i guess.
-                    -------------------------------
-                    'r': Read (default mode)
-                    'w': Write
-                    'a': Append
-                    'r+': Read and write
-                    """
-                    with open("tokens.txt", "w") as t:
-                        pass
-
-                    # Token validation function (skip on Termux if discord unavailable)
-                    async def validate_token(token, channelinput):
-                        try:
-                            client = discord.Client()
-                            result = {
-                                "valid": False,
-                                "channel_found": False,
-                                "channel": None,
-                            }
-
-                            @client.event
-                            async def on_ready():
-                                print(
-                                    f"\033[1;36m[0] Received token for - {client.user.name} ({client.user.id})"
-                                )
-                                try:
-                                    channel = client.get_channel(channelinput)
-                                    result["valid"] = True
-                                    if channel:
-                                        result["channel_found"] = True
-                                        result["channel"] = channel
-                                except Exception as e:
-                                    print(
-                                        f"[x] An error occurred while checking the channel:\n{e}\033[m"
-                                    )
-                                finally:
-                                    await asyncio.sleep(0.1)
-                                    await client.close()  # Close the client after successful login
-
-                            await client.start(token)
-
-                            # Return after the client is done running
-                            return result["valid"], (
-                                result["channel_found"],
-                                result["channel"],
-                            )
-
-                        except discord.LoginFailure:
-                            print(
-                                "\033[1;31m[x] Invalid token provided. Please check and try again.\033[m"
-                            )
-                            return False, (False, None)
-                        except Exception as e:
-                            print(f"\033[1;31m[x] An error occurred:\n{e}")
-                            return False, (False, None)
-
-                    while True:
-                        token_count = input(
-                            "\033[1;34m[0]how many accounts do you want run with Mizu Network? :\n\033[m"
-                        )
-                        try:
-                            token_count = int(token_count)
-                            break
-                        except ValueError:
-                            print("\033[1;31m[x]please enter valid integer!\033[m")
-                        except Exception as e:
-                            print(f"\033[1;31m[x]An error occured:-\n {e}\033[m")
-                    for i in range(token_count):
-                        while True:
-                            print(f"\033[1;36m[0]token [{i+1}/{token_count}]\033[m")
-                            while True:
-                                tokeninput = input(
-                                    f"please enter your token for account #{i+1} :\n\033[m"
-                                )
-                                if "." in tokeninput:
-                                    if '"' in tokeninput:
-                                        if tokeninput[0] == '"':
-                                            tokeninput = tokeninput[1:]
-                                        if tokeninput[-1] == '"':
-                                            tokeninput = tokeninput[:-1]
-                                        print(tokeninput)
-                                    break
-                                else:
-                                    print("\033[1;31m[x]invalid token!")
-                            while True:
-                                channelinput = input(
-                                    f"\033[1;34mplease enter channel id for account #{i+1} :\n\033[m"
-                                )
-                                try:
-                                    channelinput = int(channelinput)
-                                    break
-                                except ValueError:
-                                    print(
-                                        "\033[1;33m[!]please enter a valid integer for channelid\033[m"
-                                    )
-                                except Exception as e:
-                                    print(
-                                        f"\033[1;31m[x]error while attempting to retrieve channel id -\n{e}\033[m"
-                                    )
-                            # validtoken=False
-                            # Skip validation on Termux if discord unavailable
-                            if not discord_available or is_termux():
-                                print(
-                                    f"\033[1;33m[!] Token validation skipped (Termux/compatibility mode)\033[m"
-                                )
-                                print(
-                                    f"\033[1;36m[0] Adding token for account #{i+1} without validation\033[m"
-                                )
-                                validtoken = True
-                                validchannel = (True, "channel (not validated)")
-                            else:
-                                try:
-                                    validtoken, validchannel = asyncio.run(
-                                        validate_token(tokeninput, channelinput)
-                                    )
-                                except Exception as e:
-                                    print(
-                                        f"\033[1;31m[x] Error validating token for account #{i+1}:\n{e}\033[m"
-                                    )
-                            if validtoken:
-                                if validchannel[0]:
-                                    print(
-                                        f"\033[1;36m[0]valid channel with name {validchannel[1]}\033[m"
-                                    )
-                                    break
-                                else:
-                                    print(
-                                        "\033[1;31m[x]Failed to get channel id, please try again.\033[m"
-                                    )
-                        with open("tokens.txt", "a") as t:
-                            t.write(f"{tokeninput} {channelinput}\n")
-                    print()
-                    print()
-                    print('\033[1;36m[0]Finished editing tokens.txt successfully!\033[m')
-                    print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config/settings.json` file then\ntype `python mizu.py` to start the code\033[m')
-                    break
-                except Exception as e:
-                    print(
-                        f"\033[1;31m[x]error when attempting to edit tokens.txt - {e}\033[m"
-                    )
-            else:
-                print('\033[1;32m[*]exiting code as basic installation is complete\nplease make sure to edit `config/settings.json` file and `tokens.txt` file then\ntype `python mizu.py` to start the code\033[m')
+        token = input("Enter your Discord Token: ").strip().replace('"', '')
+        
+        while True:
+            try:
+                channel_id = input("Enter Channel ID for Farming: ").strip()
+                int(channel_id) # Validate integer
                 break
-        else:
-            print("\033[1;33m[!]Please enter 1,2 only..\033[m")
+            except ValueError:
+                print(f"{RED}Invalid Channel ID! Please enter numbers only.{RESET}")
+
+        tokens.append(f"{token} {channel_id}")
+        
+        more = input("Add another account? (y/n): ").lower()
+        if more != 'y':
+            break
+    
+    # Save to .env
+    with open(".env", "w") as f:
+        f.write('TOKENS="' + ";".join(tokens) + '"\n')
+    print(f"{GREEN}Checking... Accounts saved to .env!{RESET}\n")
+
+    # 2. Configuration Profile
+    print(f"{YELLOW}[2] Behavior Profile{RESET}")
+    print("Choose a farming style:")
+    print("1. Safe (Recommended) - Slower, human-like, low ban risk")
+    print("2. Aggressive - Fast, max profit, higher ban risk")
+    print("3. Custom - Keep existing settings (if any)")
+    
+    choice = input("Enter choice (1-3): ").strip()
+    
+    if choice in ['1', '2']:
+        base_settings = {
+            "setprefix": "owo ",
+            "useSlashCommands": False,
+            "commands": {
+                "hunt": {"enabled": True, "cooldown": [15, 20], "useShortForm": True},
+                "battle": {"enabled": True, "cooldown": [15, 20], "useShortForm": True},
+                "sell": {"enabled": False, "cooldown": [410, 500], "rarity": ["c", "u", "r"]},
+                "sac": {"enabled": False, "cooldown": [410, 500], "rarity": ["c", "u", "r"]},
+                "pray": {"enabled": False, "cooldown": [310, 400], "userid": [], "pingUser": False},
+                "curse": {"enabled": False, "cooldown": [310, 400], "userid": [], "pingUser": False},
+                "lottery": {"enabled": False, "amount": 1},
+                "lvlGrind": {"enabled": False, "cooldown": [10, 15], "useQuoteInstead": False},
+                "cookie": {"enabled": False, "userid": 0, "pingUser": False},
+                "shop": {"enabled": False, "itemsToBuy": [1], "cooldown": [10, 16]},
+                "owo": {"enabled": True, "cooldown": [10, 15]},
+                "autoHuntBot": {"enabled": True, "cashToSpend": 10000, "upgrader": {"enabled": True, "sleeptime": [10, 15], "priorities": {"efficiency": 4, "duration": 2, "cost": 5, "gain": 4, "exp": 3, "radar": 1}}}
+            },
+            "gamble": {
+                "allottedAmount": 0,
+                "goalSystem": {"enabled": False, "amount": 0},
+                "coinflip": {"enabled": False, "startValue": 0, "multiplierOnLose": 0, "cooldown": [15, 20], "options": ["h"]},
+                "slots": {"enabled": False, "startValue": 0, "multiplierOnLose": 0, "cooldown": [15, 20]},
+                "blackjack": {}
+            },
+            "giveawayJoiner": {"enabled": False, "channelsToJoin": [], "cooldown": [40, 100], "messageRangeToCheck": 6},
+            "sleep": {"enabled": True, "frequencyPercentage": 50, "checkTime": [10, 20], "sleeptime": [300, 600]},
+             "misspell": {
+                "enabled": True,
+                "frequencyPercentage": 1,
+                "baseDelay": [0.03, 0.07],
+                "errorRectificationTimePerLetter": [0.04, 0.09]
+            },
+            "autoDaily": True,
+            "cashCheck": True,
+            "defaultCooldowns": {
+                 "longCooldown": [400, 600],
+                 "moderateCooldown": [70, 200],
+                 "shortCooldown": [10, 60],
+                 "briefCooldown": [1, 3],
+                 "captchaRestart": [5, 10],
+                 "commandHandler": {"betweenCommands": [2, 4], "beforeReaddingToQueue": 7},
+                 "reactionBot": {"hunt_and_battle": True, "owo": False, "pray_and_curse": False, "cooldown": [1, 2]}
+            },
+            "richPresence": {
+                "enabled": True,
+                "mode": "ninja",
+                "status": "online",
+                "activityType": "playing",
+                "text": "Visual Studio Code"
+            }
+        }
+
+        if choice == '1': # Safe
+            print(f"{GREEN}Applying Safe Profile...{RESET}")
+            # Safe defaults already set above essentially, just ensuring long delays
+            base_settings["sleep"]["enabled"] = True
+            base_settings["misspell"]["enabled"] = True
+            base_settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [3, 6]
             
-print()
-print('\033[1;35m🌊 Mizu OwO - Thank you for choosing Mizu OwO! Happy farming! 水\nFor support, join our Discord community or check GitHub issues\033[m')
-print('\033[1;36m📖 Documentation: https://github.com/kiy0w0/owomizu\033[m')
-print('\033[1;36m💬 Discord: https://discord.gg/mizu\033[m')
-print('\033[1;36m🎛️ Web Dashboard: http://localhost:8080 (after starting the bot)\033[m')
-sys.exit(0)
+        elif choice == '2': # Aggressive
+            print(f"{RED}Applying Aggressive Profile...{RESET}")
+            base_settings["commands"]["hunt"]["cooldown"] = [15, 16]
+            base_settings["commands"]["battle"]["cooldown"] = [15, 16]
+            base_settings["commands"]["owo"]["cooldown"] = [10, 12]
+            base_settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [0.5, 1.5]
+            base_settings["sleep"]["enabled"] = False # No sleep for the wicked
+            base_settings["misspell"]["enabled"] = False
+            
+        # Ensure directory
+        if not os.path.exists("config"):
+            os.makedirs("config")
+            
+        # Save config
+        with open("config/settings.json", "w") as f:
+            json.dump(base_settings, f, indent=4)
+        print(f"{GREEN}Configuration saved to config/settings.json!{RESET}\n")
 
+    # 3. Finalize
+    print(f"{CYAN}Setup Complete!{RESET}")
+    print("You can now run the bot using:")
+    print(f"{GREEN}python mizu.py{RESET}")
 
-"""else:
-    y = input('''what would you like to do then?
-1) install requirements.
-2) check config.json
-3) ''')"""
+if __name__ == "__main__":
+    main()

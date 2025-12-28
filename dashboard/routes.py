@@ -54,7 +54,7 @@ def get_weekday():
     # Simple implementation, assuming 0-6
     return str(datetime.now().weekday())
 
-version = "1.3.5"  # Ideally imported from main config
+version = "1.3.6"  # Ideally imported from main config
 
 # Routes
 @bp.route("/")
