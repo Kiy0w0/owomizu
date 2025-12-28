@@ -117,16 +117,79 @@ class MyClient(commands.Bot):
 
     @tasks.loop(seconds=30)
     async def presence(self):
-        if self.status != discord.Status.invisible:
+        rpc = self.global_settings_dict.get("richPresence", {})
+        
+        if rpc.get("enabled", False):
             try:
-                await self.change_presence(
-                status=discord.Status.invisible, activity=self.activity
-            )
-                self.presence.stop()
-            except:
+                mode = rpc.get("mode", "ninja").lower()
+                status_str = rpc.get("status", "online").lower()
+                
+                status_map = {
+                    "online": discord.Status.online,
+                    "idle": discord.Status.idle,
+                    "dnd": discord.Status.dnd,
+                    "invisible": discord.Status.invisible,
+                    "offline": discord.Status.invisible
+                }
+                status = status_map.get(status_str, discord.Status.online)
+                
+                activity = None
+                
+                if mode == "ninja":
+                    # Stealth mode
+                    activity = discord.Game(name="Visual Studio Code")
+                    
+                elif mode == "pamer":
+                    # Pamer mode - Dynamic stats
+                    balance = self.user_status.get("balance", 0)
+                    net = self.user_status.get("net_earnings", 0)
+                    
+                    # Format numbers (e.g. 1.2M, 500k) - simple formatting for now
+                    bal_str = f"{balance:,}"
+                    
+                    text = f"Farming OwO | 💰 {bal_str}"
+                    activity = discord.Game(name=text)
+                    
+                elif mode == "custom":
+                    act_type = rpc.get("activityType", "playing").lower()
+                    text = rpc.get("text", "Mizu OwO Bot")
+                    url = rpc.get("streamingUrl", "https://twitch.tv/discord")
+                    
+                    if act_type == "listening":
+                        activity = discord.Activity(type=discord.ActivityType.listening, name=text)
+                    elif act_type == "watching":
+                        activity = discord.Activity(type=discord.ActivityType.watching, name=text)
+                    elif act_type == "streaming":
+                        activity = discord.Streaming(name=text, url=url)
+                    elif act_type == "competing":
+                        activity = discord.Activity(type=discord.ActivityType.competing, name=text)
+                    else:
+                        activity = discord.Game(name=text)
+                
+                await self.change_presence(status=status, activity=activity)
+                
+            except Exception as e:
+                # Silently fail to avoid console spam if connection drops
                 pass
+                
+        elif self.global_settings_dict.get("offlineStatus", False):
+            # Legacy Offline Mode
+            if self.status != discord.Status.invisible:
+                try:
+                    await self.change_presence(status=discord.Status.invisible)
+                except:
+                    pass
+            # Stop loop if just setting invisible once (legacy behavior), 
+            # but better to keep checking in case it resets? 
+            # The original code stopped the loop. Let's keep it running but slow?
+            # Or just stop it like original if we want to mimic original behavior exactly.
+            # But the original behavior of "stop()" means it never checks again. 
+            # If the user enables RPC later, this loop is dead. 
+            # BETTER: Don't stop the loop. Just wait.
+            pass
         else:
-            self.presence.stop()
+             # Default behavior (Online, no activity forced)
+             pass
 
     @tasks.loop(seconds=5)
     async def config_update_checker(self):
