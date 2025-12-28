@@ -89,14 +89,5 @@
         "enabled": false,
         "minPercentage": 15,
         "refreshInterval": 120
-    },
-    "richPresence": {
-        "enabled": true,
-        "title": "Mizu OwO",
-        "mode": "ninja",
-        "status": "online",
-        "activityType": "playing",
-        "text": "Visual Studio Code",
-        "streamingUrl": "https://twitch.tv/discord"
     }
 }
