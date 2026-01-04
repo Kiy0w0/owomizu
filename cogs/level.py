@@ -7,8 +7,10 @@ Copyright (C) 2025 Kiy0w0
 import string
 import random
 
+
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
+import asyncio
 
 
 

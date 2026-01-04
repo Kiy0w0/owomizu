@@ -65,6 +65,7 @@ from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
 
+
 # Local
 from utils.misspell import misspell_word
 from utils import state
@@ -225,73 +226,6 @@ def refresh_bot_settings(changed_command=None, enabled=None):
 
     except Exception as e:
         print(f"Error refreshing bot settings: {e}")
-        enabled = data.get('enabled', False)
-        
-        if not command:
-            return jsonify({"error": "Command not specified"}), 400
-        
-        # Update main settings file
-        settings_path = "config/settings.json"
-        if os.path.exists(settings_path):
-            with open(settings_path, 'r') as f:
-                settings = json.load(f)
-            
-            # Update the specific command setting
-            if command == "hunt":
-                settings["commands"]["hunt"]["enabled"] = enabled
-            elif command == "battle":
-                settings["commands"]["battle"]["enabled"] = enabled
-            elif command == "daily":
-                settings["autoDaily"] = enabled
-            elif command == "owo":
-                settings["commands"]["owo"]["enabled"] = enabled
-            elif command == "useSlashCommands":
-                settings["useSlashCommands"] = enabled
-            elif command == "channelSwitcher":
-                settings["channelSwitcher"]["enabled"] = enabled
-            elif command == "stopHuntingWhenNoGems":
-                settings["stopHuntingWhenNoGems"] = enabled
-            
-            # Save updated settings
-            with open(settings_path, 'w') as f:
-                json.dump(settings, f, indent=4)
-            
-            # Log the change for all active bot instances
-            for user_id in listUserIds:
-                if command == "useSlashCommands":
-                    add_command_log(user_id, "system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
-                elif command == "channelSwitcher":
-                    add_command_log(user_id, "system", f"Channel Switcher {'enabled' if enabled else 'disabled'}", "info")
-                elif command == "stopHuntingWhenNoGems":
-                    add_command_log(user_id, "system", f"Stop Hunt When No Gems {'enabled' if enabled else 'disabled'}", "info")
-                else:
-                    add_command_log(user_id, "system", f"{command.upper()} {'enabled' if enabled else 'disabled'}", "info")
-        
-        # Refresh bot settings for all active instances and apply immediately
-        refresh_bot_settings(command, enabled)
-        
-        # Create specific success messages
-        command_names = {
-            "hunt": "Hunt",
-            "battle": "Battle", 
-            "daily": "Daily",
-            "owo": "OwO",
-            "useSlashCommands": "Slash Commands",
-            "channelSwitcher": "Channel Switcher",
-            "stopHuntingWhenNoGems": "Stop Hunt When No Gems"
-        }
-        
-        command_display = command_names.get(command, command.upper())
-        status = "enabled" if enabled else "disabled"
-        
-        return jsonify({
-            "success": True, 
-            "message": f"✅ {command_display} {status} successfully!"
-        })
-        
-    except Exception as e:
-        print(f"Error toggling quick setting: {e}")
-        return jsonify({"error": "Failed to toggle setting"}), 500
 
 
 # Legacy routes removed. All routes are now in dashboard/routes.py
