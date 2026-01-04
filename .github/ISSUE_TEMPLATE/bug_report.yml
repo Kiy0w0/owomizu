@@ -1,0 +1,69 @@
+name: 🐛 Bug Report
+description: Something's broken? Let us know.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Hey there! Thanks for reporting a bug. Please be as detailed as possible so we can fix it quickly.
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: First Checks
+      options:
+        - label: I checked existing issues to avoid duplicates.
+          required: true
+        - label: I'm running the latest version.
+          required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Bot Version
+      description: What version are you on? (Check the top of the dashboard or console)
+      placeholder: "e.g. 1.3.6"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: OS / Platform
+      options:
+        - Windows
+        - Linux / VPS
+        - macOS
+        - Android (Termux)
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Explain the bug clearly. What did you expect vs what actually happened?
+      placeholder: "I started the bot, but it crashed immediately with..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to reproduce?
+      description: Steps to make the error appear again.
+      placeholder: |
+        1. Run `python mizu.py`
+        2. Wait 5 minutes
+        3. See crash error
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Error Logs / Screenshots
+      description: Paste the error log here (Use code blocks ```) or drag-and-drop screenshots.
+      render: shell

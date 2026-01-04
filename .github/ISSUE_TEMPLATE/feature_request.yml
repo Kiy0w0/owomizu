@@ -1,0 +1,40 @@
+name: 💡 Feature Request
+description: Got a cool idea? Tell us!
+title: "[Idea]: "
+labels: ["enhancement", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Got an idea to make Mizu OwO even better? Awesome. Let's hear it.
+
+  - type: textarea
+    id: pitch
+    attributes:
+      label: What's the problem? (Optional)
+      description: Is this feature solving a specific pain point?
+      placeholder: "I hate it when I have to manually..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: What's your idea?
+      description: Describe what you want the bot to do.
+      placeholder: "It would be cool if the bot could automatically..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Any alternatives?
+      description: Have you thought of other ways to solve this?
+      placeholder: "I tried using X, but it didn't work well because..."
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Extra Context
+      description: Screenshots, mockups, or anything else that helps explaining.

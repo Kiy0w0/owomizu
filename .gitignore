@@ -102,6 +102,7 @@ Desktop.ini
 
 # Logs
 *.log
+logs.txt
 
 # dotenv
 .env
@@ -115,9 +116,12 @@ Desktop.ini
 *.sqlite3
 *.sqlite
 *.db
+*.db-shm
+*.db-wal
 
 # Local configuration
 *.local
 
 # Tokens file
 **/tokens.txt
+updatediscord.md

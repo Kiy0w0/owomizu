@@ -21,46 +21,45 @@
 ---
 
 ## ✨ **Features**
-
-### 🎯 **Core Automation**
-- 🤖 **Smart Auto Farming** - Advanced OwO command automation
-- 🎮 **Mini Games** - Slots, coinflip, hunt, battle with smart strategies
-- 💎 **Economy Management** - Auto sell, shop, daily rewards optimization
-- 🏆 **Leveling System** - XP tracking, progression monitoring
-- 🎁 **Giveaway Participation** - Auto join Discord giveaways
-- 🔐 **Advanced Captcha Solver** - AI-powered captcha recognition
-
-### 🚀 **New Advanced Features**
-- ⚡ **AutoEnhance System** - Auto use gems & invest essence
-- 🎯 **AutoHuntBot** - Automated huntbot upgrades & management
-- 🎲 **RPP Commands** - Auto Run/Piku/Pup every minute
-- 💰 **Smart AutoSell** - Intelligent item selling with cash triggers
-- 🔄 **Auto Random Commands** - Varied command execution patterns
-
-### 🌐 **Web Dashboard**
-- 📊 **Real-time Statistics** - Live performance metrics
-- ⚙️ **Advanced Configuration** - Comprehensive settings management
-- 📈 **Performance Monitoring** - Resource usage & optimization
-- 🎨 **Modern UI** - Beautiful responsive design with dark theme
-- 🔧 **Live Controls** - Start/stop/configure without restart
-
-### 🛡️ **Safety & Security**
-- 🔒 **Token Protection** - Secure credential management
-- 🛡️ **Anti-Detection** - Human-like behavior patterns
-- ⏱️ **Smart Delay System** - Randomized timing to avoid detection
-- 📡 **API Status Monitoring** - Real-time service health checks
-- 🚨 **Safety Checks** - Account protection mechanisms
+*   **Smart Auto Farming:** Automates `hunt`, `battle`, `owo`, and `pray` with human-like delays.
+*   **Quest Solver:** Automatically detects and solves daily quests (e.g. auto-enables slots for "Gamble 5 times").
+*   **Mini-Games:** Strategies for Slots, Coinflip, and Lottery.
+*   **Anti-Ban Technology:** Random sleep schedules, channel switching, and human-like typing simulation.
+*   **Web Dashboard:** Real-time statistics and configuration from your browser (Mobile friendly).
+*   **Auto-Upgrade:** Intelligently manages your HuntBot upgrades and essence investment.
+*   **Multi-Account:** Run as many accounts as your PC can handle.
 
 ---
 
 ## 🚀 **Quick Start**
    ```bash
+   python setup.py
    python mizu.py
    ```
-   - Bot will start immediately
+   - Run `setup.py` first for an easy, interactive configuration.
 
 2. **Access Dashboard:**
    Open: `http://localhost:2000`
+
+### ⚡ **One-Click Deploy**
+No PC? No problem. Run Mizu OwO on the cloud for free (24/7).
+
+[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/new)
+[![Run on Replit](https://repl.it/badge/github/kiy0w0/owomizu)](https://repl.it/github/kiy0w0/owomizu)
+
+---
+
+## 🛡️ **Is it Safe? (Transparency)**
+We know you're worried about bans. Here is exactly how Mizu protects your account:
+
+1.  **Human-like Typing:** The bot simulates typing status before sending messages.
+2.  **Randomized Delays:** It never sends commands at perfect intervals (e.g., 15.2s, then 16.5s, then 14.8s).
+3.  **Sleep Schedule:** You can set the bot to "sleep" for 8 hours a day, just like a real person.
+4.  **Channel Switching:** The bot moves between channels so it doesn't look like a stationary turret.
+5.  **Noise/Jitter:** Every action has a slight random time offset.
+
+*Disclaimer: Automation always carries a small risk. We recommend using an alt account or the "Safe" profile in the setup wizard.*
 
 ### 🐳 **Docker Deployment**
 1. **Configure tokens:**
@@ -178,7 +177,7 @@ We welcome all types of contributions! Whether you're a developer, designer, or 
 ### 🔧 **Development Setup**
 ```bash
 # Fork and clone the repository
-git clone https://github.com/YOUR_USERNAME/owomizu.git
+git clone https://github.com/kiy0w0/owomizu.git
 cd owomizu
 
 # Set up virtual environment

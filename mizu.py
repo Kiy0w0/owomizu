@@ -304,9 +304,6 @@ def refresh_bot_settings(changed_command=None, enabled=None):
 
 
 
-def install_package(package_name):
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "--break-system-packages", package_name])
-
 # Note: is_termux() and on_mobile already defined at the top of the file (line 22-33)
 
 if not on_mobile and not misc_dict["hostMode"]:
@@ -623,38 +620,9 @@ def run_bot(token, channel_id, global_settings_dict):
 if __name__ == "__main__":
     setup_logging()
     # Version check disabled to prevent reinstall loop
-    # try:
-    #     discord_cur_version = import_ver("discord.py-self")
-    #     discord_req_version = "2.1.0a5097+g20ae80b3"
-    #     if discord_cur_version != discord_req_version:
-    #         install_package("git+https://github.com/dolfies/discord.py-self@20ae80b398ec83fa272f0a96812140e14868c88f")
-    #         raise SystemExit("discord.py-self was reinstalled. Please restart the program.")
-    # except ImportError as e:
-    #     print(e)
-    pass
-
     if not misc_dict["console"]["compactMode"]:
         console.print(mizuPanel)
         console.rule(f"[bold blue1]version - {version}", style="navy_blue")
-    
-
-    # if check_api_status():
-    #     printBox("🌊 Mizu OwO API - Connected", "bold cyan")
-    # else:
-    #     printBox("⚠️ Mizu OwO API - Connection Failed", "bold yellow")
-    # 
-    # version_json = fetch_mizu_api("version.json")
-    #
-    # # Only check version if API fetch was successful
-    # if version_json and "version" in version_json:
-    #     if compare_versions(version, version_json["version"]):
-    #         printBox(f"""Update Detected - {version_json["version"]}
-    # Changelog:-
-    #     {version_json["changelog"]}""",'bold gold3')
-    #         if version_json.get("important_update", False):
-    #             printBox('It is reccomended to update....','bold light_yellow3' )
-    # else:
-    #     printBox("⚠️ Could not check for updates - API unavailable", "bold yellow")
 
     # Load environment variables
     from dotenv import load_dotenv
