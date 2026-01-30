@@ -543,13 +543,81 @@ def run_bot(token, channel_id, global_settings_dict):
                 break 
             
             # Ensure removal if loop continues naturally
-            state.bot_instances.remove(client)
+            if client in state.bot_instances:
+                state.bot_instances.remove(client)
             
             if getattr(client, "should_exit", False):
                 break
 
     except Exception as e:
         printBox(f"Error starting bot: {e}", "bold red")
+
+def stop_batch(active_clients):
+    """Gracefully stop a batch of clients"""
+    printBox(f"Stopping batch of {len(active_clients)} bots...", "bold yellow")
+    for client in active_clients:
+        try:
+            if client.loop.is_running():
+                asyncio.run_coroutine_threadsafe(client.close(), client.loop)
+        except Exception as e:
+            print(f"Error closing client: {e}")
+            
+    # Wait for them to actually close
+    time.sleep(5)
+    
+    # Clean up state
+    for client in active_clients:
+        if client in state.bot_instances:
+            state.bot_instances.remove(client)
+
+def run_rotation_mode(tokens_and_channels):
+    """Run bots in rotation/shift mode"""
+    rotation_config = global_settings_dict["accountRotation"]
+    batch_size = rotation_config["accountsPerShift"]
+    shift_duration = rotation_config["shiftDurationMinutes"] * 60
+    cooldown = rotation_config["cooldownBetweenShiftsSeconds"]
+    
+    # Create batches
+    batches = [tokens_and_channels[i:i + batch_size] for i in range(0, len(tokens_and_channels), batch_size)]
+    total_batches = len(batches)
+    
+    if total_batches == 0:
+        printBox("No tokens to rotate!", "bold red")
+        return
+
+    printBox(f"Rotation Mode: {total_batches} batches found. Shift duration: {rotation_config['shiftDurationMinutes']}m", "bold cyan")
+    
+    while True:
+        for i, batch in enumerate(batches):
+            printBox(f"Starting Batch {i+1}/{total_batches}", "bold green")
+            
+            # Start the threads for this batch
+            batch_threads = []
+            for token, channel_id in batch:
+                thread = Thread(target=run_bot, args=(token, channel_id, global_settings_dict))
+                thread.start()
+                batch_threads.append(thread)
+            
+            # Wait for the shift duration
+            # Check every second to allow quick exit on Ctrl+C
+            end_time = time.time() + shift_duration
+            while time.time() < end_time:
+                time.sleep(1)
+            
+            # Stop the current batch
+            # We need to find which clients correspond to this batch
+            # Actually, we can just stop ALL active clients since we only run one batch at a time
+            # But to be safe, we close all in state.bot_instances
+            
+            active_clients = list(state.bot_instances) # Create copy
+            stop_batch(active_clients)
+            
+            # Join threads to ensure they are cleaned up
+            for t in batch_threads:
+                t.join(timeout=5)
+                
+            printBox(f"Batch {i+1} finished. Cooling down for {cooldown}s...", "bold blue")
+            time.sleep(cooldown)
 
 if __name__ == "__main__":
     setup_logging()
@@ -652,6 +720,12 @@ if __name__ == "__main__":
         except Exception as e:
             print(f"Error initializing GUI: {e}")
             print("Falling back to headless mode...")
-            run_bots(tokens_and_channels)
+            if global_settings_dict["accountRotation"]["enabled"]:
+                run_rotation_mode(tokens_and_channels)
+            else:
+                run_bots(tokens_and_channels)
     else:
-        run_bots(tokens_and_channels)
+        if global_settings_dict["accountRotation"]["enabled"]:
+            run_rotation_mode(tokens_and_channels)
+        else:
+            run_bots(tokens_and_channels)

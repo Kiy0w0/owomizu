@@ -62,7 +62,16 @@ class Slots(commands.Cog):
                 await self.bot.remove_queue(id="slots")
                 await self.bot.sleep_till(cnf["cooldown"])
 
-            amount_to_gamble = int(cnf["startValue"]*(cnf["multiplierOnLose"]**self.turns_lost))
+            strategy = cnf.get("strategy", "martingale")
+
+            if strategy == "safe" and self.turns_lost >= cnf.get("maxStreakSafe", 3):
+                await self.bot.log(f"Safe Mode Triggered: Lost {self.turns_lost} times in a row. Stopping slots!", "#ff4444")
+                return
+
+            if strategy == "constant" or strategy == "safe":
+                amount_to_gamble = int(cnf["startValue"])
+            else:
+                amount_to_gamble = int(cnf["startValue"]*(cnf["multiplierOnLose"]**self.turns_lost))
 
             # Goal system check
             if self.bot.settings_dict["gamble"]["goalSystem"]["enabled"] and self.bot.gain_or_lose > goal_system_dict["amount"]:

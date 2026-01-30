@@ -88,6 +88,12 @@
     "batteryCheck": {
         "enabled": false,
         "minPercentage": 15,
-        "refreshInterval": 120
+        "refreshInterval": 300
+    },
+    "accountRotation": {
+        "enabled": false,
+        "accountsPerShift": 2,
+        "shiftDurationMinutes": 120,
+        "cooldownBetweenShiftsSeconds": 300
     }
 }

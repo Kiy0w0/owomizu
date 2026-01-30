@@ -742,7 +742,25 @@ class MyClient(commands.Bot):
         if not self.command_handler_status["captcha"] or bypass:
             await self.wait_until_ready()
             if typingIndicator:
+                # Human-like typing calculation
+                # Average typing speed: 300 CPM (Characters Per Minute) -> 5 chars per second
+                # Base reaction time: 0.5s - 1.5s
+                # Typing time = (Length / 5) * random_variance
+                
+                char_length = len(msg)
+                base_reaction = self.random.uniform(0.5, 1.2)
+                typing_speed_variance = self.random.uniform(0.8, 1.3)
+                estimated_typing_time = (char_length / 6.0) * typing_speed_variance
+                
+                total_delay = base_reaction + estimated_typing_time
+                
+                # Cap delay to avoid overly slow responses for long messages
+                total_delay = min(total_delay, 4.0)
+                
+                # await self.log(f"Typing... ({total_delay:.2f}s)", "#888888")
+                
                 async with channel.typing():
+                    await asyncio.sleep(total_delay)
                     await channel.send(msg, silent=silent)
             else:
                 await channel.send(msg, silent=silent)

@@ -140,8 +140,10 @@
         },
         "coinflip": {
             "enabled": false,
+            "strategy": "martingale",
             "startValue": 200,
             "multiplierOnLose": 2,
+            "maxStreakSafe": 3,
             "cooldown": [
                 16,
                 18
@@ -152,8 +154,10 @@
         },
         "slots": {
             "enabled": false,
+            "strategy": "martingale",
             "startValue": 200,
             "multiplierOnLose": 2,
+            "maxStreakSafe": 3,
             "cooldown": [
                 16,
                 18
@@ -276,6 +280,17 @@
     "autoRandomCommands": {
         "enabled": true,
         "onlyWhenActive": true
+    },
+    "autoTransfer": {
+        "enabled": false,
+        "destinationId": 0,
+        "triggerAmount": 500000,
+        "keepAmount": 50000
+    },
+    "autoEquip": {
+        "enabled": false,
+        "interval_minutes": 60,
+        "ignore_weapons": []
     },
     "accountRotation": {
         "enabled": false,

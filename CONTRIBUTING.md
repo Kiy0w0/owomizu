@@ -628,7 +628,7 @@ Special recognition for outstanding contributions:
 3. Provide detailed reproduction steps
 
 ### I want to suggest a feature
-1. Join [Discord](https://discord.gg/mizu) to discuss
+1. Join [Discord](https://discord.gg/bkvMhwjSPG) to discuss
 2. Create GitHub issue with feature template
 3. Participate in community discussion
 

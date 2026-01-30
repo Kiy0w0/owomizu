@@ -107,6 +107,19 @@ class Gems(commands.Cog):
 
         if cnf["order"]["lowestToHighest"]:
             tier_order.reverse()
+            
+        # SMART GEM MANAGER (QUEST CHECK)
+        # Check if we have active 'special' gem quests
+        force_special_gems = False
+        try:
+            quest_cog = self.bot.get_cog("Quest")
+            if quest_cog and quest_cog.quest_detected:
+                special_quest = quest_cog.quests.get("special", {})
+                if special_quest.get("target", 0) > special_quest.get("progress", 0) and not special_quest.get("completed", False):
+                    force_special_gems = True
+                    await self.bot.log(f"💎 Smart Gem: Special Gem Quest Detected! Forcing use of special gems.", "#b388ff")
+        except Exception:
+            pass # Fail silently if quest cog issue
 
         grouped_gem_list = []
 
@@ -118,7 +131,18 @@ class Gems(commands.Cog):
             for gem_id in gem_tiers[tier]:
                 gem_index = gem_tiers[tier].index(gem_id)
                 gem_type_key = gem_type[gem_index]
-                if cnf["gemsToUse"].get(gem_type_key) and available_gems[tier].get(gem_id, 0) > 0:
+                
+                # Check config normally, OR force if smart manager says so
+                should_use = cnf["gemsToUse"].get(gem_type_key)
+                
+                if force_special_gems:
+                    if gem_type_key == "specialGem":
+                         should_use = True
+                    # Optional: Disable other gems if we want to focus PURELY on special?
+                    # Usually quests just want you to use special gems, doesn't matter if others are used too.
+                    # But to save normal gems, we could prioritize special.
+                    
+                if should_use and available_gems[tier].get(gem_id, 0) > 0:
                     current_group.append(gem_id)
 
             if current_group:
