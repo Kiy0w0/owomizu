@@ -87,8 +87,14 @@ cd owomizu
 # Install required packages
 pip install -r requirements.txt
 
+# **IMPORTANT**: Browser Solver Dependencies
+pip install playwright aiosqlite aiohttp "discord.py-self"
+playwright install chromium
+```
+
 # If you get permission errors, try:
 pip install --user -r requirements.txt
+playwright install chromium
 ```
 
 ### Method 2: Download ZIP
@@ -288,6 +294,8 @@ python updater.py
 ```powershell
 git pull origin main
 pip install -r requirements.txt --upgrade
+pip install playwright --upgrade
+playwright install chromium
 ```
 
 ### Check Version

@@ -9,7 +9,13 @@
 
 </div>
 
+
 ## 📋 **Prerequisites**
+
+> ⚠️ **IMPORTANT NOTE FOR TERMUX USERS:**
+> The new **Browser Captcha Solver** feature relies on Playwright (Chromium), which **DOES NOT** work natively in Termux.
+> You will need to use a Linux VPS or Host Mode (Windows/Mac) for auto-solving captchas.
+> Termux users can still use the bot, but captchas will require manual solving or non-browser methods.
 
 ### Required Apps
 1. **Termux** - Terminal emulator for Android
@@ -462,17 +468,18 @@ pkg update && pkg upgrade -y
 ```bash
 cd ~/owomizu
 git pull origin main
+git pull origin main
 python setup.py  # If new dependencies
 
 ### Safe Update Method (Important!)
 **⚠️ avoid using `python setup.py` on Termux for updates!**
-It might install `curl_cffi` which breaks the bot on Android.
+It might install `curl_cffi` or `playwright` which breaks the bot on Android.
 
 Use this command instead:
 ```bash
 cd ~/owomizu
 git pull origin main
-pip uninstall curl-cffi discord.py-self -y
+pip uninstall curl-cffi playwright -y
 pip install discord.py-self aiohttp requests rich flask pytz Pillow beautifulsoup4 lxml --no-binary :all:
 python mizu.py
 ```

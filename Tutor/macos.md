@@ -66,7 +66,17 @@ python3 -m venv venv
 source venv/bin/activate
 ```
 
-#### Step 5: Run Setup
+#### Step 5: Install Dependencies
+```bash
+# Core dependencies
+pip install -r requirements.txt
+
+# **IMPORTANT**: Install Browser Solver Requirements
+pip install playwright aiosqlite aiohttp "discord.py-self"
+playwright install chromium
+```
+
+#### Step 6: Run Setup
 ```bash
 python3 setup.py
 ```
@@ -370,6 +380,10 @@ cd owomizu
 git pull origin main
 source venv/bin/activate
 pip install -r requirements.txt --upgrade
+
+# Update browser binaries if needed
+pip install playwright --upgrade
+playwright install chromium
 ```
 
 ### Automated Update Script
