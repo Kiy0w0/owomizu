@@ -152,11 +152,11 @@ class CaptchaSolver(commands.Cog):
              url_match = re.search(r"(https?://[^\s]+)", message.content)
              if url_match:
                  url = url_match.group(1)
-                  if "owobot.com/captcha" in url:
-                      # Pause bot first
-                      await self.bot.set_stat(False)
-                      
-                      success = await self.solve_captcha(url, self.bot.token)
+                 if "owobot.com/captcha" in url:
+                     # Pause bot first
+                     await self.bot.set_stat(False)
+                     
+                     success = await self.solve_captcha(url, self.bot.token)
                      
                      if success:
                          await self.bot.log("🤖 Auto-Resume after captcha...", "#51cf66")
