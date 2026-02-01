@@ -115,10 +115,10 @@ class Gems(commands.Cog):
             quest_cog = self.bot.get_cog("Quest")
             if quest_cog and quest_cog.quest_detected:
                 special_quest = quest_cog.quests.get("special", {})
-                    if special_quest.get("target", 0) > special_quest.get("progress", 0) and not special_quest.get("completed", False):
-                        force_special_gems = True
-                        # Cannot await log here as function is sync
-                        # print(f"💎 Smart Gem: Special Gem Quest Detected! Forcing use of special gems.")
+                if special_quest.get("target", 0) > special_quest.get("progress", 0) and not special_quest.get("completed", False):
+                    force_special_gems = True
+                    # Cannot await log here as function is sync
+                    # print(f"💎 Smart Gem: Special Gem Quest Detected! Forcing use of special gems.")
         except Exception:
             pass # Fail silently if quest cog issue
 
