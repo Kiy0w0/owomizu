@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+            ⚙️ Configuration Editor
+        </h1>
+        <div class="space-x-2">
+            <button onclick="saveSettings()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition">
+                💾 Save & Apply
+            </button>
+            <a href="/" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded transition">
+                Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Info Banner -->
+    <div class="bg-blue-900/30 border-l-4 border-blue-500 text-blue-100 p-4 mb-6 rounded" role="alert">
+        <p class="font-bold">Info</p>
+        <p>Edit your <code>settings.json</code> directly here. Changes will be applied automatically to the bot within a few seconds.</p>
+    </div>
+
+    <!-- Editor Container -->
+    <div class="bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden">
+        <div class="bg-gray-900 px-4 py-2 border-b border-gray-700 flex justify-between items-center">
+            <span class="text-sm text-gray-400">config/settings.json</span>
+            <button onclick="formatJSON()" class="text-xs bg-gray-700 hover:bg-gray-600 text-white px-2 py-1 rounded">
+                Format JSON
+            </button>
+        </div>
+        <textarea id="jsonEditor" class="w-full h-[600px] bg-gray-900 text-green-400 font-mono p-4 focus:outline-none resize-y" spellcheck="false"></textarea>
+    </div>
+</div>
+
+<script>
+    // Load Settings on Page Load
+    document.addEventListener('DOMContentLoaded', async () => {
+        try {
+            const response = await fetch('/api/settings');
+            const data = await response.json();
+            document.getElementById('jsonEditor').value = JSON.stringify(data, null, 4);
+        } catch (error) {
+            alert('Failed to load settings!');
+            console.error(error);
+        }
+    });
+
+    // Format JSON Button
+    function formatJSON() {
+        const textarea = document.getElementById('jsonEditor');
+        try {
+            const current = JSON.parse(textarea.value);
+            textarea.value = JSON.stringify(current, null, 4);
+        } catch (e) {
+            alert('Invalid JSON! Cannot format.');
+        }
+    }
+
+    // Save Settings
+    async function saveSettings() {
+        const textarea = document.getElementById('jsonEditor');
+        try {
+            const config = JSON.parse(textarea.value);
+            
+            const btn = document.querySelector('button[onclick="saveSettings()"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            const response = await fetch('/api/settings', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(config)
+            });
+
+            const result = await response.json();
+            
+            if (result.status === 'success') {
+                alert('✅ Settings saved! Bot will update in a moment.');
+            } else {
+                alert('❌ Error: ' + result.message);
+            }
+
+            btn.innerText = originalText;
+            btn.disabled = false;
+
+        } catch (e) {
+            alert('❌ Invalid JSON! Please check your syntax.\n' + e.message);
+        }
+    }
+</script>
+{% endblock %}

@@ -54,7 +54,7 @@ def get_weekday():
     # Simple implementation, assuming 0-6
     return str(datetime.now().weekday())
 
-version = "1.3.6"  # Ideally imported from main config
+version = "1.4.0"  # Ideally imported from main config
 
 # Routes
 @bp.route("/")
@@ -64,6 +64,10 @@ def home():
 @bp.route("/dashboard")
 def dashboard():
     return render_template("index.html", version=version)
+
+@bp.route("/settings")
+def settings_page():
+    return render_template("settings.html", version=version)
 
 
 @bp.route('/api/console', methods=['GET'])
