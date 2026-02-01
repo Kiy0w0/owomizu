@@ -8,7 +8,7 @@ charset-normalizer
 click
 discord-protos
 discord.py-self @ git+https://github.com/dolfies/discord.py-self.git
-Flask
+Flask[async]
 frozenlist
 idna
 itsdangerous

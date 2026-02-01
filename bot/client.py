@@ -384,7 +384,7 @@ class MyClient(commands.Bot):
             "autosell": self.settings_dict.get("autoSell", {}).get("enabled", False),
             "battle": commands_dict["battle"]["enabled"] and not reaction_bot_dict["hunt_and_battle"] and not huntbot_active,
             "captcha": True,
-            "channelswitcher": self.settings_dict["channelSwitcher"]["enabled"],
+            "channelswitcher": self.settings_dict.get("channelSwitcher", {}).get("enabled", False),
             "chat": True,
             "coinflip": self.settings_dict["gamble"]["coinflip"]["enabled"],
             "commands": True,

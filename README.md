@@ -62,6 +62,7 @@ We know you're worried about bans. Here is exactly how Mizu protects your accoun
 *Disclaimer: Automation always carries a small risk. We recommend using an alt account or the "Safe" profile in the setup wizard.*
 
 ### 🐳 **Docker Deployment**
+> For a detailed VPS setup guide, check out the [**Docker VPS Tutorial**](/Tutor/docker_vps.md).
 1. **Configure tokens:**
    Create `.env` in the project directory.
 
@@ -88,6 +89,7 @@ python updater.py
 - 🐧 [**Linux Installation**](/Tutor/linux.md) - Ubuntu, Debian, CentOS setup
 - 🍎 [**macOS Setup**](/Tutor/macos.md) - macOS installation guide  
 - 📱 [**Termux (Android)**](/Tutor/termux.md) - Mobile setup guide
+- 🐳 [**Docker VPS**](/Tutor/docker_vps.md) - 24/7 Hosting guide
 
 ### ⚙️ **Configuration**
 - 🔑 **Token Setup** - Discord token extraction and setup
