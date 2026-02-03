@@ -386,12 +386,12 @@ class MyClient(commands.Bot):
             "captcha": True,
             "channelswitcher": self.settings_dict.get("channelSwitcher", {}).get("enabled", False),
             "chat": True,
-            "coinflip": self.settings_dict["gamble"]["coinflip"]["enabled"],
+            "coinflip": self.settings_dict.get("gamble", {}).get("coinflip", {}).get("enabled", False),
             "commands": True,
             "cookie": commands_dict["cookie"]["enabled"],
             "daily": self.settings_dict["autoDaily"],
-            "gems": self.settings_dict["autoUse"]["gems"]["enabled"], 
-            "giveaway": self.settings_dict["giveawayJoiner"]["enabled"],
+            "gems": self.settings_dict.get("autoUse", {}).get("gems", {}).get("enabled", False), 
+            "giveaway": self.settings_dict.get("giveawayJoiner", {}).get("enabled", False),
             "hunt": commands_dict["hunt"]["enabled"] and not reaction_bot_dict["hunt_and_battle"] and not huntbot_active,
             "huntbot": huntbot_active,
             "level": commands_dict["lvlGrind"]["enabled"],
@@ -404,7 +404,7 @@ class MyClient(commands.Bot):
             "richpresence": self.global_settings_dict.get("richPresence", {}).get("enabled", True),
             "sell": commands_dict["sell"]["enabled"],
             "shop": commands_dict["shop"]["enabled"],
-            "slots": self.settings_dict["gamble"]["slots"]["enabled"]
+            "slots": self.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False)
         }
 
     def add_dashboard_log(self, command_type, message, status="info"):

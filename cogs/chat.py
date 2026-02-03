@@ -26,6 +26,16 @@ class Chat(commands.Cog):
                 await self.bot.log("starting Mizu..","#87875f")
                 self.bot.command_handler_status["sleep"]=False
 
+            elif f"{cnf['prefix']}pause" in message.content.lower():
+                await self.bot.log("Pausing Mizu...", "#e0aa3e")
+                await self.bot.set_stat(False, "user_pause")
+                self.bot.add_dashboard_log("system", "Bot paused by user command", "warning")
+
+            elif f"{cnf['prefix']}resume" in message.content.lower():
+                await self.bot.log("Resuming Mizu...", "#51cf66")
+                await self.bot.set_stat(True, "user_resume")
+                self.bot.add_dashboard_log("system", "Bot resumed by user command", "success")
+
         if f"{cnf['prefix']}{cnf['commandToRestartAfterCaptcha']}" in message.content.lower():
             await self.bot.log("restarting Mizu after captcha","#87875f")
             
