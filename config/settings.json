@@ -5,16 +5,16 @@
         "hunt": {
             "enabled": true,
             "cooldown": [
-                15,
-                17
+                16,
+                22
             ],
             "useShortForm": true
         },
         "battle": {
             "enabled": true,
             "cooldown": [
-                15,
-                17
+                16,
+                22
             ],
             "useShortForm": true
         },
@@ -60,13 +60,15 @@
             "pingUser": false
         },
         "curse": {
-            "enabled": false,
+            "enabled": true,
             "cooldown": [
                 310,
                 400
             ],
-            "userid": [],
-            "pingUser": false
+            "userid": [
+                "1211322704087613551"
+            ],
+            "pingUser": true
         },
         "lottery": {
             "enabled": false,
@@ -227,8 +229,8 @@
         ],
         "commandHandler": {
             "betweenCommands": [
-                1.7,
-                2.7
+                3.0,
+                4.5
             ],
             "beforeReaddingToQueue": 7
         },
@@ -237,8 +239,8 @@
             "owo": false,
             "pray_and_curse": false,
             "cooldown": [
-                0.5,
-                1
+                2.5,
+                4.0
             ]
         }
     },
@@ -329,7 +331,7 @@
         }
     },
     "channelSwitcher": {
-        "enabled": true,
+        "enabled": false,
         "users": [
             {
                 "userid": 123456789,

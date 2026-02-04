@@ -5,6 +5,8 @@ Copyright (C) 2025 Kiy0w0
 """
 
 from discord.ext import commands
+import os
+import sys
 
 
 class Chat(commands.Cog):
@@ -21,6 +23,7 @@ class Chat(commands.Cog):
                 await self.bot.log("stopping Mizu..","#87875f")
                 self.bot.should_exit = True
                 await self.bot.close()
+                os._exit(0)
 
             elif f"{cnf['prefix']}{cnf['commandToStartUser']}" in message.content.lower():
                 await self.bot.log("starting Mizu..","#87875f")
@@ -35,6 +38,12 @@ class Chat(commands.Cog):
                 await self.bot.log("Resuming Mizu...", "#51cf66")
                 await self.bot.set_stat(True, "user_resume")
                 self.bot.add_dashboard_log("system", "Bot resumed by user command", "success")
+
+            elif f"{cnf['prefix']}restart" in message.content.lower():
+                await self.bot.log("Restarting Mizu...", "#e0aa3e")
+                self.bot.add_dashboard_log("system", "Bot restarting by user command", "warning")
+                await self.bot.close()
+                os.execl(sys.executable, sys.executable, *sys.argv)
 
         if f"{cnf['prefix']}{cnf['commandToRestartAfterCaptcha']}" in message.content.lower():
             await self.bot.log("restarting Mizu after captcha","#87875f")

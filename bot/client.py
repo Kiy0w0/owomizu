@@ -398,7 +398,7 @@ class MyClient(commands.Bot):
             "lottery": commands_dict["lottery"]["enabled"],
             "others": True,
             "owo": commands_dict["owo"]["enabled"] and not reaction_bot_dict["owo"],
-            "pray": commands_dict["pray"]["enabled"] and not reaction_bot_dict["pray_and_curse"],
+            "pray": (commands_dict["pray"]["enabled"] or commands_dict["curse"]["enabled"]) and not reaction_bot_dict["pray_and_curse"],
             "rpp": self.settings_dict.get("autoRandomCommands", {}).get("enabled", False),
             "reactionbot": reaction_bot_dict["hunt_and_battle"] or reaction_bot_dict["owo"] or reaction_bot_dict["pray_and_curse"],
             "richpresence": self.global_settings_dict.get("richPresence", {}).get("enabled", True),
@@ -594,6 +594,24 @@ class MyClient(commands.Bot):
             if not priority_int and priority_int!=0:
                 await self.log(f"Error - command with id: {cmd_data['id']} do not have a priority set in misc.json", "#c25560")
                 return
+
+            # --- SMART SYSTEM START ---
+            # Check if command is on cooldown based on last_ran and basecd
+            base_cd = cnf[cmd_data["id"]].get("basecd", 0)
+            elapsed = time.time() - self.cmds_state[cmd_data["id"]]["last_ran"]
+            
+            # Jika user maksa 'quick' (misal reaction bot), boleh skip check? 
+            # Tapi sebaiknya tetap safety check minimal.
+            # Kita kasih toleransi 1-2 detik.
+            remaining = base_cd - elapsed
+            
+            if remaining > 0.5 and not quick:
+                 await self.log(f"⏳ Mizu Cooldown System: {cmd_data['id']} is on cooldown ({remaining:.1f}s left). Pausing...", "#555555")
+                 await asyncio.sleep(remaining + 0.5) 
+                 # Cek ulang status bot setelah bangun tidur panjang
+                 if not self.command_handler_status["state"]: 
+                     return
+            # --- SMART SYSTEM END ---
 
             async with self.lock:
                 await self.queue.put((

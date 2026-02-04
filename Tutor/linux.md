@@ -126,10 +126,10 @@ Once the bot is running, access the web dashboard:
 
 ```bash
 # Open in default browser
-xdg-open http://localhost:5000
+xdg-open http://localhost:1200
 
 # Or manually navigate to:
-http://localhost:5000
+http://localhost:1200
 ```
 
 ---

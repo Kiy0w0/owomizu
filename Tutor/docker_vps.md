@@ -80,16 +80,12 @@ The bot will now build the container and start running. This may take a few minu
 
 ## 🌐 **Web Dashboard Access**
 
-Once the bot is running, you can access the dashboard from your browser:
-
-```
-http://<YOUR_VPS_IP>:2000
-```
-
-**Firewall Settings:**
-If you cannot access the dashboard, you may need to open port 2000:
+Once the bot is running, you canBy default, the dashboard runs on port `1200`.
+To access it, open your browser and go to:
+`http://<YOUR_VPS_IP>:1200`
+*Note: You might need to allow port 1200 through your firewall.*
 ```bash
-sudo ufw allow 2000
+sudo ufw allow 1200
 ```
 
 ---
@@ -148,10 +144,10 @@ newgrp docker
 Ensure your `tokens.txt` is in the same folder as `docker-compose.yml`.
 
 ### Port Collision
-If port 2000 is taken, edit `docker-compose.yml`:
+If port 1200 is taken, edit `docker-compose.yml`:
 ```yaml
 ports:
-  - "3000:2000"  # Changes external port to 3000
+  - "3000:1200"  # Changes external port to 3000
 ```
 
 ---

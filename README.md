@@ -39,7 +39,7 @@
    - Run `setup.py` first for an easy, interactive configuration.
 
 2. **Access Dashboard:**
-   Open: `http://localhost:2000`
+   Open: `http://localhost:1200` or `http://YOUR_LOCAL_IP:1200`
 
 ### ⚡ **One-Click Deploy**
 No PC? No problem. Run Mizu OwO on the cloud for free (24/7).
@@ -72,7 +72,7 @@ We know you're worried about bans. Here is exactly how Mizu protects your accoun
    ```
    
 3. **Access Dashboard:**
-   Open: `http://localhost:2000`
+   Open: `http://localhost:1200`
 
 ### 🔄 **Auto-Update System**
 ```bash
