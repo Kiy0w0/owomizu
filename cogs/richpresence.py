@@ -26,7 +26,6 @@ class RichPresence(commands.Cog):
             balance = self.bot.user_status.get("balance", 0)
             earnings = self.bot.user_status.get("net_earnings", 0)
             
-            # Determine status text
             # Format number with commas (e.g. 1,000,000)
             bal_f = f"{balance:,}"
 

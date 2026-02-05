@@ -32,3 +32,4 @@ urllib3
 Werkzeug
 yarl
 python-dotenv
+pypresence

@@ -391,6 +391,7 @@ class MyClient(commands.Bot):
             "autoenhance": self.settings_dict.get("autoEnhance", {}).get("enabled", False),
             "autosell": self.settings_dict.get("autoSell", {}).get("enabled", False),
             "battle": commands_dict["battle"]["enabled"] and not reaction_bot_dict["hunt_and_battle"] and not huntbot_active,
+            "boss": self.settings_dict.get("bossBattle", {}).get("enabled", False),
             "captcha": True,
             "channelswitcher": self.settings_dict.get("channelSwitcher", {}).get("enabled", False),
             "chat": True,

@@ -266,8 +266,12 @@
                 "specialGem": true
             }
         },
-        "autoLootbox": false,
-        "autoCrate": false
+        "autoLootbox": true,
+        "autoCrate": true
+    },
+    "bossBattle": {
+        "enabled": true,
+        "joinChancePercent": 100
     },
     "autoSell": {
         "enabled": false,
