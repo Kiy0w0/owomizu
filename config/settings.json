@@ -271,7 +271,7 @@
     },
     "bossBattle": {
         "enabled": true,
-        "joinChancePercent": 100
+        "joinChancePercent": 50
     },
     "autoSell": {
         "enabled": false,
