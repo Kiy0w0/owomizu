@@ -341,18 +341,45 @@
                 "userid": 123456789,
                 "channels": [
                     123456789,
-                    987654321,
-                    564613215
+                    987654321
+                ]
+            },
+            {
+                "userid": 0,
+                "channels": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "userid": 0,
+                "channels": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "userid": 0,
+                "channels": [
+                    0,
+                    0
+                ]
+            },
+            {
+                "userid": 0,
+                "channels": [
+                    0,
+                    0
                 ]
             }
         ],
         "interval": [
-            1800,
-            3600
+            300,
+            600
         ],
         "delayBeforeSwitch": [
             2,
-            5
+            4
         ]
     },
     "questTracker": {
