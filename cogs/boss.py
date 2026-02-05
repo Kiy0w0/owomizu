@@ -168,8 +168,8 @@ class Boss(commands.Cog):
                                             guild_id
                                         )
                                         if click_status:
-                                            await self.bot.log("Joined Boss battle! ⚔️", "#B5C1CE")
                                             self.consume_boss_ticket()
+                                            await self.bot.log(f"Joined Boss battle! ⚔️ (Tickets left: {self.boss_tickets})", "#B5C1CE")
 
                     if component.component_name == "text_display":
                         if component.content and "Are you sure you want to use another boss ticket?" in component.content:

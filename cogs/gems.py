@@ -113,6 +113,7 @@ class Gems(commands.Cog):
             self.gem_cmd["cmd_arguments"] = ""
             for item in result:
                 self.gem_cmd["cmd_arguments"] += f"{item[1:]} "
+            await self.bot.log(f"Auto-using gems: {self.gem_cmd['cmd_arguments']} 💎", "#00d1d1")
             await self.bot.put_queue(self.gem_cmd, priority=True)
             self.reduce_used_gems(result)
             if self.bot.hunt_disabled:
