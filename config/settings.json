@@ -256,14 +256,14 @@
                 "rare": true,
                 "epic": true,
                 "mythical": true,
-                "legendary": false,
-                "fabled": false
+                "legendary": true,
+                "fabled": true
             },
             "gemsToUse": {
                 "huntGem": true,
                 "empoweredGem": true,
                 "luckyGem": true,
-                "specialGem": false
+                "specialGem": true
             }
         },
         "autoLootbox": false,

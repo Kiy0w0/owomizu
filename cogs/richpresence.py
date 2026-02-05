@@ -27,6 +27,10 @@ class RichPresence(commands.Cog):
             earnings = self.bot.user_status.get("net_earnings", 0)
             
             # Determine status text
+            # Format number with commas (e.g. 1,000,000)
+            bal_f = f"{balance:,}"
+
+            # Determine status text
             if self.bot.command_handler_status["sleep"]:
                 status_text = "Sleeping zZZ..."
                 status_type = discord.Status.idle
@@ -34,8 +38,6 @@ class RichPresence(commands.Cog):
                 status_text = "Paused ⏸️"
                 status_type = discord.Status.dnd
             else:
-                # Format number with commas (e.g. 1,000,000)
-                bal_f = f"{balance:,}"
                 status_text = f"OwOMIZU | 🪙 {bal_f}"
                 status_type = discord.Status.online
 

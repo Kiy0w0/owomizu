@@ -1,9 +1,3 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
-
 import asyncio
 import re
 
@@ -42,14 +36,11 @@ def convert_small_numbers(small_number):
         "⁸": "8",
         "⁹": "9",
     }
-    # Only convert superscript numbers, filter out other characters
-    converted = ''.join(numbers.get(char, '') for char in small_number if char in numbers)
-    # If no valid numbers found, return 0
-    return int(converted) if converted else 0
+    normal_string = "".join(numbers.get(char, char) for char in small_number)
+    return int(normal_string)
 
 
 def find_gems_available(message):
-
     available_gems = {
         "fabled": {"057": 0, "071": 0, "078": 0, "085": 0},  # fabled
         "legendary": {"056": 0, "070": 0, "077": 0, "084": 0},  # legendary
@@ -75,52 +66,141 @@ def find_gems_available(message):
     return available_gems
 
 
+def len_gems_in_use(msg):
+    to_check = ("gem1", "gem3", "gem4", "star")
+    return sum(1 for gem in to_check if gem in msg)
+
+
 class Gems(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.grouped_gems = None
-        self.available_gems = None
+        self.available_gems = {}
         self.inventory_check = False
+        self.already_checked = False
+        self.cache_gems_in_use = {}
+        self.prev_count = 0
+        self.count = 0
         self.gem_cmd = {
             "cmd_name": self.bot.alias["use"]["normal"],
             "cmd_arguments": "",
             "prefix": True,
             "checks": False,
-            "id": "gems"
+            "id": "gems",
         }
         self.inv_cmd = {
             "cmd_name": self.bot.alias["inv"]["normal"],
             "prefix": True,
             "checks": True,
-            "id": "inv"
+            "id": "inv",
         }
 
-    def find_gems_to_use(self, available_gems):
-        gem_type = {
-            0: "huntGem",
-            1: "empoweredGem",
-            2: "luckyGem",
-            3: "specialGem"
+    def enabled_gem_types(self):
+        cnf = self.bot.settings_dict["autoUse"]["gems"]["gemsToUse"]
+        return {
+            "huntGem": cnf["huntGem"],
+            "empoweredGem": cnf["empoweredGem"],
+            "luckyGem": cnf["luckyGem"],
+            "specialGem": cnf["specialGem"],
         }
-        tier_order = ['fabled', 'legendary', 'mythical', 'epic', 'rare', 'uncommon', 'common']
+
+    async def use_gems(self, available_gems, gems_in_use=None, full=False):
+        if not full:
+            result = self.find_specific_gems_to_use(gems_in_use, available_gems)
+        else:
+            result = self.find_gems_to_use(available_gems)
+        if result:
+            self.gem_cmd["cmd_arguments"] = ""
+            for item in result:
+                self.gem_cmd["cmd_arguments"] += f"{item[1:]} "
+            await self.bot.put_queue(self.gem_cmd, priority=True)
+            self.reduce_used_gems(result)
+            if self.bot.hunt_disabled:
+                self.bot.hunt_disabled = False
+        else:
+            if not full:
+                self.already_checked = True
+            else:
+                await self.bot.log("Warn: No gems to use.", "#924444")
+                self.bot.user_status["no_gems"] = True
+                if (
+                    not self.bot.hunt_disabled
+                    and self.bot.settings_dict["autoUse"]["gems"].get(
+                        "disable_hunts_if_no_gems", False
+                    )
+                ):
+                    await self.bot.log(
+                        "Disabling hunt since there is no gems to be used.", "#C51818"
+                    )
+                    """
+                    Currently no_gems status isn't being reset after being set
+                    """
+                    self.bot.hunt_disabled = True
+
+    def fetch_gems_in_use(self, msg):
+        gem_type_map = {
+            "gem1": "huntGem",
+            "gem4": "luckyGem",
+            "gem3": "empoweredGem",
+            "star": "specialGem",
+        }
+
+        tier_prefix_map = {
+            "c": "common",
+            "u": "uncommon",
+            "r": "rare",
+            "e": "epic",
+            "m": "mythical",
+            "l": "legendary",
+            "f": "fabled",
+        }
+
+        result = []
+        gems_in_use = []
+        all_gem_type = ["huntGem", "luckyGem", "empoweredGem", "specialGem"]
+
+        for key, value in gem_type_map.items():
+            if key in msg:
+                for prefix, tier in tier_prefix_map.items():
+                    if f"{prefix}{key}" in msg:
+                        result.append({"gem_type": value, "gem_tier": tier})
+                        gems_in_use.append(value)
+
+        gems_not_in_use = [x for x in all_gem_type if x not in gems_in_use]
+
+        gems_required_to_use = self.enabled_gem_types()
+        for gem in gems_not_in_use:
+            if gems_required_to_use[gem]:
+                return result, True
+
+        return result, False
+
+    def reduce_used_gems(self, used_gem_ids):
+        for gem_id in used_gem_ids:
+            for _, gems in self.available_gems.items():
+                if gem_id in gems:
+                    if gems[gem_id] > 0:
+                        gems[gem_id] -= 1
+                    if gems[gem_id] < 0:
+                        # Huh?
+                        gems[gem_id] = 0
+                    break
+
+    def find_gems_to_use(self, available_gems):
+        gem_type = {0: "huntGem", 1: "empoweredGem", 2: "luckyGem", 3: "specialGem"}
+        tier_order = [
+            "fabled",
+            "legendary",
+            "mythical",
+            "epic",
+            "rare",
+            "uncommon",
+            "common",
+        ]
         cnf = self.bot.settings_dict["autoUse"]["gems"]
 
         if cnf["order"]["lowestToHighest"]:
             tier_order.reverse()
-            
-        # SMART GEM MANAGER (QUEST CHECK)
-        # Check if we have active 'special' gem quests
-        force_special_gems = False
-        try:
-            quest_cog = self.bot.get_cog("Quest")
-            if quest_cog and quest_cog.quest_detected:
-                special_quest = quest_cog.quests.get("special", {})
-                if special_quest.get("target", 0) > special_quest.get("progress", 0) and not special_quest.get("completed", False):
-                    force_special_gems = True
-                    # Cannot await log here as function is sync
-                    # print(f"💎 Smart Gem: Special Gem Quest Detected! Forcing use of special gems.")
-        except Exception:
-            pass # Fail silently if quest cog issue
 
         grouped_gem_list = []
 
@@ -132,18 +212,10 @@ class Gems(commands.Cog):
             for gem_id in gem_tiers[tier]:
                 gem_index = gem_tiers[tier].index(gem_id)
                 gem_type_key = gem_type[gem_index]
-                
-                # Check config normally, OR force if smart manager says so
-                should_use = cnf["gemsToUse"].get(gem_type_key)
-                
-                if force_special_gems:
-                    if gem_type_key == "specialGem":
-                         should_use = True
-                    # Optional: Disable other gems if we want to focus PURELY on special?
-                    # Usually quests just want you to use special gems, doesn't matter if others are used too.
-                    # But to save normal gems, we could prioritize special.
-                    
-                if should_use and available_gems[tier].get(gem_id, 0) > 0:
+                if (
+                    cnf["gemsToUse"].get(gem_type_key)
+                    and available_gems[tier].get(gem_id, 0) > 0
+                ):
                     current_group.append(gem_id)
 
             if current_group:
@@ -151,97 +223,118 @@ class Gems(commands.Cog):
 
         return self.process_result(grouped_gem_list)
 
+    def find_specific_gems_to_use(self, gems_in_use, available_gems):
+        temp_available_gems = {
+            tier: gems.copy() for tier, gems in available_gems.items()
+        }
+        gem_type_map = {
+            "huntGem": ["057", "056", "055", "054", "053", "052", "051"],
+            "empoweredGem": ["071", "070", "069", "068", "067", "066", "065"],
+            "luckyGem": ["078", "077", "076", "075", "074", "073", "072"],
+            "specialGem": ["085", "084", "083", "082", "081", "080", "079"],
+        }
+
+        for item in gems_in_use:
+            gem_ids = gem_type_map[item["gem_type"]]
+            for _, gems in temp_available_gems.items():
+                for gem_id in gem_ids:
+                    if gem_id in gems:
+                        gems[gem_id] = 0
+
+        """print(available_gems)
+        print("to")
+        print(temp_available_gems)"""
+
+        return self.find_gems_to_use(temp_available_gems)
 
     def process_result(self, result):
         # Find the group with the highest number of items
         max_group = max(result, key=len, default=None)
         return max_group
 
-
-
     async def cog_load(self):
-        if not self.bot.settings_dict["commands"]["hunt"]["enabled"] or not self.bot.settings_dict["autoUse"]["gems"]["enabled"]:
+        if (
+            not self.bot.settings_dict["commands"]["hunt"]["enabled"]
+            or not self.bot.settings_dict["autoUse"]["gems"]["enabled"]
+        ):
             try:
-                asyncio.create_task(self.bot.unload_cog("cogs.gems"))
+                # asyncio.create_task(self.bot.unload_cog("cogs.gems"))
+                pass
             except ExtensionNotLoaded:
                 pass
+        else:
+            await self.bot.log("Gem Automation Loaded 💎", "#00d1d1")
 
     async def cog_unload(self):
         await self.bot.remove_queue(id="gems")
 
-
     @commands.Cog.listener()
     async def on_message(self, message):
-        if message.channel.id != self.bot.channel_id or message.author.id != self.bot.owo_bot_id:
-            return
         
-        if "caught" in message.content:
+        if (
+            message.channel.id != self.bot.channel_id
+            or message.author.id != self.bot.owo_bot_id
+        ):
+            return
+            
+        # Optimization: Check if gems automation is enabled
+        if not self.bot.settings_dict["autoUse"]["gems"]["enabled"]:
+            return
+
+        # Handle 'caught' message (Hunt result)
+        if "caught" in message.content and f"<@{self.bot.user.id}>" in message.content:
             if self.bot.user_status["no_gems"]:
                 return
-            await self.bot.set_stat(False)
+            
+            # Check if any gem is missing from the message
+            # But wait, 'caught' message doesn't show active gems, it just shows loot.
+            # We need to check inventory periodically or rely on 'empowered by' message.
+            # The logic here seems to force inventory check after a hunt to be sure?
+            
+            # Original code logic:
+            # await self.bot.set_stat(False)
             self.inventory_check = True
-            await self.bot.log(f"🔍 Checking inventory for gems...", "#00bcd4")
             await self.bot.put_queue(self.inv_cmd, priority=True)
-        elif "'s Inventory ======**" in message.content:
-            if self.inventory_check:
-                await self.bot.remove_queue(id="inv")
-                #if not self.available_gems:
-                self.available_gems = find_gems_available(message.content)
-                gems_list = self.find_gems_to_use(self.available_gems)
 
-                self.gem_cmd["cmd_arguments"]=""
-                if gems_list:
-                    for i in gems_list:
-                        self.gem_cmd["cmd_arguments"]+=f"{i[1:]} "
-                    
-                    # Log the gems being used
-                    gems_used = self.gem_cmd["cmd_arguments"].strip()
-                    await self.bot.log(f"💎 Using gems: {gems_used}", "#9c27b0")
-                    self.bot.add_dashboard_log("gems", f"Using gems: {gems_used}", "info")
-                    
-                    # Reset no_gems status when gems are available
-                    if self.bot.user_status["no_gems"]:
-                        was_paused = self.bot.settings_dict.get("stopHuntingWhenNoGems", False)
-                        self.bot.user_status["no_gems"] = False
-                        await self.bot.log(f"✅ Gems available again!", "#51cf66")
-                        self.bot.add_dashboard_log("gems", "Gems available", "success")
-                        
-                        # Auto-resume hunt and battle if stopHuntingWhenNoGems is enabled
-                        if was_paused:
-                            await self.bot.log(f"🔄 Resuming hunt and battle...", "#51cf66")
-                            
-                            # Resume hunt if enabled
-                            if self.bot.settings_dict.get("commands", {}).get("hunt", {}).get("enabled", False):
-                                hunt_cog = self.bot.get_cog('Hunt')
-                                if hunt_cog:
-                                    await asyncio.sleep(2)  # Small delay before resuming
-                                    await self.bot.put_queue(hunt_cog.cmd)
-                                    await self.bot.log(f"Hunt resumed", "#51cf66")
-                                    self.bot.add_dashboard_log("hunt", "Hunt resumed - gems available", "success")
-                            
-                            # Resume battle if enabled
-                            if self.bot.settings_dict.get("commands", {}).get("battle", {}).get("enabled", False):
-                                battle_cog = self.bot.get_cog('Battle')
-                                if battle_cog:
-                                    await asyncio.sleep(2)  # Small delay before resuming
-                                    await self.bot.put_queue(battle_cog.cmd)
-                                    await self.bot.log(f"Battle resumed", "#51cf66")
-                                    self.bot.add_dashboard_log("battle", "Battle resumed - gems available", "success")
+        if "hunt is empowered by" in message.content and f"<@{self.bot.user.id}>" in message.content:
+            if self.bot.user_status["no_gems"]:
+                return
+            if self.already_checked:
+                count = len_gems_in_use(message.content)
+                if count == self.count:
+                    return
                 else:
-                    if not self.bot.user_status["no_gems"]:
-                        await self.bot.log(f"⚠️ No gems available!", "#ff9800")
-                        self.bot.add_dashboard_log("gems", "No gems available", "warning")
-                        self.bot.user_status["no_gems"] = True
-                        
-                        # Check if stopHuntingWhenNoGems is enabled
-                        if self.bot.settings_dict.get("stopHuntingWhenNoGems", False):
-                            await self.bot.log(f"🛑 stopHuntingWhenNoGems enabled - Hunt & Battle will pause", "#ff9800")
-                            self.bot.add_dashboard_log("hunt", "Hunt & Battle pausing (no gems)", "warning")
-                            
-                await self.bot.put_queue(self.gem_cmd, priority=True)
-                await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["briefCooldown"])
-                await self.bot.set_stat(True)
+                    self.already_checked = False
+                    self.count = count
+
+            result, required = self.fetch_gems_in_use(message.content)
+
+            if result and required:
+                if self.available_gems:
+                    await self.use_gems(self.available_gems, result)
+                else:
+                    # await self.bot.set_stat(False)
+                    await self.bot.put_queue(self.inv_cmd, priority=True)
+                    self.cache_gems_in_use = result
+
+        elif "'s Inventory ======**" in message.content and str(self.bot.user.id) in message.content:
+            await self.bot.remove_queue(id="inv")
+            self.available_gems = find_gems_available(message.content)
+            self.already_checked = False
+            
+            # await self.bot.log(f"Inventory Gems Updated: {self.available_gems}", "#444444") 
+            
+            if self.inventory_check:
+                await self.use_gems(self.available_gems, full=True)
+                # await self.bot.sleep_till([2,4])
                 self.inventory_check = False
+                self.cache_gems_in_use = {}
+            elif self.cache_gems_in_use:
+                await self.use_gems(self.available_gems, self.cache_gems_in_use)
+                self.cache_gems_in_use = {}
+
+            # await self.bot.set_stat(True)
+
 
 async def setup(bot):
     await bot.add_cog(Gems(bot))

@@ -25,6 +25,7 @@ except ImportError:
 from utils import state
 from utils import helpers
 from utils.misspell import misspell_word
+from cogs.comp import headers as comp_headers
 
 # Constants
 VERSION = "1.4.0"
@@ -57,6 +58,8 @@ class MyClient(commands.Bot):
         self.commands_dict = {}
         self.lock = asyncio.Lock()
         self.cash_check = False
+        self.boss_channel_id = 0
+        self.local_headers = {}
         self.gain_or_lose = 0
         self.checks = []
         self.dm, self.cm = None,None
@@ -98,6 +101,11 @@ class MyClient(commands.Bot):
                 "in_monitor": False,
                 "last_ran": 0
             }
+            
+    def get_nick(self, message):
+        if message.guild and message.guild.me:
+            return message.guild.me.display_name
+        return self.user.name
 
     async def set_stat(self, value, debug_note=None):
         if value:
