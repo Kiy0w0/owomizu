@@ -12,121 +12,325 @@
     },
     "hostMode": false,
     "command_info": {
-        "cash": {"priority": 1, "basecd": 5, "log_color": "#229451"},
-        "hunt": {"priority": 2, "basecd": 15, "log_color": "#674ce0"},
-        "battle": {"priority": 2, "basecd": 15, "log_color": "#674ce0"},
-        "gems": {"priority": 3, "basecd": 5, "log_color": "#993ade"},
-        "inv": {"priority": 3, "basecd": 10, "log_color": "#4db6c4"},
-        "zoo": {"priority": 3, "basecd": 45, "log_color": "#4db6c4"},
-        "owo": {"priority": 3, "basecd": 10, "log_color": "#730fa6"},
-        "lootbox": {"priority": 4, "basecd": 5, "log_color": "#977bab"},
-        "crate": {"priority": 4, "basecd": 5, "log_color": "#977bab"},
-        "huntbot": {"priority": 5, "basecd": 1, "log_color": "#0a2963"},
-        "coinflip": {"priority": 5, "basecd": 15, "log_color": "#945322"},
-        "slots": {"priority": 5, "basecd": 15, "log_color": "#945322"},
-        "pray": {"priority": 6, "basecd": 300, "log_color": "#226194"},
-        "cookie": {"priority": 7, "basecd": 5, "log_color": "#226194"},
-        "daily": {"priority": 7, "basecd": 5, "log_color": "#457d5f"},
-        "lottery": {"priority": 8, "basecd": 5, "log_color": "#457d5f"},
-        "level": {"priority": 8, "basecd": 15, "log_color": "#434a46"},
-        "sell": {"priority": 9, "basecd": 1, "log_color": "#6e6c0b"},
-        "autosell": {"priority": 1, "basecd": 1, "log_color": "#ffd43b"},
-        "shop": {"priority": 9, "basecd": 15, "log_color": "#6e6c0b"},
-        "upgrade": {"priority": 9, "basecd": 1, "log_color": "#0a2963"},
-        "run": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
-        "pup": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
-        "piku": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
-        "rpp": {"priority": 8, "basecd": 10, "log_color": "#74c0fc"},
-        "autoenhance": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
-        "autoenhance_inv": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
-        "autoenhance_gems": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
-        "autoenhance_huntbot": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
-        "autoenhance_upgrade": {"priority": 3, "basecd": 5, "log_color": "#9c88ff"},
-        "quest": {"priority": 7, "basecd": 10, "log_color": "#00d7af"}
+        "cash": {
+            "priority": 1,
+            "basecd": 5,
+            "log_color": "#229451"
+        },
+        "hunt": {
+            "priority": 2,
+            "basecd": 15,
+            "log_color": "#674ce0"
+        },
+        "battle": {
+            "priority": 2,
+            "basecd": 15,
+            "log_color": "#674ce0"
+        },
+        "gems": {
+            "priority": 3,
+            "basecd": 5,
+            "log_color": "#993ade"
+        },
+        "inv": {
+            "priority": 3,
+            "basecd": 10,
+            "log_color": "#4db6c4"
+        },
+        "zoo": {
+            "priority": 3,
+            "basecd": 45,
+            "log_color": "#4db6c4"
+        },
+        "owo": {
+            "priority": 3,
+            "basecd": 10,
+            "log_color": "#730fa6"
+        },
+        "lootbox": {
+            "priority": 4,
+            "basecd": 5,
+            "log_color": "#977bab"
+        },
+        "crate": {
+            "priority": 4,
+            "basecd": 5,
+            "log_color": "#977bab"
+        },
+        "huntbot": {
+            "priority": 5,
+            "basecd": 1,
+            "log_color": "#0a2963"
+        },
+        "coinflip": {
+            "priority": 5,
+            "basecd": 15,
+            "log_color": "#945322"
+        },
+        "slots": {
+            "priority": 5,
+            "basecd": 15,
+            "log_color": "#945322"
+        },
+        "pray": {
+            "priority": 6,
+            "basecd": 300,
+            "log_color": "#226194"
+        },
+        "cookie": {
+            "priority": 7,
+            "basecd": 5,
+            "log_color": "#226194"
+        },
+        "daily": {
+            "priority": 7,
+            "basecd": 5,
+            "log_color": "#457d5f"
+        },
+        "lottery": {
+            "priority": 8,
+            "basecd": 5,
+            "log_color": "#457d5f"
+        },
+        "level": {
+            "priority": 8,
+            "basecd": 15,
+            "log_color": "#434a46"
+        },
+        "sell": {
+            "priority": 9,
+            "basecd": 1,
+            "log_color": "#6e6c0b"
+        },
+        "autosell": {
+            "priority": 1,
+            "basecd": 1,
+            "log_color": "#ffd43b"
+        },
+        "shop": {
+            "priority": 9,
+            "basecd": 15,
+            "log_color": "#6e6c0b"
+        },
+        "upgrade": {
+            "priority": 9,
+            "basecd": 1,
+            "log_color": "#0a2963"
+        },
+        "run": {
+            "priority": 8,
+            "basecd": 10,
+            "log_color": "#74c0fc"
+        },
+        "pup": {
+            "priority": 8,
+            "basecd": 10,
+            "log_color": "#74c0fc"
+        },
+        "piku": {
+            "priority": 8,
+            "basecd": 10,
+            "log_color": "#74c0fc"
+        },
+        "rpp": {
+            "priority": 8,
+            "basecd": 10,
+            "log_color": "#74c0fc"
+        },
+        "autoenhance": {
+            "priority": 3,
+            "basecd": 5,
+            "log_color": "#9c88ff"
+        },
+        "autoenhance_inv": {
+            "priority": 3,
+            "basecd": 5,
+            "log_color": "#9c88ff"
+        },
+        "autoenhance_gems": {
+            "priority": 3,
+            "basecd": 5,
+            "log_color": "#9c88ff"
+        },
+        "autoenhance_huntbot": {
+            "priority": 3,
+            "basecd": 5,
+            "log_color": "#9c88ff"
+        },
+        "autoenhance_upgrade": {
+            "priority": 3,
+            "basecd": 5,
+            "log_color": "#9c88ff"
+        },
+        "quest": {
+            "priority": 7,
+            "basecd": 10,
+            "log_color": "#00d7af"
+        },
+        "quest_check": {
+            "priority": 7,
+            "basecd": 60,
+            "log_color": "#00d7af"
+        },
+        "quest_action": {
+            "priority": 7,
+            "basecd": 5,
+            "log_color": "#00d7af"
+        }
     },
     "alias": {
         "hunt": {
             "normal": "hunt",
             "shortform": "h",
-            "alias": ["hunt", "catch", "h"]
+            "alias": [
+                "hunt",
+                "catch",
+                "h"
+            ]
         },
         "battle": {
             "normal": "battle",
             "shortform": "b",
-            "alias": ["battle", "fight", "b"]
+            "alias": [
+                "battle",
+                "fight",
+                "b"
+            ]
         },
         "owo": {
             "normal": "owo",
-            "alias": ["owo", "uwu"]
+            "alias": [
+                "owo",
+                "uwu"
+            ]
         },
         "sac": {
             "normal": "sac",
-            "alias": ["sac", "sacrifice", "essence", "sc"]
+            "alias": [
+                "sac",
+                "sacrifice",
+                "essence",
+                "sc"
+            ]
         },
         "lottery": {
             "normal": "lottery",
-            "alias": ["lottery", "bet", "lotto"]
+            "alias": [
+                "lottery",
+                "bet",
+                "lotto"
+            ]
         },
         "cookie": {
             "normal": "cookie",
-            "alias": ["cookie", "rep"]
+            "alias": [
+                "cookie",
+                "rep"
+            ]
         },
         "shop": {
             "normal": "shop",
-            "alias": ["shop", "market"]
+            "alias": [
+                "shop",
+                "market"
+            ]
         },
         "huntbot": {
             "normal": "ah",
-            "alias": ["ah", "hb", "huntbot", "autohunt"]
+            "alias": [
+                "ah",
+                "hb",
+                "huntbot",
+                "autohunt"
+            ]
         },
         "zoo": {
             "normal": "zoo",
-            "alias": ["zoo", "z"]
+            "alias": [
+                "zoo",
+                "z"
+            ]
         },
         "cash": {
             "normal": "cash",
-            "alias": ["cash", "money", "currency", "cowoncy", "credit", "balance"]
+            "alias": [
+                "cash",
+                "money",
+                "currency",
+                "cowoncy",
+                "credit",
+                "balance"
+            ]
         },
         "use": {
             "normal": "use",
-            "alias": ["use", "equip"]
+            "alias": [
+                "use",
+                "equip"
+            ]
         },
         "lootbox": {
             "normal": "lootbox",
-            "alias": ["lootbox", "lb"]
+            "alias": [
+                "lootbox",
+                "lb"
+            ]
         },
         "crate": {
             "normal": "crate",
-            "alias": ["crate", "wc"]
+            "alias": [
+                "crate",
+                "wc"
+            ]
         },
         "coinflip": {
             "normal": "cf",
-            "alias": ["cf", "coinflip", "coin", "flip"]
+            "alias": [
+                "cf",
+                "coinflip",
+                "coin",
+                "flip"
+            ]
         },
         "slots": {
             "normal": "s",
-            "alias": ["s", "slots", "slot"]
+            "alias": [
+                "s",
+                "slots",
+                "slot"
+            ]
         },
         "inv": {
             "normal": "inv",
-            "alias": ["inv", "inventory"]
+            "alias": [
+                "inv",
+                "inventory"
+            ]
         },
         "upgrade": {
             "normal": "upg",
-            "alias": ["upg", "upgrade"]
+            "alias": [
+                "upg",
+                "upgrade"
+            ]
         },
         "run": {
             "normal": "run",
-            "alias": ["run"]
+            "alias": [
+                "run"
+            ]
         },
         "pup": {
-            "normal": "pup", 
-            "alias": ["pup"]
+            "normal": "pup",
+            "alias": [
+                "pup"
+            ]
         },
         "piku": {
             "normal": "piku",
-            "alias": ["piku"]
+            "alias": [
+                "piku"
+            ]
         }
     }
-    
 }

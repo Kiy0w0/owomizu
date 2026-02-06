@@ -38,7 +38,7 @@ class Quest(commands.Cog):
             # Wait for other priority tasks
             while (
                 self.bot.command_handler_status["captcha"] 
-                or self.bot.command_handler_status["paused"]
+                or not self.bot.command_handler_status["state"]
                 or self.bot.command_handler_status["sleep"]
             ):
                 await asyncio.sleep(10)
@@ -62,15 +62,15 @@ class Quest(commands.Cog):
 
     async def check_quest(self):
         """Send 'owo quest' and parse the response"""
-        channel = self.bot.get_channel(self.quest_channel_id)
-        if not channel:
-            return
-
-        # Send 'owo quest'
-        await self.bot.send_command("owo quest")
         
-        # Wait for response (handled by on_message mostly, but we trigger it here)
-        # The actual parsing happens in on_message listener for better reliability
+        # Use put_queue to send command
+        cmd = {
+            "cmd_name": "owo",
+            "cmd_arguments": "quest",
+            "prefix": False,
+            "id": "quest_check"
+        }
+        await self.bot.put_queue(cmd)
         
         # Reset current quest state to trigger a refresh
         self.current_quest = None
