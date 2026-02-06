@@ -364,13 +364,6 @@
                     0,
                     0
                 ]
-            },
-            {
-                "userid": 0,
-                "channels": [
-                    0,
-                    0
-                ]
             }
         ],
         "interval": [
@@ -383,12 +376,17 @@
         ]
     },
     "questTracker": {
-        "enabled": false,
+        "enabled": true,
         "autoCheckQuests": true,
         "notifications": true,
         "logRareAnimals": true,
         "trackProgress": true,
-        "notifyOnCompletion": true
-    },
-    "stopHuntingWhenNoGems": false
+        "notifyOnCompletion": true,
+        "stopHuntingWhenNoGems": false,
+        "safety": {
+            "enabled": true,
+            "runTimeMinutes": 120,
+            "sleepTimeMinutes": 15
+        }
+    }
 }

@@ -408,6 +408,7 @@ class MyClient(commands.Bot):
             "others": True,
             "owo": commands_dict["owo"]["enabled"] and not reaction_bot_dict["owo"],
             "pray": (commands_dict["pray"]["enabled"] or commands_dict["curse"]["enabled"]) and not reaction_bot_dict["pray_and_curse"],
+            "quest": self.settings_dict.get("questTracker", {}).get("enabled", False),
             "rpp": self.settings_dict.get("autoRandomCommands", {}).get("enabled", False),
             "reactionbot": reaction_bot_dict["hunt_and_battle"] or reaction_bot_dict["owo"] or reaction_bot_dict["pray_and_curse"],
             "richpresence": self.global_settings_dict.get("richPresence", {}).get("enabled", True),
