@@ -634,10 +634,26 @@ if __name__ == "__main__":
     tokens_env = os.getenv("TOKENS")
     if tokens_env:
         # Format: "token1 channel1;token2 channel2"
-        tokens_and_channels = [entry.strip().split()[:2] for entry in tokens_env.split(';') if entry.strip()]
+        raw_tokens = [entry.strip().split() for entry in tokens_env.split(';') if entry.strip()]
+        tokens_and_channels = []
+        for t in raw_tokens:
+            if len(t) >= 2:
+                tokens_and_channels.append(t[:2])
+            elif len(t) == 1:
+                # Handle case where user provided token but no channel
+                # We can append a default channel '0' or skip. Let's append '0' to avoid crash but warn user
+                print(f"Warning: Token ending in ...{t[0][-5:]} is missing Channel ID. Defaulting to 0.")
+                tokens_and_channels.append([t[0], "0"])
+        
         printBox("Loaded tokens from .env file", "bold green")
     elif os.path.exists("tokens.txt"):
-        tokens_and_channels = [line.strip().split()[:2] for line in open("tokens.txt", "r") if line.strip()]
+        tokens_and_channels = []
+        for line in open("tokens.txt", "r"):
+            parts = line.strip().split()
+            if len(parts) >= 2:
+                tokens_and_channels.append(parts[:2])
+            elif len(parts) == 1:
+                 tokens_and_channels.append([parts[0], "0"])
         printBox(f"WARNING: Using tokens.txt is deprecated. Please migrate to .env", "bold yellow")
     else:
         printBox("No tokens found! Check .env or tokens.txt", "bold red")
