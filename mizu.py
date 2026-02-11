@@ -498,11 +498,16 @@ def run_bot(token, channel_id, global_settings_dict):
     # Use shared state
     
     # Create and set event loop for this thread (required for Termux compatibility)
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+    
+    if not token or not isinstance(token, str) or len(token) < 10:
+        printBox(f"Error: Invalid token passed to run_bot: {token}", "bold red")
+        return
+
+    # Validated token
+    
+    # Create a new event loop for this thread (Crucial for Termux/Linux threading)
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     
     try:
         logging.getLogger("discord.client").setLevel(logging.ERROR)
@@ -535,7 +540,8 @@ def run_bot(token, channel_id, global_settings_dict):
             else:
                 # Mobile (Termux) uses an older version without curl_cffi.
                 try:
-                    client.run(token, log_level=logging.ERROR)
+                    loop.run_until_complete(client.start(token))
+                    # client.run(token, log_level=logging.ERROR) # Causes signal handler error in threads
                 except Exception as e:
                     printBox(f"Unknown error when running bot: {e}", "bold red")
                 finally:

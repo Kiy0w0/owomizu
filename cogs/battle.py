@@ -70,7 +70,17 @@ class Battle(commands.Cog):
                                 self.bot.add_dashboard_log("battle", "Battle paused - No gems available", "warning")
                                 return
                                 
-                            await self.bot.sleep_till(self.bot.settings_dict["commands"]["battle"]["cooldown"])
+                            cooldown_battle = self.bot.settings_dict["commands"]["battle"]["cooldown"]
+                            
+                            # SAFETY CHECK: Enforce minimum cooldown
+                            if isinstance(cooldown_battle, (int, float)) and cooldown_battle < 5:
+                                cooldown_battle = 15
+                                await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
+                            elif isinstance(cooldown_battle, list) and cooldown_battle[0] < 5:
+                                cooldown_battle = [15, max(15, cooldown_battle[1])]
+                                await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
+                                
+                            await self.bot.sleep_till(cooldown_battle)
                             self.cmd["cmd_name"] = (
                                 self.bot.alias["battle"]["shortform"] 
                                 if self.bot.settings_dict["commands"]["battle"]["useShortForm"] 

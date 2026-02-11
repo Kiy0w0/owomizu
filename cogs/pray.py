@@ -69,7 +69,7 @@ class Pray(commands.Cog):
         chosen_cmd = random.choice(cmds_enabled)
         cnf = self.bot.settings_dict['commands'][chosen_cmd]
         
-        # Siapkan argumen (user target)
+        # (user target)
         cmd_argument_data = cmd_argument(cnf['userid'], cnf['pingUser'])
         
         # update command object
@@ -85,8 +85,17 @@ class Pray(commands.Cog):
         await self.bot.log(f"Queued {chosen_cmd}... (Wait {cnf['cooldown']})", "#d0ff78")
 
         # Sleep sesuai cooldown
-        sleep_duration = self.bot.random_float(cnf["cooldown"]) 
-        await self.bot.sleep_till([sleep_duration, sleep_duration + 5])
+        try:
+            sleep_duration = self.bot.random_float(cnf["cooldown"]) 
+        except Exception:
+            sleep_duration = 300 # Default fallback
+            
+        # SAFETY CHECK: Prevent spam
+        if sleep_duration < 60:
+             await self.bot.log(f"({sleep_duration}s). Enforcing 5m safety delay.", "#e74c3c")
+             sleep_duration = 300
+             
+        await self.bot.sleep_till([sleep_duration, sleep_duration + 10])
 
     @pray_loop.before_loop
     async def before_pray(self):

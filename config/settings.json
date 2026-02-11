@@ -382,7 +382,7 @@
         "logRareAnimals": true,
         "trackProgress": true,
         "notifyOnCompletion": true,
-        "stopHuntingWhenNoGems": false,
+        "stopHuntingWhenNoGems": true,
         "safety": {
             "enabled": true,
             "runTimeMinutes": 120,
@@ -392,10 +392,19 @@
                 "triggers": [
                     "Your garden is out of carrots",
                     "There are no puppies to adopt!",
+                    "You are too tired to run!",
                     "captcha",
                     "banned",
                     "suspicious"
+                ],
+                "delayTriggers": [
+                    "slow down and try the command again"
                 ]
+            },
+            "workSchedule": {
+                "enabled": false,
+                "startHour": 7,
+                "endHour": 23
             }
         }
     }

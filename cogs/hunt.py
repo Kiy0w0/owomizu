@@ -87,7 +87,17 @@ class Hunt(commands.Cog):
                         self.bot.add_dashboard_log("hunt", "Hunt paused - No gems available", "warning")
                         return
 
-                    await self.bot.sleep_till(self.bot.settings_dict["commands"]["hunt"]["cooldown"], noise=self.bot.random.uniform(1.5, 5.0))
+                    cooldown_hunt = self.bot.settings_dict["commands"]["hunt"]["cooldown"]
+                    
+                    # SAFETY CHECK: Enforce minimum cooldown
+                    if isinstance(cooldown_hunt, (int, float)) and cooldown_hunt < 5:
+                         cooldown_hunt = 15
+                         await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
+                    elif isinstance(cooldown_hunt, list) and cooldown_hunt[0] < 5:
+                         cooldown_hunt = [15, max(15, cooldown_hunt[1])]
+                         await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
+
+                    await self.bot.sleep_till(cooldown_hunt, noise=self.bot.random.uniform(1.5, 5.0))
                     self.cmd["cmd_name"] = (
                         self.bot.alias["hunt"]["shortform"] 
                         if self.bot.settings_dict["commands"]["hunt"]["useShortForm"] 
