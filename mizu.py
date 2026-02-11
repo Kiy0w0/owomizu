@@ -637,23 +637,26 @@ if __name__ == "__main__":
         raw_tokens = [entry.strip().split() for entry in tokens_env.split(';') if entry.strip()]
         tokens_and_channels = []
         for t in raw_tokens:
+            token_clean = t[0].strip().strip('"').strip("'")
             if len(t) >= 2:
-                tokens_and_channels.append(t[:2])
+                tokens_and_channels.append([token_clean, t[1]])
             elif len(t) == 1:
-                # Handle case where user provided token but no channel
-                # We can append a default channel '0' or skip. Let's append '0' to avoid crash but warn user
-                print(f"Warning: Token ending in ...{t[0][-5:]} is missing Channel ID. Defaulting to 0.")
-                tokens_and_channels.append([t[0], "0"])
+                print(f"Warning: Token ending in ...{token_clean[-5:]} is missing Channel ID. Defaulting to 0.")
+                tokens_and_channels.append([token_clean, "0"])
         
         printBox("Loaded tokens from .env file", "bold green")
     elif os.path.exists("tokens.txt"):
         tokens_and_channels = []
         for line in open("tokens.txt", "r"):
             parts = line.strip().split()
+            if not parts: continue
+            
+            token_clean = parts[0].strip().strip('"').strip("'")
+
             if len(parts) >= 2:
-                tokens_and_channels.append(parts[:2])
+                tokens_and_channels.append([token_clean, parts[1]])
             elif len(parts) == 1:
-                 tokens_and_channels.append([parts[0], "0"])
+                 tokens_and_channels.append([token_clean, "0"])
         printBox(f"WARNING: Using tokens.txt is deprecated. Please migrate to .env", "bold yellow")
     else:
         printBox("No tokens found! Check .env or tokens.txt", "bold red")

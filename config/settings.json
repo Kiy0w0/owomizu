@@ -386,7 +386,17 @@
         "safety": {
             "enabled": true,
             "runTimeMinutes": 120,
-            "sleepTimeMinutes": 15
+            "sleepTimeMinutes": 15,
+            "autoStop": {
+                "enabled": true,
+                "triggers": [
+                    "Your garden is out of carrots",
+                    "There are no puppies to adopt!",
+                    "captcha",
+                    "banned",
+                    "suspicious"
+                ]
+            }
         }
     }
 }

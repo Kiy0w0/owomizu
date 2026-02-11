@@ -65,7 +65,12 @@ class Huntbot(commands.Cog):
             "radar": {"enabled": False, "current_level": 0, "invested": 0},
         }
 
-        for trait, value in self.bot.settings_dict["commands"]["autoHuntBot"]["upgrader"]["traits"].items():
+        traits_config = self.bot.settings_dict["commands"]["autoHuntBot"]["upgrader"].get("traits", {
+            "efficiency": True, "duration": True, "cost": True, 
+            "gain": True, "exp": True, "radar": True
+        })
+
+        for trait, value in traits_config.items():
             if value:
                 self.upgrade_details[trait]["enabled"] = True
 
@@ -198,8 +203,15 @@ class Huntbot(commands.Cog):
                     await self.bot.set_stat(False)
                     if embed.fields:
                         self.get_experience(embed)
-                        data = allocate_essence(self.upgrade_details, self.bot.settings_dict["commands"]["autoHuntBot"]["upgrader"]["priorities"])
-                        await self.bot.sleep_till(self.bot.settings_dict["commands"]["autoHuntBot"]["upgrader"]["sleeptime"])
+                        priorities = self.bot.settings_dict["commands"]["autoHuntBot"]["upgrader"].get("priorities", {
+                            "efficiency": 4, "duration": 2, "cost": 5, 
+                            "gain": 4, "exp": 3, "radar": 1 
+                        })
+                        data = allocate_essence(self.upgrade_details, priorities)
+                        
+                        sleeptime = self.bot.settings_dict["commands"]["autoHuntBot"]["upgrader"].get("sleeptime", [10, 15])
+                        
+                        await self.bot.sleep_till(sleeptime)
                         for trait, essence_alloc in data.items():
                             self.upgrade_cmd["cmd_arguments"] = f"{trait} {essence_alloc}"
                             if essence_alloc > 0:
