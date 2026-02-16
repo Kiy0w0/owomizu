@@ -162,7 +162,7 @@ mizuArt = r"""
 M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "1.4.0"
+version = "1.5.5"
 debug_print = True
 
 def merge_dicts(main, small):
@@ -499,8 +499,8 @@ def run_bot(token, channel_id, global_settings_dict):
     
     # Create and set event loop for this thread (required for Termux compatibility)
     
-    if not token or not isinstance(token, str) or len(token) < 10:
-        printBox(f"Error: Invalid token passed to run_bot: {token}", "bold red")
+    if not token or not isinstance(token, str) or len(token) < 50 or token.count('.') < 2:
+        printBox(f"Error: Invalid token format passed to run_bot!\nToken: {token[:15]}... (hidden)\nReason: Token seems too short or malformed (must contain 2 dots).", "bold red")
         return
 
     # Validated token
@@ -543,7 +543,14 @@ def run_bot(token, channel_id, global_settings_dict):
                     loop.run_until_complete(client.start(token))
                     # client.run(token, log_level=logging.ERROR) # Causes signal handler error in threads
                 except Exception as e:
-                    printBox(f"Unknown error when running bot: {e}", "bold red")
+                    error_str = str(e)
+                    if "Improper token" in error_str:
+                        printBox(f"Critical Error: Invalid Token Detected!\nPlease check your .env file or tokens.txt.\nMake sure there are no extra spaces or quotes around your token.", "bold red")
+                    elif "'NoneType' object is not iterable" in error_str:
+                        printBox(f"Critical Error: Discord.py version incompatibility detected!\nTry running: pip install aiohttp==3.9.5", "bold red")
+                        printBox(f"Original error: {e}", "red")
+                    else:
+                        printBox(f"Unknown error when running bot: {e}", "bold red")
                 finally:
                     if client in state.bot_instances: state.bot_instances.remove(client)
                 break 

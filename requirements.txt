@@ -1,4 +1,4 @@
-aiohttp
+aiohttp<3.10
 aiosignal
 aiosqlite
 attrs
@@ -7,7 +7,7 @@ certifi
 charset-normalizer
 click
 discord-protos
-discord.py-self @ git+https://github.com/dolfies/discord.py-self.git
+discord.py-self==2.1.0
 Flask[async]
 frozenlist
 idna

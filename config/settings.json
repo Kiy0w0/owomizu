@@ -382,30 +382,31 @@
         "logRareAnimals": true,
         "trackProgress": true,
         "notifyOnCompletion": true,
-        "stopHuntingWhenNoGems": true,
-        "safety": {
+        "stopHuntingWhenNoGems": true
+    },
+    "safety": {
+        "enabled": true,
+        "runTimeMinutes": 120,
+        "sleepTimeMinutes": 15,
+        "autoStop": {
             "enabled": true,
-            "runTimeMinutes": 120,
-            "sleepTimeMinutes": 15,
-            "autoStop": {
-                "enabled": true,
-                "triggers": [
-                    "Your garden is out of carrots",
-                    "There are no puppies to adopt!",
-                    "You are too tired to run!",
-                    "captcha",
-                    "banned",
-                    "suspicious"
-                ],
-                "delayTriggers": [
-                    "slow down and try the command again"
-                ]
-            },
-            "workSchedule": {
-                "enabled": false,
-                "startHour": 7,
-                "endHour": 23
-            }
+            "delayDuration": 300,
+            "triggers": [
+                "Your garden is out of carrots",
+                "There are no puppies to adopt!",
+                "You are too tired to run!",
+                "captcha",
+                "banned",
+                "suspicious"
+            ],
+            "delayTriggers": [
+                "slow down and try the command again"
+            ]
+        },
+        "workSchedule": {
+            "enabled": false,
+            "startHour": 7,
+            "endHour": 23
         }
     }
 }

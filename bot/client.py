@@ -28,7 +28,7 @@ from utils.misspell import misspell_word
 from cogs.comp import headers as comp_headers
 
 # Constants
-VERSION = "1.4.0"
+VERSION = "1.5.5"
 MIZU_NETWORK_API = "https://api.ive.my.id"
 
 class MyClient(commands.Bot):

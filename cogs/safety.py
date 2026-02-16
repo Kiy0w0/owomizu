@@ -111,12 +111,9 @@ class Safety(commands.Cog):
         if not auto_stop_conf.get("enabled", False):
             return
 
-        # Check only in monitored channels (optional, but safer)
-        # If trigger is global (e.g. DM form bot), remove channel check
-        if message.channel.id not in self.bot.list_channel and not isinstance(message.channel, int): 
-            # We assume message.channel is an object, list_channel has IDs.
-            # But let's be safe and check all incoming messages for now creates less risk.
-            pass
+        # Check only in monitored channels, but allow DMs (where guild is None)
+        if message.guild and message.channel.id not in self.bot.list_channel:
+            return
 
         content_lower = message.content.lower()
         
@@ -125,12 +122,13 @@ class Safety(commands.Cog):
         for trigger in delay_triggers:
             if trigger in content_lower:
                 # MATCH FOUND!
-                await self.bot.log(f"⚠️ Cooldown Triggered: '{trigger}' detected! Sleeping for 5 minutes...", "#f39c12")
+                delay_duration = auto_stop_conf.get("delayDuration", 300)
+                await self.bot.log(f"⚠️ Cooldown Triggered: '{trigger}' detected! Sleeping for {delay_duration} seconds...", "#f39c12")
                 self.bot.add_dashboard_log("system", f"Temporary Pause (Cooldown): {trigger}", "warning")
                 
                 # Start temporary sleep task
                 # We use create_task so it doesn't block the listener
-                self.bot.loop.create_task(self.temporary_sleep(300))
+                self.bot.loop.create_task(self.temporary_sleep(delay_duration))
                 return
 
         # 2. Check Auto-Stop Triggers (Permanent Stop)
