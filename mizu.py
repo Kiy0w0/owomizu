@@ -506,8 +506,8 @@ def run_bot(token, channel_id, global_settings_dict):
     # Validated token
     
     # Create a new event loop for this thread (Crucial for Termux/Linux threading)
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
+    # loop = asyncio.new_event_loop()
+    # asyncio.set_event_loop(loop)
     
     try:
         logging.getLogger("discord.client").setLevel(logging.ERROR)
@@ -540,8 +540,8 @@ def run_bot(token, channel_id, global_settings_dict):
             else:
                 # Mobile (Termux) uses an older version without curl_cffi.
                 try:
-                    loop.run_until_complete(client.start(token))
-                    # client.run(token, log_level=logging.ERROR) # Causes signal handler error in threads
+                    # Match betaver implementation
+                    client.run(token, log_level=logging.ERROR)
                 except Exception as e:
                     error_str = str(e)
                     if "Improper token" in error_str:
