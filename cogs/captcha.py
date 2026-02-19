@@ -27,6 +27,19 @@ try:
 except ImportError:
     pass
 
+# Selenium for Web Captcha (Desktop Only)
+SELENIUM_AVAILABLE = False
+try:
+    from selenium import webdriver
+    from selenium.webdriver.common.by import By
+    from selenium.webdriver.support.ui import WebDriverWait
+    from selenium.webdriver.support import expected_conditions as EC
+    from webdriver_manager.chrome import ChromeDriverManager
+    from selenium.webdriver.chrome.service import Service
+    SELENIUM_AVAILABLE = True
+except ImportError:
+    pass
+
 list_captcha = ["human", "captcha", "link", "letterword"]
 
 # OwO bot responses indicating wrong captcha answer
@@ -60,15 +73,7 @@ def clean(msg):
     return re.sub(r"[^a-zA-Z]", "", msg)
 
 def is_termux():
-    termux_prefix = os.environ.get("PREFIX")
-    termux_home = os.environ.get("HOME")
-    
-    if termux_prefix and "com.termux" in termux_prefix:
-        return True
-    elif termux_home and "com.termux" in termux_home:
-        return True
-    else:
-        return os.path.isdir("/data/data/com.termux")
+    return os.path.isdir("/data/data/com.termux")
 
 on_mobile = is_termux()
 
@@ -121,6 +126,85 @@ class Captcha(commands.Cog):
         self._captcha_image_path = None  # Saved image path for retries
         self._captcha_channel = None     # Channel to send answer to
         self._solving_active = False     # Whether we're in a solve cycle
+
+        # Web Captcha State
+        self._driver = None
+
+    def _init_driver(self):
+        """Initialize Selenium WebDriver (Chrome) for web captcha handling."""
+        if not SELENIUM_AVAILABLE or on_mobile:
+            return None
+        
+        try:
+            options = webdriver.ChromeOptions()
+            options.add_argument("--disable-gpu")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--window-size=1280,720")
+            
+            # Auto-download chromedriver
+            service = Service(ChromeDriverManager().install())
+            driver = webdriver.Chrome(service=service, options=options)
+            return driver
+        except Exception as e:
+            print(f"Failed to init Selenium: {e}")
+            return None
+
+    async def _handle_web_captcha(self, url):
+        """Handle web-based captcha verification via Selenium."""
+        if on_mobile:
+            # Termux fallback: Open link manually
+            run_system_command(f"termux-open {url}")
+            await self.bot.log(f"🔗 Opened captcha link in external browser (Termux)", "#3498db")
+            return
+
+        if not SELENIUM_AVAILABLE:
+            await self.bot.log(f"⚠️ Selenium not installed. Cannot auto-click verify link.", "#e67e22")
+            return
+
+        try:
+            await self.bot.log(f"🌐 Web-Solver: Opening verify link...", "#3498db")
+            
+            if not self._driver:
+                self._driver = await asyncio.to_thread(self._init_driver)
+            
+            if not self._driver:
+                await self.bot.log("❌ Web-Solver: Failed to launch browser", "#c25560")
+                return
+
+            # Open URL in thread
+            await asyncio.to_thread(self._driver.get, url)
+            
+            await asyncio.sleep(3) # Wait for load
+            title = self._driver.title
+            page_source = self._driver.page_source.lower()
+
+            if "login" in title.lower() or "login-button" in page_source:
+                await self.bot.log("🛑 Web-Solver: NOT LOGGED IN! Please login to Discord in the opened browser.", "#d70000")
+                self.bot.add_dashboard_log("captcha", "Web-Solver: Login required!", "error")
+                # Keep browser open for user to login
+                return
+
+            # Check for Captcha
+            await self.bot.log("✅ Logged in! Verifying...", "#51cf66")
+            
+            try:
+                buttons = self._driver.find_elements(By.TAG_NAME, "button")
+                clicked = False
+                for btn in buttons:
+                    if "verify" in btn.text.lower():
+                        btn.click()
+                        await self.bot.log("🖱️ Clicked 'Verify'", "#51cf66")
+                        clicked = True
+                        break
+                
+                if not clicked:
+                     await self.bot.log("ℹ️ No 'Verify' button found.", "#3498db")
+
+            except Exception as ex:
+                pass
+
+        except Exception as e:
+            await self.bot.log(f"❌ Web-Solver error: {e}", "#c25560")
 
     async def _download_image(self, url):
         """Download an image from URL and return bytes"""
@@ -279,19 +363,16 @@ class Captcha(commands.Cog):
 
         if message.channel.id == self.bot.dm.id and message.author.id == self.bot.owo_bot_id:
             if "I have verified that you are human! Thank you! :3" in message.content:
-                # Captcha solved successfully!
                 self._cleanup_captcha()
                 
                 time_to_sleep = self.bot.random_float(self.bot.settings_dict['defaultCooldowns']['captchaRestart'])
                 await self.bot.log(f"Captcha solved! - sleeping {time_to_sleep}s before restart.", "#5fd700")
                 
-                # Add dashboard log for captcha solved
                 self.bot.add_dashboard_log("captcha", f"Captcha solved! Resuming in {time_to_sleep:.1f}s", "success")
                 
                 await asyncio.sleep(time_to_sleep)
                 self.bot.command_handler_status["captcha"] = False
                 
-                # Add dashboard log for bot resumed
                 self.bot.add_dashboard_log("system", "Bot automatically resumed after captcha", "success")
                 await self.bot.log(f"Bot automatically resumed after captcha!", "#51cf66")
                 
@@ -329,17 +410,15 @@ class Captcha(commands.Cog):
                             hasattr(message.components[0].children[0], "label")
                             and message.components[0].children[0].label == "Verify"
                         )
-                        or (
-                            hasattr(message.components[0].children[0], "url")
-                            and message.components[0].children[0].url
-                            == "https://owobot.com?login="
-                        )
+                or (
+                    hasattr(message.components[0].children[0], "url")
+                    and "owobot.com" in message.components[0].children[0].url
+                )
                     )
                 )
-                or (
-                    "⚠️" in message.content and message.attachments
-                )  # message attachment check
-                or any(b in clean(message.content) for b in list_captcha)
+            # message attachment check
+            or ("⚠️" in message.content and message.attachments)
+            or any(b in clean(message.content) for b in list_captcha)
             ):
                 if not get_channel_name(message.channel) == "owo DMs":
                     display_name = message.guild.me.display_name
@@ -348,7 +427,6 @@ class Captcha(commands.Cog):
                 self.bot.command_handler_status["captcha"] = True
                 await self.bot.log(f"Captcha detected!", "#d70000")
                 
-                # Add dashboard log for captcha detected
                 channel_name = get_channel_name(message.channel)
                 self.bot.add_dashboard_log("captcha", f"Captcha detected in {channel_name}! Bot stopped automatically", "error")
                 
@@ -358,23 +436,19 @@ class Captcha(commands.Cog):
                     try:
                         await self.bot.log("🧩 Auto-Solver: Captcha image detected, starting solve cycle...", "#f39c12")
                         
-                        # Download image to temp file (keep for retries)
                         img_url = message.attachments[0].url
                         img_data = await self._download_image(img_url)
                         
                         if img_data:
-                            # Save for retry access
                             tmp_path = os.path.join(tempfile.gettempdir(), f"mizu_captcha_{self.bot.user.id}.png")
                             with open(tmp_path, "wb") as f:
                                 f.write(img_data)
                             
-                            # Setup retry state
                             self._captcha_image_path = tmp_path
                             self._captcha_channel = message.channel
                             self._solve_attempt = 0
                             self._solving_active = True
                             
-                            # First attempt (strategy 0)
                             auto_solved = await self._attempt_solve(strategy_index=0)
                         else:
                             await self.bot.log("🧩 Auto-Solver: Failed to download captcha image", "#c25560")
@@ -382,6 +456,21 @@ class Captcha(commands.Cog):
                         await self.bot.log(f"🧩 Auto-Solver error: {e}", "#c25560")
                         self.bot.add_dashboard_log("captcha", f"Auto-Solver error: {e}", "error")
                 # === END AUTO-SOLVE ===
+                
+                # === WEB CAPTCHA / VERIFY LINK ===
+                # Check if message has a "Verify" button component
+                verify_url = None
+                if message.components:
+                    for comp in message.components:
+                        if hasattr(comp, 'children'):
+                            for child in comp.children:
+                                if hasattr(child, 'url') and child.url and "owobot.com" in child.url:
+                                    verify_url = child.url
+                                    break
+                
+                if verify_url and self.bot.global_settings_dict.get("captcha", {}).get("autoSolve", {}).get("enabled", False):
+                    # Trigger web handler
+                    asyncio.create_task(self._handle_web_captcha(verify_url))
                 
                 if not auto_solved and not self._solving_active:
                     self.captcha_handler(message.channel, "Link")
@@ -405,7 +494,6 @@ class Captcha(commands.Cog):
                 self.bot.command_handler_status["captcha"] = True
                 await self.bot.log(f"Ban detected!", "#d70000")
                 
-                # Add dashboard log for ban detected
                 channel_name = get_channel_name(message.channel)
                 self.bot.add_dashboard_log("captcha", f"Ban detected in {channel_name}! Bot stopped automatically", "error")
                 
@@ -438,7 +526,6 @@ class Captcha(commands.Cog):
                             self.bot.command_handler_status["captcha"] = True
                             await self.bot.log(f"Captcha detected...?", "#d70000")
                             
-                            # Add dashboard log for embed captcha detected
                             channel_name = get_channel_name(message.channel)
                             self.bot.add_dashboard_log("captcha", f"Possible captcha detected in embed ({channel_name})! Bot stopped", "warning")
                             
@@ -450,7 +537,6 @@ class Captcha(commands.Cog):
                                 self.bot.command_handler_status["captcha"] = True
                                 await self.bot.log(f"Captcha detected...?", "#d70000")
                                 
-                                # Add dashboard log for field captcha detected
                                 channel_name = get_channel_name(message.channel)
                                 self.bot.add_dashboard_log("captcha", f"Possible captcha in embed field ({channel_name})! Bot stopped", "warning")
                                 
@@ -459,7 +545,6 @@ class Captcha(commands.Cog):
                                 self.bot.command_handler_status["captcha"] = True
                                 await self.bot.log(f"Captcha detected...?", "#d70000")
                                 
-                                # Add dashboard log for field value captcha detected
                                 channel_name = get_channel_name(message.channel)
                                 self.bot.add_dashboard_log("captcha", f"Possible captcha in embed field value ({channel_name})! Bot stopped", "warning")
                                 

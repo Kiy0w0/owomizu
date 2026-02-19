@@ -81,6 +81,8 @@ while IFS= read -r requirement || [[ -n "$requirement" ]]; do
     [[ "$requirement" == *"ddddocr"* ]] && continue
     [[ "$requirement" == *"opencv"* ]] && continue
     [[ "$requirement" == *"ultralytics"* ]] && continue
+    [[ "$requirement" == *"selenium"* ]] && continue
+    [[ "$requirement" == *"webdriver-manager"* ]] && continue
     
     echo -e "  Installing ${BLUE}${requirement}${NC}..."
     pip install "$requirement" 2>/dev/null || echo -e "  ${YELLOW}⚠ Failed to install ${requirement} (may be optional)${NC}"

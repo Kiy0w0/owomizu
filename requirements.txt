@@ -36,3 +36,5 @@ pypresence
 ddddocr
 opencv-python-headless
 ultralytics
+selenium
+webdriver-manager

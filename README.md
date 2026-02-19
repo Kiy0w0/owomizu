@@ -4,247 +4,104 @@
 
 *Advanced Auto Farming Bot for OwO Discord Game*
 
-[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://mizu)
-[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/)
+[![Discord](https://img.shields.io/badge/Discord-Join%20Server-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/yourinvite)
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![Discord Bot](https://img.shields.io/badge/Discord-Bot-7289da.svg)](https://discord.com/)
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android-brightgreen.svg)]()
-[![Version](https://img.shields.io/badge/Version-1.5.5-cyan.svg)]()
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20Termux-brightgreen.svg)]()
 [![Status](https://img.shields.io/badge/Status-Active-success.svg)]()
 
 ![Mizu Network Banner](static/imgs/mizu.png)
 
-**The most advanced, feature-rich, and user-friendly OwO farming bot**
+**The most chill yet OP OwO farming bot. Fully automated, anti-ban, and now supports Auto-Solve Captcha!**
 
 </div>
 
 ---
 
-## ✨ **Features**
-*   **Smart Auto Farming:** Automates `hunt`, `battle`, `owo`, and `pray` with human-like delays.
-*   **Quest Solver:** Automatically detects and solves daily quests (e.g. auto-enables slots for "Gamble 5 times").
-*   **Mini-Games:** Strategies for Slots, Coinflip, and Lottery.
-*   **Anti-Ban Technology:** Random sleep schedules, channel switching, and human-like typing simulation.
-*   **Web Dashboard:** Real-time statistics and configuration from your browser (Mobile friendly).
-*   **Auto-Upgrade:** Intelligently manages your HuntBot upgrades and essence investment.
-*   **Multi-Account:** Run as many accounts as your PC can handle.
+## ✨ Key Features
+
+*   **🌾 Auto Farming**: `hunt`, `battle`, `owo`, and `pray` run on their own. Uses randomized, human-like delays so you stay under the radar.
+*   **🤖 Auto Captcha Solver**:
+    *   **Image Captcha**: Automatically reads and solves text in images (powered by Aurabeam). Includes a smart retry system with multiple strategies.
+    *   **Web Captcha**: Automatically detects "Verify" links.
+        *   *PC*: Opens browser, checks login, and clicks verify for you.
+        *   *Termux*: Automatically opens your phone's browser so you just have to tap.
+*   **🛡️ Rate Limit Handler**: If Discord API is lagging or OwO says "slow down", the bot automatically takes a break. Safe and spam-free.
+*   **📱 Termux Support**: optimized to run lightly on your phone. Comes with an easy setup script.
+*   **📜 Quest & Mini-Games**: Can handle daily quests and play slots/coinflip if you want.
+*   **📊 Web Dashboard**: Monitor bot stats, XP, and inventory via browser. Mobile-friendly too.
 
 ---
 
-## 🚀 **Quick Start**
-   ```bash
-   python setup.py
-   python mizu.py
-   ```
-   - Run `setup.py` first for an easy, interactive configuration.
+## 🚀 How to Install
 
-2. **Access Dashboard:**
-   Open: `http://localhost:1200` or `http://YOUR_LOCAL_IP:1200`
+### 📱 Android Users (Termux)
+For the mobile farmers, here's the easy way:
 
-### ⚡ **One-Click Deploy**
-No PC? No problem. Run Mizu OwO on the cloud for free (24/7).
-
-[![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/new)
-[![Run on Replit](https://repl.it/badge/github/kiy0w0/owomizu)](https://repl.it/github/kiy0w0/owomizu)
-
----
-
-## 🛡️ **Is it Safe? (Transparency)**
-We know you're worried about bans. Here is exactly how Mizu protects your account:
-
-1.  **Human-like Typing:** The bot simulates typing status before sending messages.
-2.  **Randomized Delays:** It never sends commands at perfect intervals (e.g., 15.2s, then 16.5s, then 14.8s).
-3.  **Sleep Schedule:** You can set the bot to "sleep" for 8 hours a day, just like a real person.
-4.  **Channel Switching:** The bot moves between channels so it doesn't look like a stationary turret.
-5.  **Noise/Jitter:** Every action has a slight random time offset.
-
-*Disclaimer: Automation always carries a small risk. We recommend using an alt account or the "Safe" profile in the setup wizard.*
-
-### 🐳 **Docker Deployment**
-> For a detailed VPS setup guide, check out the [**Docker VPS Tutorial**](/Tutor/docker_vps.md).
-1. **Configure tokens:**
-   Create `.env` in the project directory.
-
-2. **Run with Docker Compose:**
-   ```bash
-   docker-compose up -d
-   ```
-   
-3. **Access Dashboard:**
-   Open: `http://localhost:1200`
-
-### 🔄 **Auto-Update System**
-```bash
-# Update to latest version with settings preservation
-python updater.py
-```
-
----
-
-## 📖 **Documentation**
-
-### 📋 **Installation Guides**
-- 🪟 [**Windows Setup**](/Tutor/windows.md) - Complete Windows installation guide
-- 🐧 [**Linux Installation**](/Tutor/linux.md) - Ubuntu, Debian, CentOS setup
-- 🍎 [**macOS Setup**](/Tutor/macos.md) - macOS installation guide  
-- 📱 [**Termux (Android)**](/Tutor/termux.md) - Mobile setup guide
-- 🐳 [**Docker VPS**](/Tutor/docker_vps.md) - 24/7 Hosting guide
-
-### ⚙️ **Configuration**
-- 🔑 **Token Setup** - Discord token extraction and setup
-- ⚙️ **Settings** - `config/settings.json` configuration options
-- 🌐 **Global Settings** - `config/global_settings.json` system settings
-- 🎯 **Command Configuration** - Individual command customization
-
-#### 🔒 Security & Tokens
-We prioritize security. Instead of plain text files, we recommend using Environment Variables.
-
-1.  Rename `.env.example` to `.env` (or create a new `.env` file).
-2.  Add your tokens in the format:
-    ```env
-    TOKENS="YOUR_TOKEN_1 CHANNEL_ID_1;YOUR_TOKEN_2 CHANNEL_ID_2"
+1.  Open Termux (download from F-Droid, PlayStore version is outdated).
+2.  Run these commands one by one:
+    ```bash
+    pkg update && pkg upgrade -y
+    pkg install git -y
+    git clone https://github.com/kiy0w0/owomizu
+    cd owomizu
     ```
-    *Note: Multiple accounts are separated by semicolons (;)*
-3.  **Legacy Support:** `tokens.txt` is still supported but **deprecated**. Please migrate to `.env`.
+3.  Run the special Termux setup script (installs everything needed):
+    ```bash
+    chmod +x setup_termux.sh
+    ./setup_termux.sh
+    ```
+4.  Once success, just run:
+    ```bash
+    python mizu.py
+    ```
 
-### 🔧 **Advanced Features**
-- 💎 **AutoEnhance** - Automatic gem usage and essence investment
-- 🎯 **AutoHuntBot** - Huntbot automation and upgrades
-- 💰 **AutoSell** - Smart item selling with triggers
-- 🎲 **RPP System** - Random command execution
-- 🔄 **Multi-Account** - Managing multiple Discord accounts
+### 🖥️ PC Users (Windows/Linux)
+1.  Make sure you have **Python 3.8** or higher installed.
+2.  Clone this repo:
+    ```bash
+    git clone https://github.com/kiy0w0/owomizu
+    cd owomizu
+    ```
+3.  Install requirements:
+    ```bash
+    pip install -r requirements.txt
+    ```
+    *(Note: If you want to use Web Solver on PC, you need Chrome installed)*
+4.  Initial setup (enter tokens etc):
+    ```bash
+    python setup.py
+    ```
+5.  Start the bot:
+    ```bash
+    python mizu.py
+    ```
 
-### 🛠️ **Development**
-- 🤝 [**Contributing Guide**](/CONTRIBUTING.md) - How to contribute
-- 📝 **API Documentation** - Internal API reference
-- 🧪 **Testing** - Testing procedures and guidelines
-- 🔧 **Development Setup** - Local development environment
-
----
-
-## 🎨 **Screenshots**
-
-<div align="center">
-
-### 🖥️ Desktop CLI
-![Desktop CLI](static/imgs/desktop_cli.jpg)
-
-### 🌐 Web Dashboard
-![Web Dashboard](static/imgs/web.png)
-
-</div>
-
----
-
-## 🔧 **API Integration**
-
-### 🌐 **Mizu Network API**
-Our bot integrates with the live Mizu API for enhanced functionality:
-
-- 📡 **Status Monitoring** - Real-time service health checks
-- 📢 **Announcements** - Important updates and news
-- 🔄 **Version Checking** - Automatic update notifications
-- 🛡️ **Safety Updates** - Security patches and warnings
-- 📊 **Statistics** - Usage analytics and performance metrics
-
-**API Endpoint:** `https://api.ive.my.id`
-
-### 🎛️ **Web Dashboard API**
-The bot includes a built-in REST API for the web dashboard:
-- 📊 `/api/stats` - Real-time statistics
-- ⚙️ `/api/settings` - Configuration management
-- 🎮 `/api/commands` - Command control
-- 📈 `/api/performance` - Performance metrics
+## 📚 Detailed Guides
+Need specific instructions for your OS?
+*   [🪟 Windows Guide](Tutor/windows.md)
+*   [🐧 Linux Guide](Tutor/linux.md)
+*   [🍎 macOS Guide](Tutor/macos.md)
+*   [📱 Termux Guide](Tutor/termux.md)
+*   [🐳 Docker VPS Guide](Tutor/docker_vps.md)
 
 ---
 
-## 🤝 **Contributing**
+## ⚙️ Config & Tips
 
-We welcome all types of contributions! Whether you're a developer, designer, or just want to help improve documentation.
+Main config files are in the `config/` folder:
+*   `settings.json`: User config (account token, channel IDs, gamble settings, etc).
+*   `global_settings.json`: System config (webhooks, captcha features, etc).
 
-### 🌟 **Ways to Contribute**
-- 🐛 **Bug Reports** - Found an issue? Let us know!
-- 💡 **Feature Requests** - Have ideas? Share them!
-- 💻 **Code Contributions** - Fix bugs or add features
-- 📖 **Documentation** - Help improve guides and docs
-- 🎨 **Design** - UI/UX improvements
-- 🌐 **Translations** - Help make Mizu multilingual
-
-### 📋 **Getting Started**
-1. Read our [**Contributing Guidelines**](/CONTRIBUTING.md)
-2. Join our [**Discord Community**](https://4NsdaRWD2K)
-3. Check [**Good First Issues**](https://github.com/kiy0w0/owomizu/labels/good%20first%20issue)
-
-### 🔧 **Development Setup**
-```bash
-# Fork and clone the repository
-git clone https://github.com/kiy0w0/owomizu.git
-cd owomizu
-
-# Set up virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-
-# Install pre-commit hooks
-pre-commit install
-```
+**Safety Tips (Anti-Ban):**
+*   Don't be greedy and run it 24/7 non-stop. Use the `sleep` feature in config.
+*   Use reasonable delays, don't speedrun it.
+*   Check logs occasionally if errors pop up.
 
 ---
 
-## 📄 **License**
+## 🤝 Contributing
+Found a bug or want to add a feature? Feel free to PR!
+Join our Discord if you need help or just want to chat.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## ⚠️ **Disclaimer**
-
-This bot is for educational purposes only. Use at your own risk. The developers are not responsible for any Discord account suspensions or bans that may result from using this bot.
-
----
-
-## 🌟 **Support & Community**
-
-<div align="center">
-
-### 💬 **Get Help**
-[![Discord](https://img.shields.io/badge/Discord-Join%20Community-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/4NsdaRWD2K)
-[![GitHub Issues](https://img.shields.io/badge/GitHub-Report%20Issues-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/kiy0w0/owomizu/issues)
-
-### 🎯 **Quick Links**
-| Need Help With | Go To |
-|----------------|-------|
-| 🐛 **Bug Reports** | [GitHub Issues](https://github.com/kiy0w0/owomizu/issues) |
-| 💡 **Feature Requests** | [GitHub Discussions](https://github.com/kiy0w0/owomizu/discussions) |
-| ❓ **General Questions** | [Discord #help](https://discord.gg/4NsdaRWD2K) |
-| 💻 **Development** | [Discord #development](https://discord.gg/4NsdaRWD2K) |
-| 📖 **Documentation** | [Wiki](https://github.com/kiy0w0/owomizu/wiki) |
-
-**Made with 💙 by the Mizu Network Community**
-
-*Stay Mizu, Stay Water* 🌊
-
-</div>
-
----
-
-<div align="center">
-
-### 📊 **Stats**
-
-![GitHub stars](https://img.shields.io/github/stars/kiy0w0/owomizu?style=social)
-![GitHub forks](https://img.shields.io/github/forks/kiy0w0/owomizu?style=social)
-![GitHub watchers](https://img.shields.io/github/watchers/kiy0w0/owomizu?style=social)
-
-![GitHub last commit](https://img.shields.io/github/last-commit/kiy0w0/owomizu)
-![GitHub repo size](https://img.shields.io/github/repo-size/kiy0w0/owomizu)
-![GitHub language count](https://img.shields.io/github/languages/count/kiy0w0/owomizu)
-
-</div>
-
----
+**Disclaimer:**
+*This bot is for educational purposes only. Use at your own risk.* 🌊
