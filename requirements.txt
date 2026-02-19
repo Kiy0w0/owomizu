@@ -33,3 +33,6 @@ Werkzeug
 yarl
 python-dotenv
 pypresence
+ddddocr
+opencv-python-headless
+ultralytics

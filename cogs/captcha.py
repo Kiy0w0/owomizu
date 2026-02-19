@@ -1,7 +1,10 @@
 """
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
+Mizu OwO Bot - Captcha Handler & Auto-Solver
+Copyright (C) 2026 MizuNetwork
+Copyright (C) 2026 Kiy0w0
+
+Part of the OwOMizu Project (https://github.com/Kiy0w0/owomizu)
+Auto-Solver powered by Aurabeam Captcha Solver (https://github.com/Kiy0w0/aurabeam-captcha-solver)
 """
 
 import threading
@@ -9,11 +12,31 @@ import time
 import re
 import os
 import asyncio
+import tempfile
 
 from discord.ext import commands, tasks
 from discord import DMChannel
 
+# Captcha Solver (Optional - requires ddddocr & opencv)
+SOLVER_AVAILABLE = False
+MAX_SOLVE_STRATEGIES = 0
+try:
+    from captcha_solver.solve import solve_captcha, get_strategy_count
+    SOLVER_AVAILABLE = True
+    MAX_SOLVE_STRATEGIES = get_strategy_count()
+except ImportError:
+    pass
+
 list_captcha = ["human", "captcha", "link", "letterword"]
+
+# OwO bot responses indicating wrong captcha answer
+WRONG_ANSWER_PHRASES = [
+    "wrong answer",
+    "incorrect",
+    "that is not right",
+    "try again",
+    "wrong! you have",
+]
 
 def get_path(path):
     cur_dir = os.getcwd()
@@ -92,6 +115,71 @@ def console_handler(cnf, captcha=True):
 class Captcha(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+        # Retry state for auto-solver
+        self._solve_attempt = 0          # Current strategy index
+        self._solve_max_retries = 3      # Max retries (strategies 0,1,2,3)
+        self._captcha_image_path = None  # Saved image path for retries
+        self._captcha_channel = None     # Channel to send answer to
+        self._solving_active = False     # Whether we're in a solve cycle
+
+    async def _download_image(self, url):
+        """Download an image from URL and return bytes"""
+        try:
+            async with self.bot.session.get(url) as resp:
+                if resp.status == 200:
+                    return await resp.read()
+        except Exception as e:
+            await self.bot.log(f"Failed to download captcha image: {e}", "#c25560")
+        return None
+
+    async def _attempt_solve(self, strategy_index=0):
+        """Attempt to solve the cached captcha image with a specific strategy."""
+        if not self._captcha_image_path or not os.path.exists(self._captcha_image_path):
+            await self.bot.log("🧩 Auto-Solver: No cached captcha image to solve", "#c25560")
+            return False
+
+        try:
+            strategy_names = ["Standard", "Adaptive", "Heavy Distortion", "OTSU Auto"]
+            name = strategy_names[strategy_index] if strategy_index < len(strategy_names) else f"Strategy {strategy_index}"
+            
+            await self.bot.log(f"🧩 Auto-Solver: Attempt {strategy_index + 1}/{self._solve_max_retries + 1} using [{name}]...", "#f39c12")
+            self.bot.add_dashboard_log("captcha", f"Auto-Solver attempt {strategy_index + 1} [{name}]", "warning")
+
+            # Run solver in executor (blocking call)
+            loop = asyncio.get_event_loop()
+            answer = await loop.run_in_executor(None, solve_captcha, self._captcha_image_path, strategy_index)
+
+            if answer and len(answer) > 0:
+                await self.bot.log(f"🧩 Auto-Solver result: '{answer}' [{name}]", "#51cf66")
+                self.bot.add_dashboard_log("captcha", f"Auto-Solver answer: {answer} [{name}]", "success")
+
+                # Human-like delay before answering
+                delay = self.bot.random_float([2.0, 5.0])
+                await asyncio.sleep(delay)
+
+                # Send answer
+                if self._captcha_channel:
+                    await self._captcha_channel.send(answer)
+                    await self.bot.log(f"🧩 Auto-Solver: Sent '{answer}' to {get_channel_name(self._captcha_channel)}", "#51cf66")
+                    return True
+            else:
+                await self.bot.log(f"🧩 Auto-Solver: Empty result from [{name}]", "#c25560")
+        except Exception as e:
+            await self.bot.log(f"🧩 Auto-Solver error (attempt {strategy_index + 1}): {e}", "#c25560")
+        
+        return False
+
+    def _cleanup_captcha(self):
+        """Cleanup temp captcha image and reset state."""
+        if self._captcha_image_path:
+            try:
+                os.remove(self._captcha_image_path)
+            except:
+                pass
+        self._captcha_image_path = None
+        self._captcha_channel = None
+        self._solve_attempt = 0
+        self._solving_active = False
 
     def captcha_handler(self, channel, captcha_type):
         if self.bot.misc["hostMode"]:
@@ -191,6 +279,9 @@ class Captcha(commands.Cog):
 
         if message.channel.id == self.bot.dm.id and message.author.id == self.bot.owo_bot_id:
             if "I have verified that you are human! Thank you! :3" in message.content:
+                # Captcha solved successfully!
+                self._cleanup_captcha()
+                
                 time_to_sleep = self.bot.random_float(self.bot.settings_dict['defaultCooldowns']['captchaRestart'])
                 await self.bot.log(f"Captcha solved! - sleeping {time_to_sleep}s before restart.", "#5fd700")
                 
@@ -205,6 +296,24 @@ class Captcha(commands.Cog):
                 await self.bot.log(f"Bot automatically resumed after captcha!", "#51cf66")
                 
                 await self.bot.update_captcha_db()
+                return
+
+            # === WRONG ANSWER RETRY ===
+            content_lower = message.content.lower()
+            if self._solving_active and any(phrase in content_lower for phrase in WRONG_ANSWER_PHRASES):
+                self._solve_attempt += 1
+                if self._solve_attempt <= self._solve_max_retries and self._solve_attempt < MAX_SOLVE_STRATEGIES:
+                    await self.bot.log(f"🧩 Auto-Solver: Wrong answer! Retrying with strategy {self._solve_attempt + 1}...", "#f39c12")
+                    self.bot.add_dashboard_log("captcha", f"Wrong answer - retrying (attempt {self._solve_attempt + 1})", "warning")
+                    
+                    # Small delay before retry
+                    await asyncio.sleep(self.bot.random_float([1.5, 3.0]))
+                    await self._attempt_solve(strategy_index=self._solve_attempt)
+                else:
+                    await self.bot.log(f"🧩 Auto-Solver: All {self._solve_attempt} attempts failed. Manual solve required.", "#d70000")
+                    self.bot.add_dashboard_log("captcha", "Auto-Solver exhausted all strategies - manual solve needed", "error")
+                    self._cleanup_captcha()
+                    self.captcha_handler(self._captcha_channel or message.channel, "Link")
                 return
 
         if message.channel.id in {self.bot.dm.id, self.bot.cm.id} and message.author.id == self.bot.owo_bot_id:
@@ -243,7 +352,39 @@ class Captcha(commands.Cog):
                 channel_name = get_channel_name(message.channel)
                 self.bot.add_dashboard_log("captcha", f"Captcha detected in {channel_name}! Bot stopped automatically", "error")
                 
-                self.captcha_handler(message.channel, "Link")
+                # === AUTO-SOLVE WITH RETRY ===
+                auto_solved = False
+                if SOLVER_AVAILABLE and message.attachments and self.bot.global_settings_dict.get("captcha", {}).get("autoSolve", {}).get("enabled", False):
+                    try:
+                        await self.bot.log("🧩 Auto-Solver: Captcha image detected, starting solve cycle...", "#f39c12")
+                        
+                        # Download image to temp file (keep for retries)
+                        img_url = message.attachments[0].url
+                        img_data = await self._download_image(img_url)
+                        
+                        if img_data:
+                            # Save for retry access
+                            tmp_path = os.path.join(tempfile.gettempdir(), f"mizu_captcha_{self.bot.user.id}.png")
+                            with open(tmp_path, "wb") as f:
+                                f.write(img_data)
+                            
+                            # Setup retry state
+                            self._captcha_image_path = tmp_path
+                            self._captcha_channel = message.channel
+                            self._solve_attempt = 0
+                            self._solving_active = True
+                            
+                            # First attempt (strategy 0)
+                            auto_solved = await self._attempt_solve(strategy_index=0)
+                        else:
+                            await self.bot.log("🧩 Auto-Solver: Failed to download captcha image", "#c25560")
+                    except Exception as e:
+                        await self.bot.log(f"🧩 Auto-Solver error: {e}", "#c25560")
+                        self.bot.add_dashboard_log("captcha", f"Auto-Solver error: {e}", "error")
+                # === END AUTO-SOLVE ===
+                
+                if not auto_solved and not self._solving_active:
+                    self.captcha_handler(message.channel, "Link")
                 if self.bot.global_settings_dict["webhook"]["enabled"]:
                     await self.bot.webhookSender(
                         msg=f"-{self.bot.username} [+] CAPTCHA Detected",

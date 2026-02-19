@@ -83,6 +83,9 @@
                 "bannedContent": "Banned from OwO!"
             },
             "openCaptchaWebsite": false
+        },
+        "autoSolve": {
+            "enabled": true
         }
     },
     "batteryCheck": {

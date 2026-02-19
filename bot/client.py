@@ -82,7 +82,8 @@ class MyClient(commands.Bot):
             "state": True,
             "captcha": False,
             "sleep": False,
-            "hold_handler": False
+            "hold_handler": False,
+            "rate_limited": False
         }
 
         with open("config/misc.json", "r") as config_file:
@@ -409,9 +410,11 @@ class MyClient(commands.Bot):
             "owo": commands_dict["owo"]["enabled"] and not reaction_bot_dict["owo"],
             "pray": (commands_dict["pray"]["enabled"] or commands_dict["curse"]["enabled"]) and not reaction_bot_dict["pray_and_curse"],
             "quest": self.settings_dict.get("questTracker", {}).get("enabled", False),
+            "ratelimit": True,
             "rpp": self.settings_dict.get("autoRandomCommands", {}).get("enabled", False),
             "reactionbot": reaction_bot_dict["hunt_and_battle"] or reaction_bot_dict["owo"] or reaction_bot_dict["pray_and_curse"],
             "richpresence": self.global_settings_dict.get("richPresence", {}).get("enabled", True),
+            "safety": self.settings_dict.get("safety", {}).get("enabled", False),
             "sell": commands_dict["sell"]["enabled"],
             "shop": commands_dict["shop"]["enabled"],
             "slots": self.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False)
@@ -587,6 +590,7 @@ class MyClient(commands.Bot):
                 or self.command_handler_status["hold_handler"]
                 or self.command_handler_status["sleep"]
                 or self.command_handler_status["captcha"]
+                or self.command_handler_status.get("rate_limited", False)
             ):
                 if priority and (
                     not self.command_handler_status["sleep"]
