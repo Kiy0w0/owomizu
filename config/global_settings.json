@@ -2,6 +2,7 @@
     "typingIndicator": true,
     "silentTextMessages": false,
     "offlineStatus": false,
+    "discordStatus": "online",
     "website": {
         "enabled": true,
         "port": 1200,

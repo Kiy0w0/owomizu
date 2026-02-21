@@ -538,22 +538,54 @@ def run_bot(token, channel_id, global_settings_dict):
                     if client in state.bot_instances: state.bot_instances.remove(client)
 
             else:
-                # Mobile (Termux) uses an older version without curl_cffi.
+                # Mobile (Termux) – uses discord.py-self without curl_cffi.
+                # Retry loop: keep reconnecting on recoverable errors (network drops,
+                # server resets, etc.). Only exit on fatal errors like bad token.
                 try:
-                    # Match betaver implementation
                     client.run(token, log_level=logging.ERROR)
                 except Exception as e:
                     error_str = str(e)
-                    if "Improper token" in error_str:
-                        printBox(f"Critical Error: Invalid Token Detected!\nPlease check your .env file or tokens.txt.\nMake sure there are no extra spaces or quotes around your token.", "bold red")
+                    if "Improper token" in error_str or "401" in error_str:
+                        # Fatal – bad token, no point retrying
+                        printBox(
+                            f"[Termux] Critical Error: Invalid Token!\n"
+                            f"Make sure there are no extra spaces, newlines, or quotes around\n"
+                            f"your token in .env or tokens.txt.\n"
+                            f"Quick check: python -c \"import os; from dotenv import load_dotenv; load_dotenv(); print(repr(os.getenv('TOKENS')))\"",
+                            "bold red"
+                        )
+                        if client in state.bot_instances:
+                            state.bot_instances.remove(client)
+                        break
                     elif "'NoneType' object is not iterable" in error_str:
-                        printBox(f"Critical Error: Discord.py version incompatibility detected!\nTry running: pip install aiohttp==3.9.5", "bold red")
+                        printBox(f"[Termux] Discord.py version incompatibility!\nTry: pip install aiohttp==3.9.5", "bold red")
                         printBox(f"Original error: {e}", "red")
+                        if client in state.bot_instances:
+                            state.bot_instances.remove(client)
+                        break
+                    elif "Cannot connect" in error_str or "Connection" in error_str or "TimeoutError" in error_str:
+                        # Recoverable network error – retry after a short delay
+                        printBox(f"[Termux] Network error, retrying in 10s...\n{e}", "bold yellow")
+                        if client in state.bot_instances:
+                            state.bot_instances.remove(client)
+                        time.sleep(10)
+                        continue  # restart the while True loop
                     else:
-                        printBox(f"Unknown error when running bot: {e}", "bold red")
-                finally:
-                    if client in state.bot_instances: state.bot_instances.remove(client)
-                break 
+                        printBox(f"[Termux] Unknown error: {e}\nRetrying in 10s...", "bold yellow")
+                        if client in state.bot_instances:
+                            state.bot_instances.remove(client)
+                        time.sleep(10)
+                        continue  # retry unknown errors too
+                else:
+                    # client.run() returned normally (clean disconnect)
+                    if client in state.bot_instances:
+                        state.bot_instances.remove(client)
+                    if getattr(client, "should_exit", False):
+                        break
+                    # Otherwise treat as recoverable, restart
+                    printBox("[Termux] Bot disconnected, restarting...", "bold yellow")
+                    time.sleep(5)
+                    continue
             
             # Ensure removal if loop continues naturally
             if client in state.bot_instances:

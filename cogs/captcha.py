@@ -73,6 +73,13 @@ def clean(msg):
     return re.sub(r"[^a-zA-Z]", "", msg)
 
 def is_termux():
+    """Robust Termux detection: checks PREFIX/HOME env vars AND filesystem."""
+    termux_prefix = os.environ.get("PREFIX")
+    termux_home = os.environ.get("HOME")
+    if termux_prefix and "com.termux" in termux_prefix:
+        return True
+    if termux_home and "com.termux" in termux_home:
+        return True
     return os.path.isdir("/data/data/com.termux")
 
 on_mobile = is_termux()
@@ -391,10 +398,17 @@ class Captcha(commands.Cog):
                     await asyncio.sleep(self.bot.random_float([1.5, 3.0]))
                     await self._attempt_solve(strategy_index=self._solve_attempt)
                 else:
-                    await self.bot.log(f"🧩 Auto-Solver: All {self._solve_attempt} attempts failed. Manual solve required.", "#d70000")
-                    self.bot.add_dashboard_log("captcha", "Auto-Solver exhausted all strategies - manual solve needed", "error")
+                    await self.bot.log(f"🧩 Auto-Solver: All {self._solve_attempt} attempts failed.", "#d70000")
+                    self.bot.add_dashboard_log("captcha", "Auto-Solver exhausted all strategies", "error")
+
+                    # Last resort: if there's a stored verify URL, try web handler
+                    if hasattr(self, '_last_verify_url') and self._last_verify_url:
+                        await self.bot.log("🌐 Auto-Solver: Falling back to web captcha handler...", "#f39c12")
+                        asyncio.create_task(self._handle_web_captcha(self._last_verify_url))
+                    else:
+                        self.captcha_handler(self._captcha_channel or message.channel, "Link")
+
                     self._cleanup_captcha()
-                    self.captcha_handler(self._captcha_channel or message.channel, "Link")
                 return
 
         if message.channel.id in {self.bot.dm.id, self.bot.cm.id} and message.author.id == self.bot.owo_bot_id:
@@ -468,10 +482,14 @@ class Captcha(commands.Cog):
                                     verify_url = child.url
                                     break
                 
-                if verify_url and self.bot.global_settings_dict.get("captcha", {}).get("autoSolve", {}).get("enabled", False):
-                    # Trigger web handler
-                    asyncio.create_task(self._handle_web_captcha(verify_url))
-                
+                if verify_url:
+                    self._last_verify_url = verify_url  # Store for fallback
+                    if self.bot.global_settings_dict.get("captcha", {}).get("autoSolve", {}).get("enabled", False):
+                        # Trigger web handler
+                        asyncio.create_task(self._handle_web_captcha(verify_url))
+                else:
+                    self._last_verify_url = None
+
                 if not auto_solved and not self._solving_active:
                     self.captcha_handler(message.channel, "Link")
                 if self.bot.global_settings_dict["webhook"]["enabled"]:
