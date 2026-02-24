@@ -402,51 +402,69 @@ def start_runtime_loop(path="utils/data/weekly_runtime.json"):
         print(f"Error when attempting to start runtime handler:\n{e}")
 
 
-"""Create SQLight database"""
-def create_database(db_path="utils/data/db.sqlite"):
+def _build_database_schema(db_path="utils/data/db.sqlite"):
+    """Create all tables and populate initial data. Called after integrity is confirmed."""
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
-    c.execute(
-        "CREATE TABLE IF NOT EXISTS commands (name TEXT PRIMARY KEY, count INTEGER)"
-    )
-    c.execute(
-        "CREATE TABLE IF NOT EXISTS cowoncy_earnings (user_id TEXT, hour INTEGER, earnings INTEGER, PRIMARY KEY (user_id, hour))"
-    )
-    c.execute(
-        "CREATE TABLE IF NOT EXISTS gamble_winrate (hour INTEGER PRIMARY KEY, wins INTEGER, losses INTEGER, net INTEGER)"
-    )
-    c.execute(
-        "CREATE TABLE IF NOT EXISTS user_stats (user_id TEXT PRIMARY KEY, daily REAL, lottery REAL, cookie REAL, giveaways REAL, captchas INTEGER, cowoncy INTEGER)"
-    )
-    c.execute(
-        "CREATE TABLE IF NOT EXISTS meta_data (key TEXT PRIMARY KEY, value INTEGER)"
-    )
-    # Switch to WAL mode for better concurrency
+    c.execute("CREATE TABLE IF NOT EXISTS commands (name TEXT PRIMARY KEY, count INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS cowoncy_earnings (user_id TEXT, hour INTEGER, earnings INTEGER, PRIMARY KEY (user_id, hour))")
+    c.execute("CREATE TABLE IF NOT EXISTS gamble_winrate (hour INTEGER PRIMARY KEY, wins INTEGER, losses INTEGER, net INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS user_stats (user_id TEXT PRIMARY KEY, daily REAL, lottery REAL, cookie REAL, giveaways REAL, captchas INTEGER, cowoncy INTEGER)")
+    c.execute("CREATE TABLE IF NOT EXISTS meta_data (key TEXT PRIMARY KEY, value INTEGER)")
+
     c.execute("PRAGMA journal_mode=WAL;")
-    # Set auto_vacuum so deleted rows automatically reuse space instead of inflating the db file
     c.execute("PRAGMA auto_vacuum = FULL;")
-    # Perform a manual VACUUM to shrink existing inflated databases (compacting all old free pages)
-    c.execute("VACUUM;")
 
-    # Populate
-
-    # -- gamble_winrate
     for hr in range(24):
-        # hour does not have 24 in 24 hr format!!
         c.execute("INSERT OR IGNORE INTO gamble_winrate (hour, wins, losses, net) VALUES (?, ?, ?, ?)", (hr, 0, 0, 0))
 
-    # -- meta data
     c.execute("INSERT OR IGNORE INTO meta_data (key, value) VALUES (?, ?)", ("gamble_winrate_last_checked", 0))
     c.execute("INSERT OR IGNORE INTO meta_data (key, value) VALUES (?, ?)", ("cowoncy_earnings_last_checked", 0))
 
-    # -- commands
     for cmd in misc_dict["command_info"].keys():
         c.execute("INSERT OR IGNORE INTO commands (name, count) VALUES (?, ?)", (cmd, 0))
 
-    # -- end --#
     conn.commit()
     conn.close()
+
+
+def create_database(db_path="utils/data/db.sqlite"):
+    """
+    Create or verify the SQLite database.
+    If the database is corrupted (malformed disk image), automatically
+    backs it up and recreates it from scratch so the bot doesn't crash.
+    """
+    # Check integrity first (catches "database disk image is malformed")
+    if os.path.exists(db_path):
+        try:
+            conn = sqlite3.connect(db_path, timeout=5)
+            result = conn.execute("PRAGMA integrity_check;").fetchone()
+            conn.close()
+
+            if result and result[0] != "ok":
+                raise sqlite3.DatabaseError(f"Integrity check failed: {result[0]}")
+
+        except sqlite3.DatabaseError as e:
+            # Database is corrupt — back it up and delete it
+            backup_path = db_path + f".corrupted_{int(time.time())}.bak"
+            printBox(
+                f"⚠️  Database corruption detected!\n"
+                f"Reason: {e}\n\n"
+                f"Auto-recovery: The broken database has been backed up to:\n"
+                f"  {backup_path}\n\n"
+                f"A fresh database will be created now. Your stats data has been lost,\n"
+                f"but the bot will work normally going forward.",
+                "bold yellow"
+            )
+            try:
+                os.rename(db_path, backup_path)
+            except Exception as rename_err:
+                printBox(f"Could not backup db: {rename_err}\nDeleting instead.", "bold red")
+                os.remove(db_path)
+
+    # Build fresh schema (creates file if not exists, or populates existing clean one)
+    _build_database_schema(db_path)
 
 
 # ----------STARTING BOT----------#
