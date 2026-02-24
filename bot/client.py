@@ -213,36 +213,49 @@ class MyClient(commands.Bot):
             await self.start_cogs()
 
     async def update_database(self, sql, params=None):
-        if not hasattr(self, 'db') or not self.db:
-             async with aiosqlite.connect("utils/data/db.sqlite", timeout=5) as db:
-                await db.execute("PRAGMA journal_mode=WAL;")
-                await db.execute("PRAGMA synchronous=NORMAL;")
-                await db.execute("BEGIN;")
-                await db.execute(sql, params)
-                await db.commit()
-             return
+        retries = 5
+        for i in range(retries):
+            try:
+                if not hasattr(self, 'db') or not self.db:
+                    async with aiosqlite.connect("utils/data/db.sqlite", timeout=30.0) as db:
+                        await db.execute("PRAGMA journal_mode=WAL;")
+                        await db.execute("PRAGMA synchronous=NORMAL;")
+                        await db.execute("BEGIN;")
+                        await db.execute(sql, params)
+                        await db.commit()
+                    return
 
-        try:
-            await self.db.execute(sql, params)
-            await self.db.commit()
-        except Exception as e:
-            await self.log(f"Database error in update_database: {e}", "#c25560")
+                await self.db.execute(sql, params)
+                await self.db.commit()
+                return  # Success, exit retry loop
+            except Exception as e:
+                err_str = str(e).lower()
+                if "locked" in err_str and i < retries - 1:
+                    await asyncio.sleep(self.random.uniform(0.5, 2.0))
+                    continue
+                await self.log(f"Database error in update_database: {e}", "#c25560")
+                break
 
     async def get_from_db(self, sql, params=None):
-        if not hasattr(self, 'db') or not self.db:
-            async with aiosqlite.connect("utils/data/db.sqlite", timeout=5) as db:
-                db.row_factory = aiosqlite.Row
-                async with db.execute(sql, params or ()) as cursor:
-                    result = await cursor.fetchall()
-                    return result
+        retries = 5
+        for i in range(retries):
+            try:
+                if not hasattr(self, 'db') or not self.db:
+                    async with aiosqlite.connect("utils/data/db.sqlite", timeout=30.0) as db:
+                        db.row_factory = aiosqlite.Row
+                        async with db.execute(sql, params or ()) as cursor:
+                            return await cursor.fetchall()
 
-        try:
-            async with self.db.execute(sql, params or ()) as cursor:
-                result = await cursor.fetchall()
-                return result
-        except Exception as e:
-            await self.log(f"Database error in get_from_db: {e}", "#c25560")
-            return []
+                async with self.db.execute(sql, params or ()) as cursor:
+                    return await cursor.fetchall()
+            except Exception as e:
+                err_str = str(e).lower()
+                if "locked" in err_str and i < retries - 1:
+                    await asyncio.sleep(self.random.uniform(0.5, 2.0))
+                    continue
+                await self.log(f"Database error in get_from_db: {e}", "#c25560")
+                return []
+        return []
 
     async def close(self):
         if hasattr(self, 'db') and self.db:

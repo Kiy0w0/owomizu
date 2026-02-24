@@ -422,8 +422,12 @@ def create_database(db_path="utils/data/db.sqlite"):
     c.execute(
         "CREATE TABLE IF NOT EXISTS meta_data (key TEXT PRIMARY KEY, value INTEGER)"
     )
-    # Switch to WAL mode.
+    # Switch to WAL mode for better concurrency
     c.execute("PRAGMA journal_mode=WAL;")
+    # Set auto_vacuum so deleted rows automatically reuse space instead of inflating the db file
+    c.execute("PRAGMA auto_vacuum = FULL;")
+    # Perform a manual VACUUM to shrink existing inflated databases (compacting all old free pages)
+    c.execute("VACUUM;")
 
     # Populate
 

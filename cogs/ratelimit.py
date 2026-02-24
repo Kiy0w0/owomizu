@@ -120,6 +120,14 @@ class RateLimitHandler(commands.Cog):
         
         content_lower = message.content.lower()
         if any(phrase in content_lower for phrase in rate_limit_phrases):
+            # Only count if the message actually mentions the bot, OR if it's in a DM
+            # This prevents all bots in the same server from falsely pausing when only 1 bot is rate-limited
+            if message.guild:
+                # In a server, ensure the OwO message is meant for this specific bot
+                is_for_me = (str(self.bot.user.id) in message.content) or any(m.id == self.bot.user.id for m in message.mentions)
+                if not is_for_me:
+                    return
+
             self._rate_limit_count += 1
             self._last_rate_limit = time.time()
             self._total_rate_limits += 1
