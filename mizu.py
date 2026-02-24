@@ -414,7 +414,6 @@ def _build_database_schema(db_path="utils/data/db.sqlite"):
     c.execute("CREATE TABLE IF NOT EXISTS meta_data (key TEXT PRIMARY KEY, value INTEGER)")
 
     c.execute("PRAGMA journal_mode=WAL;")
-    c.execute("PRAGMA auto_vacuum = FULL;")
 
     for hr in range(24):
         c.execute("INSERT OR IGNORE INTO gamble_winrate (hour, wins, losses, net) VALUES (?, ?, ?, ?)", (hr, 0, 0, 0))
