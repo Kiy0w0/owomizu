@@ -75,15 +75,25 @@ class Battle(commands.Cog):
                             # SAFETY CHECK: Enforce minimum cooldown
                             if isinstance(cooldown_battle, (int, float)) and cooldown_battle < 5:
                                 cooldown_battle = 15
-                                await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
+                                await self.bot.log("Enforcing 15s safety.", "#e74c3c")
                             elif isinstance(cooldown_battle, list) and cooldown_battle[0] < 5:
                                 cooldown_battle = [15, max(15, cooldown_battle[1])]
-                                await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
-                                
+                                await self.bot.log("Enforcing 15s safety.", "#e74c3c")
+
+                            # Sync basecd so put_queue Smart System doesn't double-count
+                            cd_min = cooldown_battle[0] if isinstance(cooldown_battle, list) else cooldown_battle
+                            if "battle" in self.bot.misc.get("command_info", {}):
+                                self.bot.misc["command_info"]["battle"]["basecd"] = max(1, cd_min - 2)
+
                             await self.bot.sleep_till(cooldown_battle)
+
+                            # Stamp last_ran so put_queue sees cooldown as already satisfied
+                            async with self.bot.lock:
+                                self.bot.cmds_state["battle"]["last_ran"] = __import__("time").time()
+
                             self.cmd["cmd_name"] = (
-                                self.bot.alias["battle"]["shortform"] 
-                                if self.bot.settings_dict["commands"]["battle"]["useShortForm"] 
+                                self.bot.alias["battle"]["shortform"]
+                                if self.bot.settings_dict["commands"]["battle"]["useShortForm"]
                                 else self.bot.alias["battle"]["alias"]
                             )
                             await self.bot.put_queue(self.cmd)

@@ -88,19 +88,34 @@ class Hunt(commands.Cog):
                         return
 
                     cooldown_hunt = self.bot.settings_dict["commands"]["hunt"]["cooldown"]
-                    
+
                     # SAFETY CHECK: Enforce minimum cooldown
                     if isinstance(cooldown_hunt, (int, float)) and cooldown_hunt < 5:
-                         cooldown_hunt = 15
-                         await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
+                        cooldown_hunt = 15
+                        await self.bot.log("Enforcing 15s safety.", "#e74c3c")
                     elif isinstance(cooldown_hunt, list) and cooldown_hunt[0] < 5:
-                         cooldown_hunt = [15, max(15, cooldown_hunt[1])]
-                         await self.bot.log(f"Enforcing 15s safety.", "#e74c3c")
+                        cooldown_hunt = [15, max(15, cooldown_hunt[1])]
+                        await self.bot.log("Enforcing 15s safety.", "#e74c3c")
 
-                    await self.bot.sleep_till(cooldown_hunt, noise=self.bot.random.uniform(1.5, 5.0))
+                    # Sync misc.json basecd with user's configured cooldown minimum
+                    # so put_queue Smart System doesn't add extra delay on top of the sleep below
+                    cd_min = cooldown_hunt[0] if isinstance(cooldown_hunt, list) else cooldown_hunt
+                    if "hunt" in self.bot.misc.get("command_info", {}):
+                        self.bot.misc["command_info"]["hunt"]["basecd"] = max(1, cd_min - 2)
+                    if "battle" in self.bot.misc.get("command_info", {}):
+                        battle_cd = self.bot.settings_dict["commands"]["battle"]["cooldown"]
+                        b_min = battle_cd[0] if isinstance(battle_cd, list) else battle_cd
+                        self.bot.misc["command_info"]["battle"]["basecd"] = max(1, b_min - 2)
+
+                    await self.bot.sleep_till(cooldown_hunt)
+
+                    # Stamp last_ran NOW (after sleep) so put_queue sees cooldown as already satisfied
+                    async with self.bot.lock:
+                        self.bot.cmds_state["hunt"]["last_ran"] = __import__("time").time()
+
                     self.cmd["cmd_name"] = (
-                        self.bot.alias["hunt"]["shortform"] 
-                        if self.bot.settings_dict["commands"]["hunt"]["useShortForm"] 
+                        self.bot.alias["hunt"]["shortform"]
+                        if self.bot.settings_dict["commands"]["hunt"]["useShortForm"]
                         else self.bot.alias["hunt"]["alias"]
                     )
                     await self.bot.put_queue(self.cmd)
