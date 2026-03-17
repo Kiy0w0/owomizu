@@ -412,6 +412,36 @@ class Captcha(commands.Cog):
                 return
 
         if message.channel.id in {self.bot.dm.id, self.bot.cm.id} and message.author.id == self.bot.owo_bot_id:
+
+            
+            content_lower_raw = message.content.lower()
+            CAPTCHA_PLAIN_PHRASES = [
+                "please complete your captcha",
+                "verify that you are human",
+                "complete captcha to continue",
+            ]
+            if any(phrase in content_lower_raw for phrase in CAPTCHA_PLAIN_PHRASES):
+                
+                is_dm = get_channel_name(message.channel) == "owo DMs"
+                targets_me = (
+                    is_dm
+                    or self.bot.user.name.lower() in content_lower_raw
+                    or f"<@{self.bot.user.id}>" in message.content
+                    or (message.guild and any(str(self.bot.user.id) in str(m.id) for m in message.mentions))
+                )
+                if targets_me and not self.bot.command_handler_status["captcha"]:
+                    self.bot.command_handler_status["captcha"] = True
+                    await self.bot.log("⛔ Captcha warning detected! Bot stopped.", "#d70000")
+                    self.bot.add_dashboard_log("captcha", "Captcha prompt detected (plain text) - bot stopped", "error")
+                    self.captcha_handler(message.channel, "Link")
+                    if self.bot.global_settings_dict["webhook"]["enabled"]:
+                        await self.bot.webhookSender(
+                            msg=f"-{self.bot.username} [+] CAPTCHA Detected",
+                            desc=f"**User** : <@{self.bot.user.id}>\n**Link** : [OwO Captcha]({message.jump_url})",
+                            colors="#00FFAF",
+                        )
+                    return
+
             """Handle normally expected captcha"""
             if (
                 (

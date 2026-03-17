@@ -13,8 +13,6 @@ class Battle(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._battle_task = None
-        self._waiting_for_response = False
-        self._response_event = asyncio.Event()
 
     async def cog_load(self):
         if (
@@ -33,7 +31,7 @@ class Battle(commands.Cog):
             self._battle_task.cancel()
 
     def _get_cooldown(self):
-        """Read cooldown from settings, enforce 5s minimum."""
+        """Read cooldown from settings.json, enforce 5s minimum."""
         cd = self.bot.settings_dict["commands"]["battle"]["cooldown"]
         if isinstance(cd, list):
             if cd[0] < 5:
@@ -52,14 +50,11 @@ class Battle(commands.Cog):
 
     async def _battle_loop(self):
         """
-        Independent battle loop.
-        Manages its own cooldown — completely bypasses put_queue / Smart Cooldown System.
-        Cooldown from settings.json is respected 1:1 with no interference.
+        Independent battle loop — sends command then sleeps for the cooldown
+        configured in settings.json. No queue interference.
         """
         await self.bot.wait_until_ready()
-
-        # Small startup stagger offset from hunt
-        await asyncio.sleep(self.bot.random.uniform(4.0, 7.0))
+        await asyncio.sleep(self.bot.random.uniform(4.0, 7.0))  # startup stagger (offset from hunt)
 
         while not self.bot.is_closed():
             try:
@@ -80,32 +75,29 @@ class Battle(commands.Cog):
                     await asyncio.sleep(10)
                     continue
 
-                # Send battle command directly to channel (no queue)
+                # Send battle command directly
                 cmd_name = self._get_cmd_name()
                 prefix = self.bot.settings_dict.get("setprefix", "owo ")
                 silent = self.bot.global_settings_dict.get("silentTextMessages", False)
-
-                self._waiting_for_response = True
-                self._response_event.clear()
-
                 await self.bot.cm.send(f"{prefix}{cmd_name}", silent=silent)
 
-                # Wait for OwO to respond (max 12s), then apply cooldown
-                try:
-                    await asyncio.wait_for(self._response_event.wait(), timeout=12.0)
-                except asyncio.TimeoutError:
-                    pass  # No response — continue to cooldown
-
-                self._waiting_for_response = False
-
-                # === EXACT cooldown from settings.json — no extras ===
+                # Sleep the configured cooldown — in 1s chunks to allow instant interrupt
                 cd = self._get_cooldown()
                 sleep_time = (
                     self.bot.random.uniform(cd[0], cd[1])
                     if isinstance(cd, list)
                     else float(cd)
                 )
-                await asyncio.sleep(sleep_time)
+                deadline = asyncio.get_event_loop().time() + sleep_time
+                while asyncio.get_event_loop().time() < deadline:
+                    if (
+                        self.bot.command_handler_status["captcha"]
+                        or self.bot.command_handler_status["sleep"]
+                        or not self.bot.command_handler_status["state"]
+                        or self.bot.command_handler_status.get("rate_limited", False)
+                    ):
+                        break
+                    await asyncio.sleep(min(1.0, deadline - asyncio.get_event_loop().time()))
 
             except asyncio.CancelledError:
                 break
@@ -123,13 +115,9 @@ class Battle(commands.Cog):
                             if message.reference is not None:
                                 referenced = await message.channel.fetch_message(message.reference.message_id)
                                 if not referenced.embeds and "You found a **weapon crate**!" in referenced.content:
-                                    pass  # Allow — not a real battle reply
+                                    pass  # Allow
                                 else:
-                                    return  # Skip — it's a reply to something else
-
-                            # Signal the loop that OwO responded
-                            if self._waiting_for_response:
-                                self._response_event.set()
+                                    return
         except Exception as e:
             await self.bot.log(f"Error - {e}, During battle on_message()", "#c25560")
 

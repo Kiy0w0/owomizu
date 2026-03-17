@@ -24,23 +24,16 @@ except json.JSONDecodeError:
 def get_emoji_cost(text, emoji_dict=emoji_dict):
     pattern = re.compile(r"<a:[a-zA-Z0-9_]+:[0-9]+>|:[a-zA-Z0-9_]+:|[\U0001F300-\U0001F6FF\U0001F700-\U0001F77F]")
     emojis = pattern.findall(text)
-    emoji_names = [emoji_dict[char]["sell_price"] for char in emojis if char in emoji_dict]
-    return emoji_names
+    return [emoji_dict[char]["sell_price"] for char in emojis if char in emoji_dict]
 
 def get_emoji_values(text):
-    emoji_costs = get_emoji_cost(text)
-    total_sell_price = 0
-    for sell_price in emoji_costs:
-        total_sell_price += sell_price
-    return total_sell_price
+    return sum(get_emoji_cost(text))
 
 
 class Hunt(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._hunt_task = None
-        self._waiting_for_response = False
-        self._response_event = asyncio.Event()
 
     async def cog_load(self):
         if (
@@ -59,7 +52,7 @@ class Hunt(commands.Cog):
             self._hunt_task.cancel()
 
     def _get_cooldown(self):
-        """Read cooldown from settings, enforce 5s minimum."""
+        """Read cooldown from settings.json, enforce 5s minimum."""
         cd = self.bot.settings_dict["commands"]["hunt"]["cooldown"]
         if isinstance(cd, list):
             if cd[0] < 5:
@@ -78,14 +71,11 @@ class Hunt(commands.Cog):
 
     async def _hunt_loop(self):
         """
-        Independent hunt loop.
-        Manages its own cooldown — completely bypasses put_queue / Smart Cooldown System.
-        Cooldown from settings.json is respected 1:1 with no interference.
+        Independent hunt loop — sends command then sleeps for the cooldown
+        configured in settings.json. No queue interference.
         """
         await self.bot.wait_until_ready()
-
-        # Small startup stagger so it doesn't collide with battle on startup
-        await asyncio.sleep(self.bot.random.uniform(1.5, 4.0))
+        await asyncio.sleep(self.bot.random.uniform(1.5, 4.0))  # startup stagger
 
         while not self.bot.is_closed():
             try:
@@ -107,32 +97,29 @@ class Hunt(commands.Cog):
                     await asyncio.sleep(10)
                     continue
 
-                # Send hunt command directly to channel (no queue)
+                # Send hunt command directly
                 cmd_name = self._get_cmd_name()
                 prefix = self.bot.settings_dict.get("setprefix", "owo ")
                 silent = self.bot.global_settings_dict.get("silentTextMessages", False)
-
-                self._waiting_for_response = True
-                self._response_event.clear()
-
                 await self.bot.cm.send(f"{prefix}{cmd_name}", silent=silent)
 
-                # Wait for OwO to respond (max 12s), then apply configured cooldown
-                try:
-                    await asyncio.wait_for(self._response_event.wait(), timeout=12.0)
-                except asyncio.TimeoutError:
-                    pass  # OwO didn't reply in time — continue anyway
-
-                self._waiting_for_response = False
-
-                # === EXACT cooldown from settings.json — no extras ===
+                # Sleep the configured cooldown — in 1s chunks to allow instant interrupt
                 cd = self._get_cooldown()
                 sleep_time = (
                     self.bot.random.uniform(cd[0], cd[1])
                     if isinstance(cd, list)
                     else float(cd)
                 )
-                await asyncio.sleep(sleep_time)
+                deadline = asyncio.get_event_loop().time() + sleep_time
+                while asyncio.get_event_loop().time() < deadline:
+                    if (
+                        self.bot.command_handler_status["captcha"]
+                        or self.bot.command_handler_status["sleep"]
+                        or not self.bot.command_handler_status["state"]
+                        or self.bot.command_handler_status.get("rate_limited", False)
+                    ):
+                        break
+                    await asyncio.sleep(min(1.0, deadline - asyncio.get_event_loop().time()))
 
             except asyncio.CancelledError:
                 break
@@ -151,10 +138,6 @@ class Hunt(commands.Cog):
                     )
                     await self.bot.update_cash(sell_value - 5, assumed=True)
                     await self.bot.update_cash(5, reduce=True)
-
-                    # Signal the loop that OwO responded
-                    if self._waiting_for_response:
-                        self._response_event.set()
         except Exception as e:
             await self.bot.log(f"Error - {e}, During hunt on_message()", "#c25560")
 
