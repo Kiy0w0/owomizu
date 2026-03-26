@@ -7,6 +7,7 @@ Copyright (C) 2025 Kiy0w0
 import asyncio
 import json
 import re
+from typing import Optional
 
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
@@ -33,7 +34,7 @@ def get_emoji_values(text):
 class Hunt(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._hunt_task = None
+        self._hunt_task: Optional[asyncio.Task] = None
 
     async def cog_load(self):
         if (
@@ -48,11 +49,11 @@ class Hunt(commands.Cog):
             self._hunt_task = asyncio.create_task(self._hunt_loop())
 
     async def cog_unload(self):
-        if self._hunt_task:
-            self._hunt_task.cancel()
+        task = self._hunt_task
+        if task is not None:
+            task.cancel()
 
     def _get_cooldown(self):
-        """Read cooldown from settings.json, enforce 5s minimum."""
         cd = self.bot.settings_dict["commands"]["hunt"]["cooldown"]
         if isinstance(cd, list):
             if cd[0] < 5:
@@ -70,16 +71,11 @@ class Hunt(commands.Cog):
         )
 
     async def _hunt_loop(self):
-        """
-        Independent hunt loop — sends command then sleeps for the cooldown
-        configured in settings.json. No queue interference.
-        """
         await self.bot.wait_until_ready()
-        await asyncio.sleep(self.bot.random.uniform(1.5, 4.0))  # startup stagger
+        await asyncio.sleep(self.bot.random.uniform(1.5, 4.0))
 
         while not self.bot.is_closed():
             try:
-                # Wait while bot is paused / sleeping / captcha / rate-limited
                 while (
                     not self.bot.command_handler_status["state"]
                     or self.bot.command_handler_status["sleep"]
@@ -88,7 +84,6 @@ class Hunt(commands.Cog):
                 ):
                     await asyncio.sleep(1.5)
 
-                # Check stopHuntingWhenNoGems
                 if (
                     self.bot.settings_dict.get("stopHuntingWhenNoGems", False)
                     and self.bot.user_status.get("no_gems", False)
@@ -97,13 +92,11 @@ class Hunt(commands.Cog):
                     await asyncio.sleep(10)
                     continue
 
-                # Send hunt command directly
                 cmd_name = self._get_cmd_name()
                 prefix = self.bot.settings_dict.get("setprefix", "owo ")
                 silent = self.bot.global_settings_dict.get("silentTextMessages", False)
                 await self.bot.cm.send(f"{prefix}{cmd_name}", silent=silent)
 
-                # Sleep the configured cooldown — in 1s chunks to allow instant interrupt
                 cd = self._get_cooldown()
                 sleep_time = (
                     self.bot.random.uniform(cd[0], cd[1])

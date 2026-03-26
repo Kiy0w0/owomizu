@@ -5,6 +5,7 @@ Copyright (C) 2025 Kiy0w0
 """
 
 import asyncio
+from typing import Optional
 
 from discord.ext import commands
 
@@ -12,7 +13,7 @@ from discord.ext import commands
 class Battle(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self._battle_task = None
+        self._battle_task: Optional[asyncio.Task] = None
 
     async def cog_load(self):
         if (
@@ -27,11 +28,11 @@ class Battle(commands.Cog):
             self._battle_task = asyncio.create_task(self._battle_loop())
 
     async def cog_unload(self):
-        if self._battle_task:
-            self._battle_task.cancel()
+        task = self._battle_task
+        if task is not None:
+            task.cancel()
 
     def _get_cooldown(self):
-        """Read cooldown from settings.json, enforce 5s minimum."""
         cd = self.bot.settings_dict["commands"]["battle"]["cooldown"]
         if isinstance(cd, list):
             if cd[0] < 5:
@@ -49,16 +50,11 @@ class Battle(commands.Cog):
         )
 
     async def _battle_loop(self):
-        """
-        Independent battle loop — sends command then sleeps for the cooldown
-        configured in settings.json. No queue interference.
-        """
         await self.bot.wait_until_ready()
-        await asyncio.sleep(self.bot.random.uniform(4.0, 7.0))  # startup stagger (offset from hunt)
+        await asyncio.sleep(self.bot.random.uniform(4.0, 7.0))
 
         while not self.bot.is_closed():
             try:
-                # Wait while bot is paused / sleeping / captcha / rate-limited
                 while (
                     not self.bot.command_handler_status["state"]
                     or self.bot.command_handler_status["sleep"]
@@ -67,7 +63,6 @@ class Battle(commands.Cog):
                 ):
                     await asyncio.sleep(1.5)
 
-                # Check stopHuntingWhenNoGems
                 if (
                     self.bot.settings_dict.get("stopHuntingWhenNoGems", False)
                     and self.bot.user_status.get("no_gems", False)
@@ -75,13 +70,11 @@ class Battle(commands.Cog):
                     await asyncio.sleep(10)
                     continue
 
-                # Send battle command directly
                 cmd_name = self._get_cmd_name()
                 prefix = self.bot.settings_dict.get("setprefix", "owo ")
                 silent = self.bot.global_settings_dict.get("silentTextMessages", False)
                 await self.bot.cm.send(f"{prefix}{cmd_name}", silent=silent)
 
-                # Sleep the configured cooldown — in 1s chunks to allow instant interrupt
                 cd = self._get_cooldown()
                 sleep_time = (
                     self.bot.random.uniform(cd[0], cd[1])

@@ -1,5 +1,6 @@
 import asyncio
 import re
+import time
 
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
@@ -81,6 +82,10 @@ class Gems(commands.Cog):
         self.cache_gems_in_use = {}
         self.prev_count = 0
         self.count = 0
+
+        self._blocked_gems: dict[str, float] = {}
+        self._gem_block_duration = 5 * 60
+
         self.gem_cmd = {
             "cmd_name": self.bot.alias["use"]["normal"],
             "cmd_arguments": "",
@@ -97,11 +102,17 @@ class Gems(commands.Cog):
 
     def enabled_gem_types(self):
         cnf = self.bot.settings_dict["autoUse"]["gems"]["gemsToUse"]
+        now = time.time()
+        
+        expired = [k for k, v in self._blocked_gems.items() if now >= v]
+        for k in expired:
+            del self._blocked_gems[k]
+            
         return {
-            "huntGem": cnf["huntGem"],
-            "empoweredGem": cnf["empoweredGem"],
-            "luckyGem": cnf["luckyGem"],
-            "specialGem": cnf["specialGem"],
+            "huntGem":      cnf["huntGem"]      and "huntGem"      not in self._blocked_gems,
+            "empoweredGem": cnf["empoweredGem"] and "empoweredGem" not in self._blocked_gems,
+            "luckyGem":     cnf["luckyGem"]     and "luckyGem"     not in self._blocked_gems,
+            "specialGem":   cnf["specialGem"]   and "specialGem"   not in self._blocked_gems,
         }
 
     async def use_gems(self, available_gems, gems_in_use=None, full=False):
@@ -323,18 +334,37 @@ class Gems(commands.Cog):
             self.available_gems = find_gems_available(message.content)
             self.already_checked = False
             
-            # await self.bot.log(f"Inventory Gems Updated: {self.available_gems}", "#444444") 
-            
             if self.inventory_check:
                 await self.use_gems(self.available_gems, full=True)
-                # await self.bot.sleep_till([2,4])
                 self.inventory_check = False
                 self.cache_gems_in_use = {}
             elif self.cache_gems_in_use:
                 await self.use_gems(self.available_gems, self.cache_gems_in_use)
                 self.cache_gems_in_use = {}
 
-            # await self.bot.set_stat(True)
+        elif message.author.id == self.bot.owo_bot_id:
+            content_lower = message.content.lower()
+            ALREADY_ACTIVE_MAP = [
+                ("hunting gem",    "huntGem"),
+                ("empowering gem", "empoweredGem"),
+                ("lucky gem",      "luckyGem"),
+                ("special gem",    "specialGem"),
+            ]
+            blocked_any = False
+            for phrase, gem_key in ALREADY_ACTIVE_MAP:
+                if phrase in content_lower and "already have an active" in content_lower:
+                    if gem_key not in self._blocked_gems:
+                        self._blocked_gems[gem_key] = time.time() + self._gem_block_duration
+                        mins = self._gem_block_duration // 60
+                        await self.bot.log(
+                            f"💎 Gem '{gem_key}' is already active — skipping for {mins} min",
+                            "#f39c12"
+                        )
+                        self.bot.add_dashboard_log("gems", f"{gem_key} already active, skipping {mins}min", "warning")
+                    blocked_any = True
+                    
+            if blocked_any:
+                await self.bot.remove_queue(id="gems")
 
 
 async def setup(bot):

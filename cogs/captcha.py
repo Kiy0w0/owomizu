@@ -128,14 +128,15 @@ class Captcha(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         # Retry state for auto-solver
-        self._solve_attempt = 0          # Current strategy index
-        self._solve_max_retries = 3      # Max retries (strategies 0,1,2,3)
-        self._captcha_image_path = None  # Saved image path for retries
-        self._captcha_channel = None     # Channel to send answer to
-        self._solving_active = False     # Whether we're in a solve cycle
+        self._solve_attempt: int = 0
+        self._solve_max_retries: int = 3
+        self._captcha_image_path: str | None = None
+        self._captcha_channel = None
+        self._solving_active: bool = False
 
         # Web Captcha State
         self._driver = None
+        self._last_verify_url: str | None = None
 
     def _init_driver(self):
         """Initialize Selenium WebDriver (Chrome) for web captcha handling."""
@@ -160,7 +161,7 @@ class Captcha(commands.Cog):
         """Handle web-based captcha verification via Selenium."""
         if on_mobile:
             # Termux fallback: Open link manually
-            run_system_command(f"termux-open {url}")
+            run_system_command(f"termux-open {url}", timeout=10)
             await self.bot.log(f"🔗 Opened captcha link in external browser (Termux)", "#3498db")
             return
 
@@ -225,7 +226,8 @@ class Captcha(commands.Cog):
 
     async def _attempt_solve(self, strategy_index=0):
         """Attempt to solve the cached captcha image with a specific strategy."""
-        if not self._captcha_image_path or not os.path.exists(self._captcha_image_path):
+        img_path = self._captcha_image_path
+        if not img_path or not os.path.exists(img_path):
             await self.bot.log("🧩 Auto-Solver: No cached captcha image to solve", "#c25560")
             return False
 
@@ -238,7 +240,8 @@ class Captcha(commands.Cog):
 
             # Run solver in executor (blocking call)
             loop = asyncio.get_event_loop()
-            answer = await loop.run_in_executor(None, solve_captcha, self._captcha_image_path, strategy_index)
+            img_path = self._captcha_image_path  # local var — always str here
+            answer = await loop.run_in_executor(None, solve_captcha, img_path, strategy_index)
 
             if answer and len(answer) > 0:
                 await self.bot.log(f"🧩 Auto-Solver result: '{answer}' [{name}]", "#51cf66")
@@ -262,10 +265,11 @@ class Captcha(commands.Cog):
 
     def _cleanup_captcha(self):
         """Cleanup temp captcha image and reset state."""
-        if self._captcha_image_path:
+        img_path = self._captcha_image_path
+        if img_path:
             try:
-                os.remove(self._captcha_image_path)
-            except:
+                os.remove(img_path)
+            except Exception:
                 pass
         self._captcha_image_path = None
         self._captcha_channel = None
@@ -421,7 +425,6 @@ class Captcha(commands.Cog):
                 "complete captcha to continue",
             ]
             if any(phrase in content_lower_raw for phrase in CAPTCHA_PLAIN_PHRASES):
-                
                 is_dm = get_channel_name(message.channel) == "owo DMs"
                 targets_me = (
                     is_dm
@@ -432,7 +435,7 @@ class Captcha(commands.Cog):
                 if targets_me and not self.bot.command_handler_status["captcha"]:
                     self.bot.command_handler_status["captcha"] = True
                     await self.bot.log("⛔ Captcha warning detected! Bot stopped.", "#d70000")
-                    self.bot.add_dashboard_log("captcha", "Captcha prompt detected (plain text) - bot stopped", "error")
+                    self.bot.add_dashboard_log("captcha", "Captcha prompt detected - bot stopped", "error")
                     self.captcha_handler(message.channel, "Link")
                     if self.bot.global_settings_dict["webhook"]["enabled"]:
                         await self.bot.webhookSender(
