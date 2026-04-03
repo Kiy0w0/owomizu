@@ -5,16 +5,16 @@
         "hunt": {
             "enabled": true,
             "cooldown": [
-                16,
-                22
+                15,
+                20
             ],
             "useShortForm": true
         },
         "battle": {
             "enabled": true,
             "cooldown": [
-                16,
-                22
+                15,
+                20
             ],
             "useShortForm": true
         },
@@ -27,11 +27,7 @@
             "rarity": [
                 "c",
                 "u",
-                "r",
-                "e",
-                "m",
-                "l",
-                "g"
+                "r"
             ]
         },
         "sac": {
@@ -43,11 +39,7 @@
             "rarity": [
                 "c",
                 "u",
-                "r",
-                "e",
-                "m",
-                "l",
-                "g"
+                "r"
             ]
         },
         "pray": {
@@ -60,15 +52,13 @@
             "pingUser": false
         },
         "curse": {
-            "enabled": true,
+            "enabled": false,
             "cooldown": [
                 310,
                 400
             ],
-            "userid": [
-                "1211322704087613551"
-            ],
-            "pingUser": true
+            "userid": [],
+            "pingUser": false
         },
         "lottery": {
             "enabled": false,
@@ -82,12 +72,12 @@
             ],
             "useQuoteInstead": false,
             "minLengthForRandomString": 5,
-            "maxLengthForRandomString": 20
+            "maxLengthForRandomString": 15
         },
         "cookie": {
             "enabled": false,
-            "userid": 408785106942164992,
-            "pingUser": true
+            "userid": 0,
+            "pingUser": false
         },
         "shop": {
             "enabled": false,
@@ -103,7 +93,7 @@
             "enabled": true,
             "cooldown": [
                 10,
-                13
+                15
             ]
         },
         "autoHuntBot": {
@@ -111,14 +101,6 @@
             "cashToSpend": 10000,
             "upgrader": {
                 "enabled": true,
-                "traits": {
-                    "efficiency": true,
-                    "duration": true,
-                    "cost": true,
-                    "gain": true,
-                    "exp": true,
-                    "radar": true
-                },
                 "sleeptime": [
                     10,
                     15
@@ -135,45 +117,45 @@
         }
     },
     "gamble": {
-        "allottedAmount": 30000,
+        "allottedAmount": 0,
         "goalSystem": {
             "enabled": false,
-            "amount": 300
+            "amount": 0
         },
         "coinflip": {
             "enabled": false,
-            "strategy": "martingale",
-            "startValue": 200,
-            "multiplierOnLose": 2,
-            "maxStreakSafe": 3,
+            "startValue": 0,
+            "multiplierOnLose": 0,
             "cooldown": [
-                16,
-                18
+                15,
+                20
             ],
             "options": [
-                "t"
+                "h"
             ]
         },
         "slots": {
             "enabled": false,
-            "strategy": "martingale",
-            "startValue": 200,
-            "multiplierOnLose": 2,
-            "maxStreakSafe": 3,
+            "startValue": 0,
+            "multiplierOnLose": 0,
             "cooldown": [
-                16,
-                18
+                15,
+                20
             ]
         },
-        "blackjack": {}
+        "blackjack": {
+            "enabled": false,
+            "startValue": 100,
+            "multiplierOnLose": 2,
+            "cooldown": [
+                15,
+                20
+            ]
+        }
     },
     "giveawayJoiner": {
         "enabled": false,
-        "channelsToJoin": [
-            1099453684691243098,
-            1168797748343099444,
-            1168797827464429618
-        ],
+        "channelsToJoin": [],
         "cooldown": [
             40,
             100
@@ -181,19 +163,19 @@
         "messageRangeToCheck": 6
     },
     "sleep": {
-        "enabled": false,
+        "enabled": true,
         "frequencyPercentage": 50,
         "checkTime": [
             10,
             20
         ],
         "sleeptime": [
-            1,
-            10
+            300,
+            600
         ]
     },
     "misspell": {
-        "enabled": false,
+        "enabled": true,
         "frequencyPercentage": 1,
         "baseDelay": [
             0.03,
@@ -203,6 +185,112 @@
             0.04,
             0.09
         ]
+    },
+    "autoUse": {
+        "autoCrate": false,
+        "autoLootbox": false,
+        "gems": {
+            "enabled": false,
+            "disable_hunts_if_no_gems": false,
+            "gemsToUse": {
+                "huntGem": true,
+                "empoweredGem": true,
+                "luckyGem": true,
+                "specialGem": true
+            },
+            "tiers": {
+                "common": true,
+                "uncommon": true,
+                "rare": true,
+                "epic": true,
+                "mythical": true,
+                "legendary": true,
+                "fabled": true
+            },
+            "order": {
+                "lowestToHighest": true
+            }
+        }
+    },
+    "autoSell": {
+        "enabled": false,
+        "triggerWhenCashBelow": 10000,
+        "sellCommand": "c u r",
+        "maxTriggersPerHour": 5,
+        "cooldownAfterSell": [60, 120]
+    },
+    "bossBattle": {
+        "enabled": false,
+        "joinChancePercent": 80
+    },
+    "channelSwitcher": {
+        "enabled": false,
+        "interval": [1800, 3600],
+        "users": []
+    },
+    "safety": {
+        "enabled": false,
+        "runTimeMinutes": 120,
+        "sleepTimeMinutes": 15,
+        "workSchedule": {
+            "enabled": false,
+            "startHour": 7,
+            "endHour": 23
+        },
+        "autoStop": {
+            "enabled": false,
+            "triggers": [],
+            "delayTriggers": [],
+            "delayDuration": 300
+        }
+    },
+    "autoRandomCommands": {
+        "enabled": false,
+        "onlyWhenActive": true
+    },
+    "autoEnhance": {
+        "enabled": false,
+        "autoUseGems": {
+            "enabled": false,
+            "cooldownMinutes": 10,
+            "useLowestFirst": true,
+            "tiers": {
+                "common": true,
+                "uncommon": true,
+                "rare": true,
+                "epic": true,
+                "mythical": true,
+                "legendary": true,
+                "fabled": true
+            },
+            "gemTypes": {
+                "huntGem": true,
+                "empoweredGem": true,
+                "luckyGem": true,
+                "specialGem": true
+            }
+        },
+        "autoInvestEssence": {
+            "enabled": false,
+            "cooldownMinutes": 30,
+            "minEssenceRequired": 100,
+            "maxEfficiencyLevel": 50,
+            "maxDurationLevel": 50,
+            "maxInvestmentPerTime": 50
+        }
+    },
+    "autoTransfer": {
+        "enabled": false,
+        "destinationId": 0,
+        "triggerAmount": 500000,
+        "keepAmount": 50000
+    },
+    "autoEquip": {
+        "enabled": false,
+        "interval_minutes": 60
+    },
+    "questTracker": {
+        "enabled": false
     },
     "autoDaily": true,
     "cashCheck": true,
@@ -220,17 +308,17 @@
             60
         ],
         "briefCooldown": [
-            0.7,
-            2.7
+            1,
+            3
         ],
         "captchaRestart": [
-            3.7,
-            5.6
+            5,
+            10
         ],
         "commandHandler": {
             "betweenCommands": [
-                3.0,
-                4.5
+                3,
+                6
             ],
             "beforeReaddingToQueue": 7
         },
@@ -239,174 +327,16 @@
             "owo": false,
             "pray_and_curse": false,
             "cooldown": [
-                2.5,
-                4.0
+                1,
+                2
             ]
         }
     },
-    "autoUse": {
-        "gems": {
-            "enabled": true,
-            "order": {
-                "lowestToHighest": true
-            },
-            "tiers": {
-                "common": true,
-                "uncommon": true,
-                "rare": true,
-                "epic": true,
-                "mythical": true,
-                "legendary": true,
-                "fabled": true
-            },
-            "gemsToUse": {
-                "huntGem": true,
-                "empoweredGem": true,
-                "luckyGem": true,
-                "specialGem": true
-            }
-        },
-        "autoLootbox": true,
-        "autoCrate": true
-    },
-    "bossBattle": {
+    "richPresence": {
         "enabled": true,
-        "joinChancePercent": 50
-    },
-    "autoSell": {
-        "enabled": false,
-        "triggerWhenCashBelow": 50,
-        "sellCommand": "all",
-        "cooldownAfterSell": [
-            300,
-            600
-        ],
-        "maxTriggersPerHour": 3
-    },
-    "autoRandomCommands": {
-        "enabled": true,
-        "onlyWhenActive": true
-    },
-    "autoTransfer": {
-        "enabled": false,
-        "destinationId": 0,
-        "triggerAmount": 500000,
-        "keepAmount": 50000
-    },
-    "autoEquip": {
-        "enabled": false,
-        "interval_minutes": 60,
-        "ignore_weapons": []
-    },
-    "accountRotation": {
-        "enabled": false,
-        "cooldownSeconds": 300,
-        "maxCommandsPerAccount": 10
-    },
-    "autoEnhance": {
-        "enabled": true,
-        "autoUseGems": {
-            "enabled": true,
-            "cooldownMinutes": 15,
-            "useLowestFirst": true,
-            "tiers": {
-                "common": true,
-                "uncommon": true,
-                "rare": true,
-                "epic": true,
-                "mythical": false,
-                "legendary": false,
-                "fabled": false
-            },
-            "gemTypes": {
-                "huntGem": true,
-                "empoweredGem": true,
-                "luckyGem": true,
-                "specialGem": false
-            }
-        },
-        "autoInvestEssence": {
-            "enabled": true,
-            "cooldownMinutes": 30,
-            "minEssenceRequired": 100,
-            "maxInvestmentPerTime": 50,
-            "maxEfficiencyLevel": 50,
-            "maxDurationLevel": 50
-        }
-    },
-    "channelSwitcher": {
-        "enabled": false,
-        "users": [
-            {
-                "userid": 123456789,
-                "channels": [
-                    123456789,
-                    987654321
-                ]
-            },
-            {
-                "userid": 0,
-                "channels": [
-                    0,
-                    0
-                ]
-            },
-            {
-                "userid": 0,
-                "channels": [
-                    0,
-                    0
-                ]
-            },
-            {
-                "userid": 0,
-                "channels": [
-                    0,
-                    0
-                ]
-            }
-        ],
-        "interval": [
-            300,
-            600
-        ],
-        "delayBeforeSwitch": [
-            2,
-            4
-        ]
-    },
-    "questTracker": {
-        "enabled": true,
-        "autoCheckQuests": true,
-        "notifications": true,
-        "logRareAnimals": true,
-        "trackProgress": true,
-        "notifyOnCompletion": true,
-        "stopHuntingWhenNoGems": true
-    },
-    "safety": {
-        "enabled": true,
-        "runTimeMinutes": 120,
-        "sleepTimeMinutes": 15,
-        "autoStop": {
-            "enabled": true,
-            "delayDuration": 300,
-            "triggers": [
-                "Your garden is out of carrots",
-                "There are no puppies to adopt!",
-                "You are too tired to run!",
-                "captcha",
-                "banned",
-                "suspicious"
-            ],
-            "delayTriggers": [
-                "slow down and try the command again"
-            ]
-        },
-        "workSchedule": {
-            "enabled": false,
-            "startHour": 7,
-            "endHour": 23
-        }
+        "mode": "ninja",
+        "status": "online",
+        "activityType": "playing",
+        "text": "Visual Studio Code"
     }
 }

@@ -378,10 +378,26 @@ def handle_weekly_runtime(path="utils/data/weekly_runtime.json"):
         # update every 15 seconds
         time.sleep(15)
 
+def _default_weekly_runtime():
+    """Return a fresh weekly runtime dict."""
+    data = {str(d): [0, 0] for d in range(7)}
+    data["last_checked"] = 0
+    return data
+
 def start_runtime_loop(path="utils/data/weekly_runtime.json"):
     try:
-        with open(path, "r") as config_file:
-            weekly_runtime_dict = json.load(config_file)
+        # Handle missing or corrupt file
+        weekly_runtime_dict = None
+        if os.path.exists(path) and os.path.getsize(path) > 0:
+            try:
+                with open(path, "r") as config_file:
+                    weekly_runtime_dict = json.load(config_file)
+            except (json.JSONDecodeError, ValueError):
+                print(f"Warning: {path} is corrupted. Recreating with defaults.")
+                weekly_runtime_dict = None
+
+        if weekly_runtime_dict is None:
+            weekly_runtime_dict = _default_weekly_runtime()
 
         now = time.time()
         last_checked = weekly_runtime_dict.get("last_checked", 0)

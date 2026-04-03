@@ -71,11 +71,12 @@ class Others(commands.Cog):
 
 
             # Lootbox and Crate Detection
+            auto_use = self.bot.settings_dict.get("autoUse", {})
             if (
                 "** You received a **weapon crate**!" in message.content
                 or "You found a **weapon crate**!" in message.content
             ):
-                if self.bot.settings_dict["autoUse"]["autoCrate"]:
+                if auto_use.get("autoCrate", False):
                     await self.bot.log("Found Crate! Using it...", "#E7DA90")
                     # Wait a bit before using
                     await asyncio.sleep(self.bot.random.uniform(2.0, 4.0))
@@ -85,7 +86,7 @@ class Others(commands.Cog):
                 "** You received a **lootbox**!" in message.content
                 or "You found a **lootbox**!" in message.content
             ):
-                if self.bot.settings_dict["autoUse"]["autoLootbox"]:
+                if auto_use.get("autoLootbox", False):
                     await self.bot.log("Found Lootbox! Opening it...", "#E7DA90")
                     await asyncio.sleep(self.bot.random.uniform(2.0, 4.0))
                     await self.bot.put_queue(self.lootbox_cmd)
