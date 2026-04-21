@@ -21,37 +21,26 @@ class Chat(commands.Cog):
             )
 
     async def _toggle_command(self, cmd_key: str, enabled: bool, channel):
-
-        try:
-            self.bot.settings_dict["commands"][cmd_key]["enabled"] = enabled
-            self._save_settings()
-            status = "enabled" if enabled else "disabled"
-            await channel.send(
-                f"{'▶️' if enabled else '⏹️'} **{cmd_key.title()}** {status}!",
-                silent=True,
-            )
-        except KeyError:
-            await channel.send(
-                f"⚠️ Setting key '{cmd_key}' not found in settings.", silent=True
-            )
+        node = self.bot.settings_dict.setdefault("commands", {}).setdefault(cmd_key, {})
+        node["enabled"] = enabled
+        self._save_settings()
+        status = "enabled" if enabled else "disabled"
+        await channel.send(
+            f"{'▶️' if enabled else '⏹️'} **{cmd_key.title()}** {status}!",
+            silent=True,
+        )
 
     async def _toggle_nested(self, *keys, enabled: bool, channel):
-
-        try:
-            node = self.bot.settings_dict
-            for k in keys[:-1]:
-                node = node[k]
-            node[keys[-1]] = enabled
-            self._save_settings()
-            label = ".".join(str(k) for k in keys)
-            status = "enabled" if enabled else "disabled"
-            await channel.send(
-                f"{'▶️' if enabled else '⏹️'} **{label}** {status}!", silent=True
-            )
-        except KeyError:
-            await channel.send(
-                f"⚠️ Setting key '{'.'.join(keys)}' not found.", silent=True
-            )
+        node = self.bot.settings_dict
+        for k in keys[:-1]:
+            node = node.setdefault(k, {})
+        node[keys[-1]] = enabled
+        self._save_settings()
+        label = ".".join(str(k) for k in keys)
+        status = "enabled" if enabled else "disabled"
+        await channel.send(
+            f"{'▶️' if enabled else '⏹️'} **{label}** {status}!", silent=True
+        )
 
     async def cog_load(self):
         cnf = self.bot.global_settings_dict.get('textCommands', {})

@@ -52,7 +52,7 @@
             "pingUser": false
         },
         "curse": {
-            "enabled": false,
+            "enabled": true,
             "cooldown": [
                 310,
                 400
@@ -217,7 +217,10 @@
         "triggerWhenCashBelow": 10000,
         "sellCommand": "c u r",
         "maxTriggersPerHour": 5,
-        "cooldownAfterSell": [60, 120]
+        "cooldownAfterSell": [
+            60,
+            120
+        ]
     },
     "bossBattle": {
         "enabled": false,
@@ -225,7 +228,10 @@
     },
     "channelSwitcher": {
         "enabled": false,
-        "interval": [1800, 3600],
+        "interval": [
+            1800,
+            3600
+        ],
         "users": []
     },
     "safety": {
