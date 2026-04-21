@@ -103,5 +103,13 @@ Main config files are in the `config/` folder:
 Found a bug or want to add a feature? Feel free to PR!
 Join our Discord if you need help or just want to chat.
 
+## ❤️ Supporters
+Huge thanks to our amazing supporters who help keep this project alive!
+
+<a href="https://github.com/diov825" style="text-decoration: none; display: inline-block; text-align: center;">
+  <img src="https://github.com/diov825.png" width="50" height="50" style="border-radius: 50%;" alt="diov825"><br>
+  <b>diov825</b>
+</a>
+
 **Disclaimer:**
 *This bot is for educational purposes only. Use at your own risk.* 🌊
