@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import re
 import asyncio
@@ -15,7 +11,6 @@ TASK:
 improve cooldown system (somehow) to make both same.
 perhaps make a new category `animals` as we are already handling command being put seperately...?
 """
-
 
 class Sell(commands.Cog):
     def __init__(self, bot):
@@ -36,7 +31,6 @@ class Sell(commands.Cog):
             "checks": True,
             "id": "sell"
         }
-        
 
     def fetch_arguments(self, cmd):
         return " ".join(self.bot.settings_dict["commands"][cmd]["rarity"])
@@ -54,14 +48,13 @@ class Sell(commands.Cog):
                 pass
         else:
             if (self.bot.settings_dict["commands"]["sell"]["enabled"] and self.bot.settings_dict["commands"]["sac"]["enabled"]) or (self.bot.settings_dict["commands"]["sell"]["enabled"]):
-                # start sell first.
                 asyncio.create_task(self.sell_sac_queue(self.sell_cmd, self.bot.settings_dict["commands"]["sell"]["cooldown"]))
             else:
                 asyncio.create_task(self.sell_sac_queue(self.sac_cmd, self.bot.settings_dict["commands"]["sac"]["cooldown"]))
 
     async def cog_unload(self):
         await self.bot.remove_queue(id="sell")
-    
+
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.channel.id == self.bot.cm.id and message.author.id == self.bot.owo_bot_id:
@@ -73,7 +66,7 @@ class Sell(commands.Cog):
                         await self.bot.update_cash(int(re.search(r'for a total of \*\*<:cowoncy:\d+> ([\d,]+)', message.content).group(1).replace(',', '')))
                     except:
                         await self.bot.log(f"failed to fetch cowoncy from sales", "#af0087")
-                
+
                 if self.bot.settings_dict["commands"]["sac"]["enabled"]:
                     await self.sell_sac_queue(self.sac_cmd, self.bot.settings_dict["commands"]["sac"]["cooldown"])
                 else:
@@ -85,7 +78,6 @@ class Sell(commands.Cog):
                     await self.sell_sac_queue(self.sell_cmd, self.bot.settings_dict["commands"]["sell"]["cooldown"])
                 else:
                     await self.sell_sac_queue(self.sac_cmd, self.bot.settings_dict["commands"]["sac"]["cooldown"])
-
 
 async def setup(bot):
     await bot.add_cog(Sell(bot))

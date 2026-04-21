@@ -1,11 +1,8 @@
-/* ==========================================
-   MIZU NETWORK - DRAWER SYSTEM CSS
-   Modern Drawer/Sidebar with animations
-   ========================================== */
 
-/* Drawer Toggle Button (Hamburger) */
+
+
 .drawer-toggle {
-  display: none; /* Hidden on desktop, visible on mobile */
+  display: none; 
   position: relative;
   width: 40px;
   height: 40px;
@@ -41,7 +38,7 @@
   top: 28px;
 }
 
-/* Animated hamburger to X */
+
 .drawer-toggle.active span:nth-child(1) {
   top: 19px;
   transform: rotate(135deg);
@@ -61,7 +58,7 @@
   background: var(--primary-light);
 }
 
-/* Drawer Backdrop */
+
 .drawer-backdrop {
   position: fixed;
   top: 0;
@@ -81,7 +78,7 @@
   visibility: visible;
 }
 
-/* Main Drawer/Sidebar */
+
 .drawer {
   position: fixed;
   top: 0;
@@ -101,7 +98,7 @@
   box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
 }
 
-/* Drawer Header */
+
 .drawer-header {
   display: flex;
   align-items: center;
@@ -135,7 +132,7 @@
 }
 
 .drawer-close {
-  display: none; /* Hidden on desktop */
+  display: none; 
   width: 36px;
   height: 36px;
   background: rgba(79, 209, 199, 0.1);
@@ -151,7 +148,7 @@
   transform: rotate(90deg);
 }
 
-/* Drawer Navigation */
+
 .drawer-nav {
   padding: 1rem 0;
 }
@@ -253,7 +250,7 @@
   50% { opacity: 0.3; }
 }
 
-/* Drawer Footer */
+
 .drawer-footer {
   position: sticky;
   bottom: 0;
@@ -276,7 +273,7 @@
   color: var(--primary-color);
 }
 
-/* Scrollbar for Drawer */
+
 .drawer::-webkit-scrollbar {
   width: 6px;
 }
@@ -294,42 +291,40 @@
   background: rgba(79, 209, 199, 0.5);
 }
 
-/* ==========================================
-   RESPONSIVE - MOBILE/TABLET
-   ========================================== */
+
 
 @media (max-width: 1024px) {
-  /* Show drawer toggle button on mobile/tablet */
+  
   .drawer-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
   }
   
-  /* Show drawer close button on mobile/tablet */
+  
   .drawer-close {
     display: flex;
     align-items: center;
     justify-content: center;
   }
   
-  /* Hide drawer by default on mobile */
+  
   .drawer {
     transform: translateX(-100%);
   }
   
-  /* Show drawer when active */
+  
   .drawer.active {
     transform: translateX(0);
   }
   
-  /* Adjust main container padding when drawer is closed on mobile */
+  
   .main-container {
     margin-left: 0;
   }
 }
 
-/* Desktop - drawer always visible */
+
 @media (min-width: 1025px) {
   .drawer {
     position: fixed;
@@ -340,15 +335,13 @@
     margin-left: var(--drawer-width);
   }
   
-  /* Hide backdrop on desktop */
+  
   .drawer-backdrop {
     display: none;
   }
 }
 
-/* ==========================================
-   ANIMATIONS
-   ========================================== */
+
 
 @keyframes slideIn {
   from {
@@ -372,14 +365,12 @@
   }
 }
 
-/* Add smooth transition for content when drawer opens/closes */
+
 .content-area {
   transition: margin-left var(--drawer-transition);
 }
 
-/* ==========================================
-   UTILITY CLASSES
-   ========================================== */
+
 
 .drawer-divider {
   height: 1px;

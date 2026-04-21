@@ -1,22 +1,16 @@
 from .components import walker
 
-
 class author:
-    # The user who send the message.
     def __init__(self, data: dict):
         self.name = data.get("username")
         self.id = int(data.get("id", 0))
 
-
 class emoji:
-    # Emoji, likely to be inside `button`
     def __init__(self, data: dict):
         self.id = int(data.get("id", 0))
         self.name = data.get("name")
 
-
 class message:
-    # Message object
     def __init__(self, data: dict):
         self.author = author(data.get("author", {}))
         self.id = int(data.get("id", 0))
@@ -32,7 +26,6 @@ class message:
                 "message_author_id": self.author.id,
             },
         )
-
 
 def get_message_obj(msg: str):
     return message(msg)

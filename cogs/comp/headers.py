@@ -5,7 +5,6 @@ import re
 from datetime import datetime
 import aiohttp
 
-
 async def extract_asset_files(session: aiohttp.ClientSession, headers):
     async with session.get("https://discord.com/login", headers=headers) as resp:
         text = await resp.text()
@@ -13,10 +12,8 @@ async def extract_asset_files(session: aiohttp.ClientSession, headers):
     pattern = r'<script\s+src="([^"]+\.js)"\s+defer>\s*</script>'
     return re.findall(pattern, text)
 
-
 _SENTRY_ASSET_REGEX = re.compile(r"assets/(sentry\.\w+)\.js")
 _BUILD_NUMBER_REGEX = re.compile(r'buildNumber\D+(\d+)"')
-
 
 async def get_build_number(session: aiohttp.ClientSession) -> int:
     headers = {
@@ -58,7 +55,6 @@ async def get_build_number(session: aiohttp.ClientSession) -> int:
     except Exception:
         return 307749
 
-
 async def get_browser_version(session: aiohttp.ClientSession) -> int:
     url = "https://versionhistory.googleapis.com/v1/chrome/platforms/win/channels/stable/versions"
     try:
@@ -68,15 +64,13 @@ async def get_browser_version(session: aiohttp.ClientSession) -> int:
     except Exception:
         return 134
 
-
 def generate_properties(build_number: int, browser_version: int) -> dict:
-    # loc = locale.getdefaultlocale()[0] or "en-US"
 
     return {
         "os": "Windows",
         "browser": "Chrome",
         "device": "",
-        "system_locale": "en-US",  # loc.replace("_", "-"),
+        "system_locale": "en-US",
         "browser_user_agent": f"Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         f"AppleWebKit/537.36 (KHTML, like Gecko) "
         f"Chrome/{browser_version}.0.0.0 Safari/537.36",
@@ -95,11 +89,9 @@ def generate_properties(build_number: int, browser_version: int) -> dict:
         "client_heartbeat_session_id": str(uuid.uuid4()),
     }
 
-
 def generate_x_super(props: dict) -> str:
     json_str = json.dumps(props, separators=(",", ":"))
     return base64.b64encode(json_str.encode("utf-8")).decode("utf-8")
-
 
 async def generate_headers() -> dict:
     timeout = aiohttp.ClientTimeout(total=15)
@@ -119,7 +111,6 @@ async def generate_headers() -> dict:
             pass
 
         if not props:
-            # print("dolfies failed...\n")
             bv = await get_browser_version(session)
             bn = await get_build_number(session)
             props = generate_properties(bn, bv)
@@ -130,8 +121,6 @@ async def generate_headers() -> dict:
         return {
             "accept": "*/*",
             "accept-language": f"{props.get('system_locale', 'en-US')},en;q=0.5",
-            # "priority": "u=1, i",
-            # "referer": "https://discord.com/channels/@me",
             "sec-ch-ua": f'"Not:A-Brand";v="24", "Chromium";v="{props.get("browser_version", "124")}"',
             "sec-ch-ua-platform": f'"{props.get("os", "Windows")}"',
             "sec-fetch-dest": "empty",
@@ -151,7 +140,6 @@ async def generate_headers() -> dict:
             "Priority": "u=0",
             "TE": "trailers",
         }
-
 
 if __name__ == "__main__":
     import asyncio

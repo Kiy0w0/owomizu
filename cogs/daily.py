@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import json
 import pytz
@@ -22,7 +18,7 @@ cmd = {
     "cmd_name": "daily",
     "prefix": True,
     "checks": True,
-    
+
     "id": "daily"
 }
 
@@ -31,7 +27,6 @@ def load_dict():
     global accounts_dict
     accounts_dict = load_json_dict()
 load_dict()
-
 
 class Daily(commands.Cog):
     def __init__(self, bot):
@@ -42,13 +37,12 @@ class Daily(commands.Cog):
             self.current_time_seconds = self.bot.time_in_seconds()
             self.last_daily_time = accounts_dict[str(self.bot.user.id)].get("daily", 0)
 
-            # Time difference calculation
             self.time_diff = self.current_time_seconds - self.last_daily_time
 
             if self.time_diff < 0:
                 self.last_daily_time = self.current_time_seconds
-            if self.time_diff < 86400:  # 86400 = seconds till a day(24hrs).
-                await asyncio.sleep(self.bot.calc_time())  # Wait until next 12:00 AM PST
+            if self.time_diff < 86400:
+                await asyncio.sleep(self.bot.calc_time())
 
             await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["briefCooldown"])
             await self.bot.put_queue(cmd, priority=True)
@@ -75,7 +69,7 @@ class Daily(commands.Cog):
     async def on_message(self, message):
         if message.channel.id == self.bot.cm.id and message.author.id == self.bot.owo_bot_id:
             if "Here is your daily **<:cowoncy:416043450337853441>" in message.content:
-                """Task: add cash check regex here"""
+
                 await self.bot.remove_queue(cmd)
                 await self.bot.set_stat(True)
                 await asyncio.sleep(self.bot.calc_time())
@@ -112,7 +106,6 @@ class Daily(commands.Cog):
                     accounts_dict[str(self.bot.user.id)]["daily"] = self.bot.time_in_seconds()
                     with open("utils/stats.json", "w") as f:
                         json.dump(accounts_dict, f, indent=4)
-
 
 async def setup(bot):
     await bot.add_cog(Daily(bot))

@@ -1,4 +1,3 @@
-#!/bin/bash
 while true; do
     echo "Starting Mizu..."
     python mizu.py

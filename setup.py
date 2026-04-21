@@ -6,7 +6,6 @@ import sys
 import subprocess
 import shutil
 
-# Color codes
 CYAN = "\033[1;36m"
 GREEN = "\033[1;32m"
 YELLOW = "\033[1;33m"
@@ -23,15 +22,14 @@ def install_dependencies():
     print(f"{CYAN}[0] Checking dependencies...{RESET}")
     try:
         subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
-        
-        # Termux specific
+
         if is_termux():
             print(f"{CYAN}[0] Installing Termux specific dependencies...{RESET}")
             try:
                 subprocess.check_call(["pkg", "install", "python-numpy", "python-pillow", "termux-api", "-y"])
             except:
                 pass
-                
+
         print(f"{GREEN}[✓] Dependencies installed!{RESET}\n")
     except Exception as e:
         print(f"{RED}[!] Error installing dependencies: {e}{RESET}")
@@ -56,44 +54,40 @@ def main():
     print_banner()
     print("Welcome to Mizu OwO Setup!")
     print("This wizard will help you configure your bot quickly.\n")
-    
-    # 0. Dependencies
+
     install_dependencies()
 
-    # 1. Token Setup
     print(f"{YELLOW}[1] Account Setup{RESET}")
     tokens = []
     while True:
         token = input("Enter your Discord Token: ").strip().replace('"', '')
-        
+
         while True:
             try:
                 channel_id = input("Enter Channel ID for Farming: ").strip()
-                int(channel_id) # Validate integer
+                int(channel_id)
                 break
             except ValueError:
                 print(f"{RED}Invalid Channel ID! Please enter numbers only.{RESET}")
 
         tokens.append(f"{token} {channel_id}")
-        
+
         more = input("Add another account? (y/n): ").lower()
         if more != 'y':
             break
-    
-    # Save to .env
+
     with open(".env", "w") as f:
         f.write('TOKENS="' + ";".join(tokens) + '"\n')
     print(f"{GREEN}Checking... Accounts saved to .env!{RESET}\n")
 
-    # 2. Configuration Profile
     print(f"{YELLOW}[2] Behavior Profile{RESET}")
     print("Choose a farming style:")
     print("1. Safe (Recommended) - Slower, human-like, low ban risk")
     print("2. Aggressive - Fast, max profit, higher ban risk")
     print("3. Custom - Keep existing settings (if any)")
-    
+
     choice = input("Enter choice (1-3): ").strip()
-    
+
     if choice in ['1', '2']:
         base_settings = {
             "setprefix": "owo ",
@@ -147,32 +141,28 @@ def main():
             }
         }
 
-        if choice == '1': # Safe
+        if choice == '1':
             print(f"{GREEN}Applying Safe Profile...{RESET}")
-            # Safe defaults already set above essentially, just ensuring long delays
             base_settings["sleep"]["enabled"] = True
             base_settings["misspell"]["enabled"] = True
             base_settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [3, 6]
-            
-        elif choice == '2': # Aggressive
+
+        elif choice == '2':
             print(f"{RED}Applying Aggressive Profile...{RESET}")
             base_settings["commands"]["hunt"]["cooldown"] = [15, 16]
             base_settings["commands"]["battle"]["cooldown"] = [15, 16]
             base_settings["commands"]["owo"]["cooldown"] = [10, 12]
             base_settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [0.5, 1.5]
-            base_settings["sleep"]["enabled"] = False # No sleep for the wicked
+            base_settings["sleep"]["enabled"] = False
             base_settings["misspell"]["enabled"] = False
-            
-        # Ensure directory
+
         if not os.path.exists("config"):
             os.makedirs("config")
-            
-        # Save config
+
         with open("config/settings.json", "w") as f:
             json.dump(base_settings, f, indent=4)
         print(f"{GREEN}Configuration saved to config/settings.json!{RESET}\n")
 
-    # 3. Finalize
     print(f"{CYAN}Setup Complete!{RESET}")
     print("You can now run the bot using:")
     print(f"{GREEN}python mizu.py{RESET}")

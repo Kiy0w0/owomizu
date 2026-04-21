@@ -2,7 +2,6 @@ import os
 import time
 import threading
 
-
 def is_termux():
     termux_prefix = os.environ.get("PREFIX")
     termux_home = os.environ.get("HOME")
@@ -14,7 +13,6 @@ def is_termux():
     else:
         return os.path.isdir("/data/data/com.termux")
 
-
 def run_system_command(command, timeout, retry=False, delay=5):
     def target():
         try:
@@ -22,14 +20,11 @@ def run_system_command(command, timeout, retry=False, delay=5):
         except Exception as e:
             print(f"Error executing command: {command} - {e}")
 
-    # Create and start a thread to execute the command
     thread = threading.Thread(target=target)
     thread.start()
 
-    # Wait for the thread to finish, with a timeout
     thread.join(timeout)
 
-    # If the thread is still alive after the timeout, terminate it
     if thread.is_alive():
         print(f"Error: {command} command failed! (captcha)")
         if retry:
@@ -37,9 +32,8 @@ def run_system_command(command, timeout, retry=False, delay=5):
             time.sleep(delay)
             run_system_command(command, timeout)
 
-
 def generate_nonce():
-    """Generate a Discord-style snowflake nonce."""
+
     now = int(time.time() * 1000)
     a = now - 1420070400000
     r = a << 22

@@ -1,15 +1,10 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import asyncio
 import time
 
 from discord.ext import commands, tasks
 from discord.ext.commands import ExtensionNotLoaded
-
 
 class Reactionbot(commands.Cog):
     def __init__(self, bot):
@@ -41,7 +36,7 @@ class Reactionbot(commands.Cog):
         }
 
         return base
-    
+
     def check_cmd_state(self, cmd, return_dict=False):
         reaction_bot_dict = self.bot.settings_dict["defaultCooldowns"]["reactionBot"]
         commands_dict = self.bot.settings_dict["commands"]
@@ -54,12 +49,11 @@ class Reactionbot(commands.Cog):
         }
 
         return enabled_dict.get(cmd) if not return_dict else enabled_dict
-    
+
     def cmd_retry_required(self, cmd):
         cmd_id = cmd if cmd!="curse" else "pray"
         priority_dict = self.bot.misc["command_info"]
         last_time = self.cmd_states[cmd_id]
-        # The 5s here is incase of delays.
         return (time.time() - last_time) > priority_dict[cmd_id]["basecd"]+5
 
     @tasks.loop(seconds=5)
@@ -90,11 +84,9 @@ class Reactionbot(commands.Cog):
             cmd = "hunt" if hunt else "battle"
             await self.send_cmd(cmd)
 
-        """OwO/UwU"""
         if self.check_cmd_state("owo"):
             await self.send_cmd("owo")
 
-        """Pray/Curse"""
         if pray or curse:
             cmds = []
             if pray:
@@ -106,7 +98,6 @@ class Reactionbot(commands.Cog):
         """Start stuck state checker"""
         self.check_stuck_state.start()
 
-    """gets executed when the cog is first loaded"""
     async def cog_load(self):
         hunt = self.check_cmd_state("hunt")
         battle = self.check_cmd_state("battle")
@@ -121,7 +112,6 @@ class Reactionbot(commands.Cog):
                 asyncio.create_task(self.bot.unload_cog("cogs.reactionbot"))
             except ExtensionNotLoaded:
                 pass
-
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -150,7 +140,6 @@ class Reactionbot(commands.Cog):
                 if curse:
                     cmds.append("curse")
                 await self.send_cmd(self.bot.random.choice(cmds))
-
 
 async def setup(bot):
     await bot.add_cog(Reactionbot(bot))

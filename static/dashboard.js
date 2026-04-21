@@ -1,7 +1,4 @@
-/**
- * Mizu Network Dashboard - JavaScript Controller
- * Advanced OwO Selfbot Control Panel
- */
+
 
 class MizuDashboard {
     constructor() {
@@ -13,43 +10,39 @@ class MizuDashboard {
         this.websocket = null;
         this.isConnected = false;
         
-        // Initialize dashboard
+        
         this.init();
     }
 
-    /**
-     * Initialize the dashboard
-     */
+    
     async init() {
         console.log('🌊 Initializing Mizu Network Dashboard...');
         
-        // Show loading screen
+        
         this.showLoadingScreen();
         
-        // Initialize drawer system
+        
         this.initializeDrawer();
         
-        // Setup event listeners
+        
         this.setupEventListeners();
         
-        // Load initial data
+        
         await this.loadInitialData();
         
-        // Start update intervals
+        
         this.startUpdateIntervals();
         
-        // Hide loading screen
+        
         this.hideLoadingScreen();
         
-        // Show welcome notification
+        
         this.showNotification('Dashboard loaded successfully!', 'success');
         
         console.log('✅ Dashboard initialized successfully');
     }
     
-    /**
-     * Initialize drawer/sidebar system
-     */
+    
     initializeDrawer() {
         const drawer = document.getElementById('drawer');
         const drawerToggle = document.getElementById('drawer-toggle');
@@ -61,7 +54,7 @@ class MizuDashboard {
             return;
         }
         
-        // Open drawer
+        
         const openDrawer = () => {
             drawer.classList.add('active');
             drawerToggle.classList.add('active');
@@ -69,7 +62,7 @@ class MizuDashboard {
             document.body.style.overflow = 'hidden';
         };
         
-        // Close drawer
+        
         const closeDrawer = () => {
             drawer.classList.remove('active');
             drawerToggle.classList.remove('active');
@@ -77,24 +70,24 @@ class MizuDashboard {
             document.body.style.overflow = '';
         };
         
-        // Toggle drawer
+        
         const toggleDrawer = () => {
             drawer.classList.contains('active') ? closeDrawer() : openDrawer();
         };
         
-        // Event listeners
+        
         drawerToggle.addEventListener('click', toggleDrawer);
         drawerClose.addEventListener('click', closeDrawer);
         drawerBackdrop.addEventListener('click', closeDrawer);
         
-        // ESC key to close
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && drawer.classList.contains('active')) {
                 closeDrawer();
             }
         });
         
-        // Close drawer on nav link click (mobile only)
+        
         const navLinks = document.querySelectorAll('.nav-link');
         navLinks.forEach(link => {
             link.addEventListener('click', () => {
@@ -104,7 +97,7 @@ class MizuDashboard {
             });
         });
         
-        // Handle window resize
+        
         let resizeTimer;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
@@ -118,9 +111,7 @@ class MizuDashboard {
         console.log('✅ Drawer system initialized');
     }
 
-    /**
-     * Show loading screen
-     */
+    
     showLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
@@ -128,9 +119,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Hide loading screen
-     */
+    
     hideLoadingScreen() {
         const loadingScreen = document.getElementById('loading-screen');
         if (loadingScreen) {
@@ -140,11 +129,9 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Setup event listeners
-     */
+    
     setupEventListeners() {
-        // Navigation
+        
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -154,20 +141,20 @@ class MizuDashboard {
         });
 
 
-        // Settings buttons
+        
         document.getElementById('save-commands')?.addEventListener('click', () => this.saveSettings());
         document.getElementById('reset-commands')?.addEventListener('click', () => this.resetSettings());
 
-        // Logs controls
+        
         document.getElementById('clear-logs')?.addEventListener('click', () => this.clearLogs());
         document.getElementById('export-logs')?.addEventListener('click', () => this.exportLogs());
         
-        // Log filters
+        
         document.getElementById('log-type-filter')?.addEventListener('change', () => this.loadCommandLogs());
         document.getElementById('account-filter')?.addEventListener('change', () => this.loadCommandLogs());
         document.getElementById('show-timestamps')?.addEventListener('change', () => this.loadCommandLogs());
         document.getElementById('auto-scroll')?.addEventListener('change', () => {
-            // Auto-scroll to bottom if enabled
+            
             if (document.getElementById('auto-scroll')?.checked) {
                 const logsOutput = document.getElementById('logs-output');
                 if (logsOutput) {
@@ -176,7 +163,7 @@ class MizuDashboard {
             }
         });
         
-        // Quick Settings toggles
+        
         document.getElementById('hunt-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('hunt', e.target.checked));
         document.getElementById('battle-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('battle', e.target.checked));
         document.getElementById('daily-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('daily', e.target.checked));
@@ -185,19 +172,19 @@ class MizuDashboard {
         document.getElementById('channel-switcher-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('channelSwitcher', e.target.checked));
         document.getElementById('stop-hunt-no-gems-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('stopHuntingWhenNoGems', e.target.checked));
         
-        // Security Settings buttons
+        
         document.getElementById('save-security')?.addEventListener('click', () => this.saveSecuritySettings());
         document.getElementById('reset-security')?.addEventListener('click', () => this.resetSecuritySettings());
 
-        // Gambling Settings buttons
+        
         document.getElementById('save-gambling')?.addEventListener('click', () => this.saveGamblingSettings());
         document.getElementById('reset-gambling')?.addEventListener('click', () => this.loadGamblingSettings());
 
-        // Stats refresh
+        
         document.getElementById('refresh-stats')?.addEventListener('click', () => this.refreshStats());
 
 
-        // Keyboard shortcuts
+        
         document.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 's') {
                 e.preventDefault();
@@ -209,12 +196,12 @@ class MizuDashboard {
             }
         });
 
-        // Window events
+        
         window.addEventListener('beforeunload', () => {
             this.cleanup();
         });
 
-        // Visibility change
+        
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
                 this.pauseUpdates();
@@ -224,27 +211,25 @@ class MizuDashboard {
         });
     }
 
-    /**
-     * Load initial data from real APIs
-     */
+    
     async loadInitialData() {
         try {
-            // Load bot status first
+            
             await this.loadBotStatus();
             
-            // Load settings
+            
             await this.loadSettings();
             
-            // Load stats
+            
             await this.loadStats();
             
-            // Load command logs
+            
             await this.loadCommandLogs();
             
-            // Load quick settings
+            
             await this.loadQuickSettings();
             
-            // Update UI
+            
             this.updateUI();
             
         } catch (error) {
@@ -254,17 +239,15 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Switch between sections
-     */
+    
     switchSection(sectionName) {
-        // Update navigation
+        
         document.querySelectorAll('.nav-item').forEach(item => {
             item.classList.remove('active');
         });
         document.querySelector(`[data-section="${sectionName}"]`).classList.add('active');
 
-        // Update content
+        
         document.querySelectorAll('.content-section').forEach(section => {
             section.classList.remove('active');
         });
@@ -272,13 +255,11 @@ class MizuDashboard {
 
         this.currentSection = sectionName;
 
-        // Load section-specific data
+        
         this.loadSectionData(sectionName);
     }
 
-    /**
-     * Load section-specific data
-     */
+    
     loadSectionData(section) {
         switch (section) {
             case 'overview':
@@ -307,22 +288,20 @@ class MizuDashboard {
                 this.loadAnalytics();
                 break;
             default:
-                // Stop log updates for other sections
+                
                 this.stopLogUpdates();
                 break;
         }
     }
 
 
-    /**
-     * Update bot status indicator
-     */
+    
     updateBotStatus(status, captchaDetected = false, isSleeping = false) {
         const statusDot = document.getElementById('status-dot');
         const statusText = document.getElementById('status-text');
         
         if (statusDot && statusText) {
-            // Handle different status types
+            
             let displayStatus = status;
             let statusClass = status;
             
@@ -347,12 +326,10 @@ class MizuDashboard {
         this.isConnected = status === 'online' && !captchaDetected && !isSleeping;
     }
 
-    /**
-     * Load settings from server
-     */
+    
     async loadSettings() {
         try {
-            // Simulate API call
+            
             this.settings = {
                 commands: {
                     hunt: { enabled: true, cooldown: [15, 17] },
@@ -378,11 +355,9 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Populate UI with settings
-     */
+    
     populateSettings() {
-        // Update quick toggles
+        
         const huntToggle = document.getElementById('hunt-toggle');
         const battleToggle = document.getElementById('battle-toggle');
         const dailyToggle = document.getElementById('daily-toggle');
@@ -394,14 +369,12 @@ class MizuDashboard {
         if (owoToggle) owoToggle.checked = this.settings.commands?.owo?.enabled || false;
     }
 
-    /**
-     * Save settings to server
-     */
+    
     async saveSettings() {
         try {
             this.showNotification('Saving settings...', 'info');
             
-            // Simulate API call
+            
             await this.delay(1000);
             
             this.showNotification('Settings saved successfully!', 'success');
@@ -412,15 +385,13 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Reset settings to default
-     */
+    
     async resetSettings() {
         if (confirm('Are you sure you want to reset all settings to default?')) {
             try {
                 this.showNotification('Resetting settings...', 'info');
                 
-                // Reset to defaults
+                
                 await this.delay(1000);
                 await this.loadSettings();
                 
@@ -433,15 +404,13 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Update quick setting
-     */
+    
     async updateQuickSetting(setting, enabled) {
         try {
             if (this.settings.commands && this.settings.commands[setting]) {
                 this.settings.commands[setting].enabled = enabled;
                 
-                // Auto-save quick settings
+                
                 await this.delay(500);
                 this.showNotification(`${setting.charAt(0).toUpperCase() + setting.slice(1)} ${enabled ? 'enabled' : 'disabled'}`, 'info');
             }
@@ -450,9 +419,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Load statistics from real selfbot API
-     */
+    
     async loadStats() {
         try {
             const response = await fetch('/api/dashboard/stats');
@@ -464,7 +431,7 @@ class MizuDashboard {
             }
         } catch (error) {
             console.error('Failed to load stats:', error);
-            // Fallback to default values
+            
             this.stats = {
                 balance: 0,
                 hunts_today: 0,
@@ -478,39 +445,35 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Update statistics UI
-     */
+    
     updateStatsUI() {
-        // Update main stats
+        
         this.updateElement('total-cowoncy', this.stats.balance_formatted || this.formatNumber(this.stats.balance));
         this.updateElement('hunts-today', this.stats.hunts_today);
         this.updateElement('battles-today', this.stats.battles_today);
         this.updateElement('uptime-display', this.formatUptime(this.stats.uptime));
         
-        // Update navbar stats
+        
         this.updateElement('navbar-balance', this.formatNumber(this.stats.balance));
         this.updateElement('navbar-uptime', this.formatUptime(this.stats.uptime));
         
-        // Update accounts breakdown
+        
         this.updateAccountsBreakdown();
     }
     
-    /**
-     * Update accounts breakdown section
-     */
+    
     updateAccountsBreakdown() {
         const accountsContainer = document.getElementById('accounts-breakdown');
         if (!accountsContainer || !this.stats.accounts) return;
         
-        // Show refresh indicator
+        
         const refreshIndicator = document.getElementById('accounts-refresh');
         if (refreshIndicator) {
             refreshIndicator.classList.add('spinning');
             setTimeout(() => refreshIndicator.classList.remove('spinning'), 1000);
         }
         
-        // Clear existing content
+        
         accountsContainer.innerHTML = '';
         
         if (this.stats.accounts.length === 0) {
@@ -529,7 +492,7 @@ class MizuDashboard {
             return;
         }
         
-        // Create account cards
+        
         this.stats.accounts.forEach(account => {
             const accountCard = document.createElement('div');
             accountCard.className = 'account-card';
@@ -571,9 +534,7 @@ class MizuDashboard {
         });
     }
 
-    /**
-     * Refresh statistics
-     */
+    
     async refreshStats() {
         try {
             const refreshBtn = document.getElementById('refresh-stats');
@@ -595,9 +556,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Load bot status from real API
-     */
+    
     async loadBotStatus() {
         try {
             const response = await fetch('/api/dashboard/status');
@@ -609,13 +568,13 @@ class MizuDashboard {
                     statusData.is_sleeping
                 );
                 
-                // Update account info if available
+                
                 if (statusData.active_accounts !== undefined) {
                     this.updateElement('active-accounts', statusData.active_accounts);
                     this.updateElement('total-accounts', statusData.total_accounts);
                 }
                 
-                // Show captcha notification if detected
+                
                 if (statusData.captcha_detected && !this.lastCaptchaNotification) {
                     this.showNotification('🚨 Captcha detected! Bot automatically stopped', 'error', 10000);
                     this.lastCaptchaNotification = true;
@@ -629,9 +588,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Load recent activity from real API
-     */
+    
     async loadRecentActivity() {
         try {
             const response = await fetch('/api/dashboard/activity');
@@ -664,9 +621,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Load command logs from real API
-     */
+    
     async loadCommandLogs() {
         try {
             const logType = document.getElementById('log-type-filter')?.value || 'all';
@@ -685,14 +640,12 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Update command logs display
-     */
+    
     updateCommandLogs(logs) {
         const logsOutput = document.getElementById('logs-output');
         if (!logsOutput) return;
 
-        // Clear welcome message
+        
         logsOutput.innerHTML = '';
 
         if (logs.length === 0) {
@@ -706,18 +659,16 @@ class MizuDashboard {
             return;
         }
 
-        // Add logs
+        
         logs.forEach(log => this.addLogEntry(log));
         
-        // Auto scroll if enabled
+        
         if (document.getElementById('auto-scroll')?.checked) {
             logsOutput.scrollTop = logsOutput.scrollHeight;
         }
     }
 
-    /**
-     * Add a single log entry
-     */
+    
     addLogEntry(log) {
         const logsOutput = document.getElementById('logs-output');
         if (!logsOutput) return;
@@ -736,16 +687,14 @@ class MizuDashboard {
 
         logsOutput.appendChild(logEntry);
 
-        // Remove old entries if too many (keep last 200)
+        
         const entries = logsOutput.querySelectorAll('.log-entry');
         if (entries.length > 200) {
             entries[0].remove();
         }
     }
 
-    /**
-     * Format log message based on status
-     */
+    
     formatLogMessage(message, status) {
         if (status === 'success') {
             return `<span class="success">${message}</span>`;
@@ -759,37 +708,33 @@ class MizuDashboard {
         return message;
     }
 
-    /**
-     * Update log statistics
-     */
+    
     updateLogStats(totalCount, filteredCount) {
         this.updateElement('total-commands', totalCount);
         
-        // Update session time (uptime)
+        
         if (this.stats && this.stats.uptime) {
             this.updateElement('session-time', this.formatUptime(this.stats.uptime));
         }
     }
 
-    /**
-     * Populate account filter dropdown
-     */
+    
     populateAccountFilter(logs) {
         const accountFilter = document.getElementById('account-filter');
         if (!accountFilter) return;
 
-        // Get unique accounts
+        
         const accounts = [...new Set(logs.map(log => ({
             id: log.account_id,
             display: log.account_display
         })))];
 
-        // Clear existing options except "All Accounts"
+        
         const allOption = accountFilter.querySelector('option[value="all"]');
         accountFilter.innerHTML = '';
         if (allOption) accountFilter.appendChild(allOption);
 
-        // Add account options
+        
         accounts.forEach(account => {
             const option = document.createElement('option');
             option.value = account.id;
@@ -798,9 +743,7 @@ class MizuDashboard {
         });
     }
 
-    /**
-     * Show log error message
-     */
+    
     showLogError(message) {
         const logsOutput = document.getElementById('logs-output');
         if (!logsOutput) return;
@@ -814,12 +757,10 @@ class MizuDashboard {
         `;
     }
 
-    /**
-     * Toggle quick setting (hunt, battle, daily, owo)
-     */
+    
     async toggleQuickSetting(command, enabled) {
         try {
-            // Show loading state
+            
             const toggle = document.getElementById(`${command}-toggle`);
             const toggleItem = toggle?.closest('.toggle-item');
             
@@ -827,12 +768,12 @@ class MizuDashboard {
                 toggle.disabled = true;
             }
             
-            // Add loading visual feedback
+            
             if (toggleItem) {
                 toggleItem.classList.add('loading');
             }
             
-            // Show immediate feedback notification
+            
             const commandNames = {
                 'hunt': 'Hunt',
                 'battle': 'Battle', 
@@ -859,7 +800,7 @@ class MizuDashboard {
                 const result = await response.json();
                 this.showNotification(result.message, 'success');
                 
-                // Log the change in the logs if we're on the logs page
+                
                 if (this.currentSection === 'logs') {
                     setTimeout(() => this.loadCommandLogs(), 500);
                 }
@@ -867,7 +808,7 @@ class MizuDashboard {
                 const error = await response.json();
                 this.showNotification(error.error || 'Failed to update setting', 'error');
                 
-                // Revert toggle state on error
+                
                 if (toggle) {
                     toggle.checked = !enabled;
                 }
@@ -876,13 +817,13 @@ class MizuDashboard {
             console.error('Error toggling quick setting:', error);
             this.showNotification('Failed to update setting', 'error');
             
-            // Revert toggle state on error
+            
             const toggle = document.getElementById(`${command}-toggle`);
             if (toggle) {
                 toggle.checked = !enabled;
             }
         } finally {
-            // Re-enable toggle and remove loading state
+            
             const toggle = document.getElementById(`${command}-toggle`);
             const toggleItem = toggle?.closest('.toggle-item');
             
@@ -896,16 +837,14 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Load current quick settings status
-     */
+    
     async loadQuickSettings() {
         try {
             const response = await fetch('/api/dashboard/quick-settings');
             if (response.ok) {
                 const settings = await response.json();
                 
-                // Update toggle states
+                
                 const huntToggle = document.getElementById('hunt-toggle');
                 const battleToggle = document.getElementById('battle-toggle');
                 const dailyToggle = document.getElementById('daily-toggle');
@@ -949,16 +888,14 @@ class MizuDashboard {
         });
     }
 
-    /**
-     * Load security settings
-     */
+    
     async loadSecuritySettings() {
         try {
             const response = await fetch('/api/dashboard/security-settings');
             if (response.ok) {
                 const settings = await response.json();
                 
-                // Update form fields
+                
                 document.getElementById('delay-min').value = settings.delay_min;
                 document.getElementById('delay-max').value = settings.delay_max;
                 document.getElementById('captcha-restart-min').value = settings.captcha_restart_min;
@@ -970,15 +907,13 @@ class MizuDashboard {
         
     }
 
-    /**
-     * Save security settings
-     */
+    
     async saveSecuritySettings() {
         try {
             const delayMin = parseFloat(document.getElementById('delay-min').value);
             const delayMax = parseFloat(document.getElementById('delay-max').value);
             
-            // Validate delay values
+            
             if (delayMin >= delayMax) {
                 this.showNotification('Minimum delay must be less than maximum delay', 'error');
                 return;
@@ -1011,7 +946,7 @@ class MizuDashboard {
                 const result = await response.json();
                 this.showNotification(result.message, 'success');
                 
-                // Log the change in the logs if we're on the logs page
+                
                 if (this.currentSection === 'logs') {
                     setTimeout(() => this.loadCommandLogs(), 500);
                 }
@@ -1025,22 +960,20 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Reset security settings to defaults
-     */
+    
     async resetSecuritySettings() {
         if (!confirm('Are you sure you want to reset all security settings to defaults?')) {
             return;
         }
 
         try {
-            // Reset to default values
+            
             document.getElementById('delay-min').value = 1.7;
             document.getElementById('delay-max').value = 2.7;
             document.getElementById('captcha-restart-min').value = 3.7;
             document.getElementById('captcha-restart-max').value = 5.6;
 
-            // Save the reset settings
+            
             await this.saveSecuritySettings();
             
         } catch (error) {
@@ -1049,34 +982,30 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Start log updates from real API
-     */
+    
     startLogUpdates() {
         if (this.intervals.logs) return;
         
-        // Load initial logs
+        
         this.loadRealLogs();
         
-        // Update logs every 3 seconds
+        
         this.intervals.logs = setInterval(() => {
             this.loadRealLogs();
         }, 3000);
     }
 
-    /**
-     * Load real logs from API
-     */
+    
     async loadRealLogs() {
         try {
             const response = await fetch('/api/dashboard/logs');
             if (response.ok) {
                 const logs = await response.json();
                 
-                // Clear existing logs and add new ones
+                
                 const logsOutput = document.getElementById('logs-output');
                 if (logsOutput) {
-                    // Only update if we have new logs
+                    
                     const currentLogCount = logsOutput.children.length;
                     if (logs.length !== currentLogCount) {
                         logsOutput.innerHTML = '';
@@ -1085,7 +1014,7 @@ class MizuDashboard {
                             logsOutput.appendChild(logEntry);
                         });
                         
-                        // Auto scroll if enabled
+                        
                         const autoScroll = document.getElementById('auto-scroll');
                         if (autoScroll && autoScroll.checked) {
                             logsOutput.scrollTop = logsOutput.scrollHeight;
@@ -1097,14 +1026,12 @@ class MizuDashboard {
             }
         } catch (error) {
             console.error('Failed to load real logs:', error);
-            // Fallback to adding a random log
+            
             this.addRandomLog();
         }
     }
 
-    /**
-     * Stop log updates
-     */
+    
     stopLogUpdates() {
         if (this.intervals.logs) {
             clearInterval(this.intervals.logs);
@@ -1112,9 +1039,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Add random log entry
-     */
+    
     addRandomLog() {
         const logTypes = ['info', 'success', 'warning', 'error'];
         const messages = [
@@ -1137,15 +1062,13 @@ class MizuDashboard {
         this.logs.push(log);
         this.updateLogsUI([log]);
         
-        // Limit log entries
+        
         if (this.logs.length > 100) {
             this.logs = this.logs.slice(-100);
         }
     }
 
-    /**
-     * Update logs UI
-     */
+    
     updateLogsUI(newLogs) {
         const logsOutput = document.getElementById('logs-output');
         if (!logsOutput) return;
@@ -1161,16 +1084,14 @@ class MizuDashboard {
             logsOutput.appendChild(logEntry);
         });
         
-        // Auto scroll if enabled
+        
         const autoScroll = document.getElementById('auto-scroll');
         if (autoScroll && autoScroll.checked) {
             logsOutput.scrollTop = logsOutput.scrollHeight;
         }
     }
 
-    /**
-     * Clear logs
-     */
+    
     clearLogs() {
         const logsOutput = document.getElementById('logs-output');
         if (logsOutput) {
@@ -1180,9 +1101,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Export logs
-     */
+    
     exportLogs() {
         const logText = this.logs.map(log => 
             `[${log.timestamp}] [${log.level.toUpperCase()}] ${log.message}`
@@ -1200,37 +1119,35 @@ class MizuDashboard {
         this.showNotification('Logs exported successfully', 'success');
     }
 
-    /**
-     * Start update intervals for real-time data
-     */
+    
     startUpdateIntervals() {
-        // Stats update every 5 seconds
+        
         this.intervals.stats = setInterval(async () => {
             if (this.currentSection === 'overview') {
                 await this.loadStats();
             }
         }, 5000);
         
-        // Bot status update every 10 seconds
+        
         this.intervals.status = setInterval(async () => {
             await this.loadBotStatus();
         }, 10000);
         
-        // Activity update every 15 seconds
+        
         this.intervals.activity = setInterval(async () => {
             if (this.currentSection === 'overview') {
                 await this.loadRecentActivity();
             }
         }, 15000);
         
-        // Command logs update every 3 seconds for real-time feel
+        
         this.intervals.commandLogs = setInterval(async () => {
             if (this.currentSection === 'logs') {
                 await this.loadCommandLogs();
             }
         }, 3000);
         
-        // Navbar stats update every 3 seconds
+        
         this.intervals.navbar = setInterval(async () => {
             try {
                 const response = await fetch('/api/dashboard/stats');
@@ -1240,14 +1157,12 @@ class MizuDashboard {
                     this.updateElement('navbar-uptime', this.formatUptime(stats.uptime));
                 }
             } catch (error) {
-                // Silent fail for navbar updates
+                
             }
         }, 3000);
     }
 
-    /**
-     * Pause updates when tab is hidden
-     */
+    
     pauseUpdates() {
         Object.keys(this.intervals).forEach(key => {
             if (key !== 'uptime') {
@@ -1257,24 +1172,18 @@ class MizuDashboard {
         });
     }
 
-    /**
-     * Resume updates when tab is visible
-     */
+    
     resumeUpdates() {
         this.startUpdateIntervals();
     }
 
-    /**
-     * Update UI elements
-     */
+    
     updateUI() {
         this.updateStatsUI();
         this.populateSettings();
     }
 
-    /**
-     * Show notification
-     */
+    
     showNotification(message, type = 'info', duration = 5000) {
         const container = document.getElementById('notifications-container');
         if (!container) return;
@@ -1293,22 +1202,20 @@ class MizuDashboard {
         
         container.appendChild(notification);
         
-        // Auto remove
+        
         setTimeout(() => {
             if (notification.parentElement) {
                 notification.remove();
             }
         }, duration);
         
-        // Add animation
+        
         setTimeout(() => {
             notification.classList.add('show');
         }, 100);
     }
 
-    /**
-     * Get notification icon
-     */
+    
     getNotificationIcon(type) {
         const icons = {
             success: 'fa-check-circle',
@@ -1319,9 +1226,7 @@ class MizuDashboard {
         return icons[type] || icons.info;
     }
 
-    /**
-     * Update element content
-     */
+    
     updateElement(id, content) {
         const element = document.getElementById(id);
         if (element) {
@@ -1329,9 +1234,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Format large numbers
-     */
+    
     formatNumber(num) {
         if (num >= 1000000000) {
             return (num / 1000000000).toFixed(1) + 'B';
@@ -1345,9 +1248,7 @@ class MizuDashboard {
         return num.toString();
     }
 
-    /**
-     * Format uptime
-     */
+    
     formatUptime(seconds) {
         const hours = Math.floor(seconds / 3600);
         const minutes = Math.floor((seconds % 3600) / 60);
@@ -1356,16 +1257,12 @@ class MizuDashboard {
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
     }
 
-    /**
-     * Delay utility
-     */
+    
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
-    /**
-     * Cleanup resources
-     */
+    
     cleanup() {
         Object.values(this.intervals).forEach(interval => {
             clearInterval(interval);
@@ -1376,9 +1273,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Load analytics data
-     */
+    
     loadAnalytics() {
         if (this.analyticsTimer) clearInterval(this.analyticsTimer);
         this.fetchAnalytics();
@@ -1389,7 +1284,7 @@ class MizuDashboard {
         fetch(`/api/dashboard/analytics`)
             .then(res => res.json())
             .then(data => {
-                // Global cards
+                
                 const fmt = new Intl.NumberFormat('en-US');
                 const fmtInt = x => fmt.format(Math.max(0, parseInt(x || 0)));
                 const byId = id => document.getElementById(id);
@@ -1398,7 +1293,7 @@ class MizuDashboard {
                 if (byId('global-session')) byId('global-session').textContent = fmtInt(data?.global?.session_total);
                 if (byId('global-net')) byId('global-net').textContent = fmtInt(data?.global?.net_earnings);
 
-                // Table
+                
                 const tbody = document.querySelector('#analytics-table tbody');
                 if (!tbody) return;
                 tbody.innerHTML = '';
@@ -1421,9 +1316,7 @@ class MizuDashboard {
             .catch(() => {});
     }
 
-    /**
-     * Load Gambling settings
-     */
+    
     async loadGamblingSettings() {
         try {
             const response = await fetch('/api/dashboard/gambling-settings');
@@ -1439,45 +1332,41 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Populate gambling form with settings
-     */
+    
     populateGamblingForm(settings) {
-        // Global settings
+        
         document.getElementById('gambling-allotted-amount').value = settings.allottedAmount || 30000;
         document.getElementById('gambling-goal-system-enabled').checked = settings.goalSystem?.enabled || false;
         document.getElementById('gambling-goal-amount').value = settings.goalSystem?.amount || 300;
 
-        // Coinflip settings
+        
         document.getElementById('coinflip-enabled').checked = settings.coinflip?.enabled || false;
         document.getElementById('coinflip-start-value').value = settings.coinflip?.startValue || 200;
         document.getElementById('coinflip-multiplier').value = settings.coinflip?.multiplierOnLose || 2;
         document.getElementById('coinflip-cooldown-min').value = settings.coinflip?.cooldown?.[0] || 16;
         document.getElementById('coinflip-cooldown-max').value = settings.coinflip?.cooldown?.[1] || 18;
         
-        // Coinflip options
+        
         const options = settings.coinflip?.options || ['t'];
         document.getElementById('coinflip-heads').checked = options.includes('h');
         document.getElementById('coinflip-tails').checked = options.includes('t');
 
-        // Slots settings
+        
         document.getElementById('slots-enabled').checked = settings.slots?.enabled || false;
         document.getElementById('slots-start-value').value = settings.slots?.startValue || 200;
         document.getElementById('slots-multiplier').value = settings.slots?.multiplierOnLose || 2;
         document.getElementById('slots-cooldown-min').value = settings.slots?.cooldown?.[0] || 16;
         document.getElementById('slots-cooldown-max').value = settings.slots?.cooldown?.[1] || 18;
 
-        // Toggle body visibility based on enabled state
+        
         this.toggleGamblingBody('coinflip', settings.coinflip?.enabled);
         this.toggleGamblingBody('slots', settings.slots?.enabled);
         
-        // Setup toggle listeners
+        
         this.setupGamblingToggles();
     }
 
-    /**
-     * Setup gambling toggle listeners
-     */
+    
     setupGamblingToggles() {
         const coinflipToggle = document.getElementById('coinflip-enabled');
         const slotsToggle = document.getElementById('slots-enabled');
@@ -1495,9 +1384,7 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Toggle gambling settings body visibility
-     */
+    
     toggleGamblingBody(type, enabled) {
         const body = document.getElementById(`${type}-settings-body`);
         if (body) {
@@ -1506,14 +1393,12 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Save Gambling settings
-     */
+    
     async saveGamblingSettings() {
         try {
             const settings = this.collectGamblingSettings();
             
-            // Validation
+            
             if (settings.coinflip.startValue < 50) {
                 this.showNotification('Coinflip start value must be at least 50', 'error');
                 return;
@@ -1541,11 +1426,9 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Collect gambling settings from form
-     */
+    
     collectGamblingSettings() {
-        // Collect coinflip options
+        
         const coinflipOptions = [];
         if (document.getElementById('coinflip-heads')?.checked) coinflipOptions.push('h');
         if (document.getElementById('coinflip-tails')?.checked) coinflipOptions.push('t');
@@ -1578,9 +1461,7 @@ class MizuDashboard {
         };
     }
 
-    /**
-     * Load AutoEnhance settings
-     */
+    
     async loadAutoEnhanceSettings() {
         try {
             const response = await fetch('/api/dashboard/autoenhance-settings');
@@ -1596,15 +1477,13 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Populate AutoEnhance form with settings
-     */
+    
     populateAutoEnhanceForm(settings) {
-        // Master toggle
+        
         const masterToggle = document.getElementById('autoenhance-master-toggle');
         if (masterToggle) masterToggle.checked = settings.enabled;
 
-        // Auto Use Gems settings
+        
         const autoGems = settings.autoUseGems;
         const gemsEnabled = document.getElementById('auto-gems-enabled');
         if (gemsEnabled) gemsEnabled.checked = autoGems.enabled;
@@ -1615,13 +1494,13 @@ class MizuDashboard {
         const gemsLowestFirst = document.getElementById('gems-lowest-first');
         if (gemsLowestFirst) gemsLowestFirst.checked = autoGems.useLowestFirst;
 
-        // Gem tiers
+        
         Object.keys(autoGems.tiers).forEach(tier => {
             const checkbox = document.getElementById(`gems-tier-${tier}`);
             if (checkbox) checkbox.checked = autoGems.tiers[tier];
         });
 
-        // Gem types
+        
         Object.keys(autoGems.gemTypes).forEach(type => {
             const typeMap = {
                 huntGem: 'hunt',
@@ -1633,7 +1512,7 @@ class MizuDashboard {
             if (checkbox) checkbox.checked = autoGems.gemTypes[type];
         });
 
-        // Auto Invest Essence settings
+        
         const autoEssence = settings.autoInvestEssence;
         const essenceEnabled = document.getElementById('auto-essence-enabled');
         if (essenceEnabled) essenceEnabled.checked = autoEssence.enabled;
@@ -1654,9 +1533,7 @@ class MizuDashboard {
         if (essenceMaxDuration) essenceMaxDuration.value = autoEssence.maxDurationLevel;
     }
 
-    /**
-     * Save AutoEnhance settings
-     */
+    
     async saveAutoEnhanceSettings() {
         try {
             const settings = this.collectAutoEnhanceSettings();
@@ -1681,15 +1558,13 @@ class MizuDashboard {
         }
     }
 
-    /**
-     * Collect AutoEnhance settings from form
-     */
+    
     collectAutoEnhanceSettings() {
-        // Master toggle
+        
         const masterToggle = document.getElementById('autoenhance-master-toggle');
         const enabled = masterToggle ? masterToggle.checked : false;
 
-        // Auto Use Gems settings
+        
         const gemsEnabled = document.getElementById('auto-gems-enabled');
         const gemsCooldown = document.getElementById('gems-cooldown');
         const gemsLowestFirst = document.getElementById('gems-lowest-first');
@@ -1712,7 +1587,7 @@ class MizuDashboard {
             gemTypes[typeMap[type]] = checkbox ? checkbox.checked : false;
         });
 
-        // Auto Invest Essence settings
+        
         const essenceEnabled = document.getElementById('auto-essence-enabled');
         const essenceCooldown = document.getElementById('essence-cooldown');
         const essenceMinRequired = document.getElementById('essence-min-required');
@@ -1740,9 +1615,7 @@ class MizuDashboard {
         };
     }
 
-    /**
-     * Reset AutoEnhance settings to defaults
-     */
+    
     resetAutoEnhanceSettings() {
         const defaultSettings = {
             enabled: false,
@@ -1781,7 +1654,7 @@ class MizuDashboard {
     }
 }
 
-// Notification styles (injected dynamically)
+
 const notificationStyles = `
 <style>
 .notification {
@@ -1925,15 +1798,15 @@ const notificationStyles = `
 </style>
 `;
 
-// Initialize dashboard when DOM is loaded
+
 document.addEventListener('DOMContentLoaded', function() {
-    // Inject notification styles
+    
     document.head.insertAdjacentHTML('beforeend', notificationStyles);
     
-    // Initialize dashboard
+    
     window.mizuDashboard = new MizuDashboard();
     
-    // Add AutoEnhance event listeners
+    
     const saveAutoEnhanceBtn = document.getElementById('save-autoenhance');
     const resetAutoEnhanceBtn = document.getElementById('reset-autoenhance');
     
@@ -1951,5 +1824,5 @@ document.addEventListener('DOMContentLoaded', function() {
     
 });
 
-// Export for global access
+
 window.MizuDashboard = MizuDashboard;

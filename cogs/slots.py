@@ -1,15 +1,10 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import re
 import asyncio
 
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
-
 
 won_pattern = r"and won <:cowoncy:\d+> ([\d,]+)"
 lose_pattern = r"bet <:cowoncy:\d+> ([\d,]+)"
@@ -38,9 +33,8 @@ class Slots(commands.Cog):
             "no_balance": False
         }
 
-
     async def cog_load(self):
-        
+
         if not self.bot.settings_dict["gamble"]["slots"]["enabled"]:
             try:
                 asyncio.create_task(self.bot.unload_cog("cogs.slots"))
@@ -73,7 +67,6 @@ class Slots(commands.Cog):
             else:
                 amount_to_gamble = int(cnf["startValue"]*(cnf["multiplierOnLose"]**self.turns_lost))
 
-            # Goal system check
             if self.bot.settings_dict["gamble"]["goalSystem"]["enabled"] and self.bot.gain_or_lose > goal_system_dict["amount"]:
                 if not self.gamble_flags["goal_reached"]:
                     self.gamble_flags["goal_reached"] = True
@@ -83,7 +76,6 @@ class Slots(commands.Cog):
             elif self.gamble_flags["goal_reached"]:
                 self.gamble_flags["goal_reached"] = False
 
-            # Balance check
             if (amount_to_gamble > self.bot.user_status["balance"] and self.bot.settings_dict["cashCheck"]):
                 if not self.gamble_flags["no_balance"]:
                     self.gamble_flags["no_balance"] = True
@@ -93,8 +85,7 @@ class Slots(commands.Cog):
             elif self.gamble_flags["no_balance"]:
                 await self.bot.log(f"Balance regained! ({self.bot.user_status['balance']}) - restarting slots!", "#4a270c")
                 self.gamble_flags["no_balance"] = False
-            
-            # Allotted value check
+
             if (self.bot.gain_or_lose + (self.bot.settings_dict["gamble"]["allottedAmount"] - amount_to_gamble) <=0):
                 if not self.gamble_flags["amount_exceeded"]:
                     self.gamble_flags["amount_exceeded"] = True
@@ -104,16 +95,14 @@ class Slots(commands.Cog):
             elif self.gamble_flags["amount_exceeded"]:
                 self.gamble_flags["amount_exceeded"] = False
 
-                
             if amount_to_gamble > 250000:
                 self.exceeded_max_amount = True
             else:
                 self.cmd["cmd_arguments"] = str(amount_to_gamble)
                 await self.bot.put_queue(self.cmd)
-                
+
         except Exception as e:
             await self.bot.log(f"Error - {e}, During slots start_slots()", "#c25560")
-
 
     @commands.Cog.listener()
     async def on_message_edit(self, before, after):
@@ -123,15 +112,15 @@ class Slots(commands.Cog):
             return
         if self.exceeded_max_amount:
             return
-        
+
         if "slots" in after.content.lower():
             if "and won nothing... :c" in after.content:
-                """Lose cash"""
+
                 match = int(re.search(lose_pattern, after.content).group(1).replace(",",""))
 
                 await self.bot.update_cash(match, reduce=True)
                 self.bot.gain_or_lose-=match
-                
+
                 self.turns_lost+=1
                 await self.bot.log(f"lost {match} in slots, net profit - {self.bot.gain_or_lose}", "#ffafaf")
                 await self.start_slots()
@@ -139,12 +128,12 @@ class Slots(commands.Cog):
             else:
                 if ("<:eggplant:417475705719226369>" in after.content.lower()
                 and "and won" in after.content.lower()):
-                    """Didn't lose case but earned nothing"""
+
                     await self.bot.log(f"didn't win or lose slots", "#ffafaf")
                     await self.start_slots()
 
                 elif "and won" in after.content.lower():
-                    """won cash"""
+
                     won_match = int(re.search(won_pattern, after.content).group(1).replace(",",""))
                     lose_match = int(re.search(lose_pattern, after.content).group(1).replace(",",""))
                     profit = won_match-lose_match
@@ -157,7 +146,5 @@ class Slots(commands.Cog):
                     await self.start_slots()
                     await self.bot.update_gamble_db("wins")
 
-
 async def setup(bot):
     await bot.add_cog(Slots(bot))
-

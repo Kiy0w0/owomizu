@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import asyncio
 import json
@@ -12,7 +8,6 @@ from typing import Optional
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 
-
 try:
     with open("utils/emojis.json", 'r', encoding="utf-8") as file:
         emoji_dict = json.load(file)
@@ -21,7 +16,6 @@ except FileNotFoundError:
 except json.JSONDecodeError:
     print("Failed to decode JSON from the file.")
 
-
 def get_emoji_cost(text, emoji_dict=emoji_dict):
     pattern = re.compile(r"<a:[a-zA-Z0-9_]+:[0-9]+>|:[a-zA-Z0-9_]+:|[\U0001F300-\U0001F6FF\U0001F700-\U0001F77F]")
     emojis = pattern.findall(text)
@@ -29,7 +23,6 @@ def get_emoji_cost(text, emoji_dict=emoji_dict):
 
 def get_emoji_values(text):
     return sum(get_emoji_cost(text))
-
 
 class Hunt(commands.Cog):
     def __init__(self, bot):
@@ -133,7 +126,6 @@ class Hunt(commands.Cog):
                     await self.bot.update_cash(5, reduce=True)
         except Exception as e:
             await self.bot.log(f"Error - {e}, During hunt on_message()", "#c25560")
-
 
 async def setup(bot):
     await bot.add_cog(Hunt(bot))

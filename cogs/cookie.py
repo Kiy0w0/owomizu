@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import json
 import pytz
@@ -23,7 +19,6 @@ def load_dict():
     accounts_dict = load_json_dict()
 load_dict()
 
-
 class Cookie(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -34,22 +29,18 @@ class Cookie(commands.Cog):
             "checks": True,
             "id": "cookie"
         }
-    
-    """change to conver times"""
-    
 
     async def start_cookie(self):
         if str(self.bot.user.id) in accounts_dict:
             self.current_time_seconds = self.bot.time_in_seconds()
             self.last_cookie_time = accounts_dict[str(self.bot.user.id)].get("cookie", 0)
 
-            # Time difference calculation
             self.time_diff = self.current_time_seconds - self.last_cookie_time
 
             if self.time_diff < 0:
                 self.last_cookie_time = self.current_time_seconds
-            if self.time_diff < 86400:  # 86400 = seconds till a day(24hrs).
-                await asyncio.sleep(self.bot.calc_time())  # Wait until next 12:00 AM PST
+            if self.time_diff < 86400:
+                await asyncio.sleep(self.bot.calc_time())
 
             await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["briefCooldown"])
             cnf = self.bot.settings_dict['commands']['cookie']
@@ -77,10 +68,7 @@ class Cookie(commands.Cog):
     async def on_message(self, message):
         if message.channel.id == self.bot.cm.id and message.author.id == self.bot.owo_bot_id:
             if "You got a cookie from" in message.content or "Nu! You need to wait" in message.content:
-                """
-                'Nu! You need to wait' will get triggered unlike slow down one
-                as the actual command slowdown is different from this.
-                """
+
                 await self.bot.remove_queue(id="cookie")
 
                 await asyncio.sleep(self.bot.calc_time())
@@ -92,8 +80,5 @@ class Cookie(commands.Cog):
                     with open("utils/stats.json", "w") as f:
                         json.dump(accounts_dict, f, indent=4)
 
-
-        
-                
 async def setup(bot):
     await bot.add_cog(Cookie(bot))

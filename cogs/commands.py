@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import asyncio
 import time
@@ -10,7 +6,6 @@ import time
 from collections import deque
 from discord.ext import commands, tasks
 from datetime import datetime, timezone, timedelta
-
 
 class Commands(commands.Cog):
     def __init__(self, bot):
@@ -21,12 +16,8 @@ class Commands(commands.Cog):
 
         self.last_msg = 0
 
-
     @tasks.loop()
     async def watchdog(self):
-        # Watch dog for unresponsive code
-        # added mostly due to library issues cause code to be unresponsive
-        # incase code becomes unresponsive we will attempt a retry
 
         cd = await self.min_seconds_for_watchdog()
 
@@ -35,11 +26,10 @@ class Commands(commands.Cog):
             return
 
         await asyncio.sleep(cd)
-        
 
         if time.time() - self.last_msg >= cd:
             await self.bot.log(f"UNABLE TO DETECT MESSAGES!", "#8b1657")
-            self.bot.command_handler_status["captcha"] = True # Prevent any further messages
+            self.bot.command_handler_status["captcha"] = True
             await self.bot.log(f"Code was stopped for obvious reasons, please report logs of when this happened along with any errors to @echoquill\nYou may report through either dms or support server!", "#8b1657")
 
             print("attempting to trigger retry!")
@@ -58,43 +48,33 @@ class Commands(commands.Cog):
             threshold = req+10
         else:
             await self.bot.log(f"Disabling watchdog since no valid cooldown found", "#13353a")
-            # Rest would daily, cookie etc which doesnt really cause much issues even in case of failure.
-            # It would be safe to assume nothing wrong will happen (hopefully)
             return None
-        #await self.bot.log(f"Watchdog threshold: {threshold}s", "#13353a")
         return threshold
 
-        
-
-    
     def sleep_required(self):
-        """makes sure three commands are within 5 second limit"""
+
         now = time.time()
-        
+
         while self.command_times and now - self.command_times[0] >= 5:
-            """Command has to be within 5 second limit"""
+
             self.command_times.popleft()
-        
+
         if len(self.command_times) < 3:
             return False, 0
         else:
             wait_time = max(0, 5 - (now - self.command_times[0]))
             return True, wait_time
-        
-        
 
     async def start_commands(self):
         await self.bot.sleep_till(self.bot.global_settings_dict["account"]["commandsHandlerStartDelay"])
         await self.bot.shuffle_queue()
         self.send_commands.start()
         self.monitor_checks.start()
-        #self.watchdog.start()
 
     async def cog_load(self):
-        """Run join_previous_giveaways when bot is ready"""
+
         asyncio.create_task(self.start_commands())
-    
-    """send commands"""
+
     @tasks.loop()
     async def send_commands(self):
         try:
@@ -112,8 +92,6 @@ class Commands(commands.Cog):
                 await self.bot.sleep_till([sleep_time, sleep_time+0.4])
                 self.command_times.clear()
 
-            
-            """Update Command state"""
             await self.bot.upd_cmd_state(cmd_id)
 
             """Append to checks"""
@@ -122,20 +100,16 @@ class Commands(commands.Cog):
                 if not in_queue:
                     async with self.bot.lock:
                         self.bot.checks.append(cmd)
-            
+
             if self.bot.settings_dict["useSlashCommands"] and cmd.get("slash_cmd_name", False):
                 await self.bot.slashCommandSender(cmd["slash_cmd_name"], self.bot.misc["command_info"][cmd_id]["log_color"])
-                # Log slash command to dashboard
                 self.bot.add_dashboard_log(cmd["slash_cmd_name"], f"/{cmd['slash_cmd_name']}")
             else:
                 command_text = self.bot.construct_command(cmd)
                 await self.bot.send(command_text, self.bot.misc["command_info"][cmd_id]["log_color"])
-                # Log text command to dashboard
                 self.bot.add_dashboard_log(cmd_id, command_text)
 
-            """add command to the deque"""
             self.command_times.append(time.time())
-            
 
         except Exception as e:
             await self.bot.log(f"Error - send_commands() loop: {e}. {cmd.get('cmd_name', None)}", "#c25560")
@@ -156,18 +130,10 @@ class Commands(commands.Cog):
                             self.bot.checks.remove(command)
                         await self.bot.put_queue(command)
 
-
                 self.calc_time = timedelta(0)
             self.last_check_time = current_time
         except Exception as e:
             await self.bot.log(f"Error - monitor_checks(): {e}", "#c25560")
-
-    """@commands.Cog.listener()
-    async def on_message(self, message):
-        self.last_msg = time.time()"""
-
-
-
 
 async def setup(bot):
     await bot.add_cog(Commands(bot))

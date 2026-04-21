@@ -1,8 +1,6 @@
 import aiohttp
 
-
 class component_names:
-    # All components to be handled
     ACTIONS_ROW_COMPONENT = 1
     BUTTON_COMPONENT = 2
     SELECT_MENU_COMPONENT = 3
@@ -11,7 +9,6 @@ class component_names:
     ROLE_SELECT_MENU_COMPONENT = 6
     MENTIONABLE_SELECT_MENU_COMPONENT = 7
     CHANNEL_SELECT_MENU_COMPONENT = 8
-    # --
     SECTION_COMPONENT = 9
     TEXT_DISPLAY_COMPONENT = 10
     THUMBNAIL_COMPONENT = 11
@@ -21,9 +18,7 @@ class component_names:
     CONTAINER_COMPONENT = 17
     LABEL_COMPONENT = 18
 
-
 BUTTON_STYLES = {
-    # 6 -> Premium. Unwanted so not including.
     1: "primary",
     2: "secondary",
     3: "success",
@@ -50,14 +45,10 @@ COMPONENT_NAMES = {
     component_names.LABEL_COMPONENT: "label",
 }
 
-
 def get_component_name(i: int):
     return COMPONENT_NAMES[i]
 
-
 def walker(components: list, message_details=None):
-    # We are seperating buttons and components
-    # I am doing this because I believe this will make development easier
     BUTTONS_LIST = []
     COMPONENTS_LIST = []
 
@@ -66,21 +57,15 @@ def walker(components: list, message_details=None):
         component_type = component.get("type")
 
         if component_type == component_names.BUTTON_COMPONENT:
-            # Accessing -> BUTTON_LIST.{element_name}
             BUTTONS_LIST.append(button(component))
         elif component_type == component_names.SELECT_MENU_COMPONENT:
             COMPONENTS_LIST.append(select_menu(component))
         elif component_type == component_names.SECTION_COMPONENT:
-            # Both accessory and components are bundled together.
-            # Currently only a thumbnail or button component..
             section_component = True
             COMPONENTS_LIST.append(section(component, message_details))
         elif component_type == component_names.TEXT_DISPLAY_COMPONENT:
-            # Markdown text
             COMPONENTS_LIST.append(text_display(component))
         elif component_type == component_names.THUMBNAIL_COMPONENT:
-            # Accessory can be either a thumbail or a button
-            # Hence accessory class can be used here.
             COMPONENTS_LIST.append(accessory(component, message_details))
         elif component_type == component_names.MEDIA_GALLERY_COMPONENT:
             COMPONENTS_LIST.append(media_gallery(component))
@@ -97,8 +82,6 @@ def walker(components: list, message_details=None):
                 BUTTONS_LIST = BUTTONS_LIST + nested_buttons_list
 
             if component.get("accessory"):
-                # For ease of development, accessory is going to be treated as either
-                # a component or a button since accessory only contains a thumbnail or a button
                 cur_accessory = accessory(component["accessory"], message_details)
 
                 if cur_accessory.component_name != "button":
@@ -108,12 +91,10 @@ def walker(components: list, message_details=None):
 
     return COMPONENTS_LIST, BUTTONS_LIST
 
-
 class emoji:
     def __init__(self, data: dict):
         self.id = int(data.get("id", 0))
         self.name = data.get("name")
-
 
 class button:
     def __init__(self, component: dict):
@@ -128,18 +109,14 @@ class button:
         self.url = component.get("url")
         self.disabled = component.get("disabled", False)
 
-
 class select_menu_options:
-    # Menu inside select menu
     def __init__(self, data: dict):
         self.emoji = emoji(data.get("emoji", {}))
         self.label = data.get("label")
         self.value = data.get("value")
         self.description = data.get("description")
 
-
 class select_menu:
-    # Actual select menu
     def __init__(self, component: dict):
         self.component_name = COMPONENT_NAMES[component["type"]]
         self.options = []
@@ -148,7 +125,6 @@ class select_menu:
                 self.options.append(select_menu_options(item))
         self.custom_id = component.get("custom_id")
         self.placeholder = component.get("placeholder")
-
 
 class section:
     def __init__(self, component: dict, message_details=None):
@@ -159,19 +135,16 @@ class section:
             component.get("components", []), message_details
         )
 
-
 class text_display:
     def __init__(self, component: dict):
         self.component_name = COMPONENT_NAMES[component["type"]]
         self.id = component.get("id")
         self.content = component.get("content")
 
-
 class media_gallery_item:
     def __init__(self, data: dict):
         self.media = media(data.get("media"))
         self.description = data.get("description")
-
 
 class media_gallery:
     def __init__(self, component: dict):
@@ -180,15 +153,12 @@ class media_gallery:
         for item in component.get("items", []):
             self.items.append(media_gallery_item(item))
 
-
 class label:
     def __init__(self, component: dict):
-        # We are not handling compoents here because those are modals which isn't necessory (for now)
         self.component_name = COMPONENT_NAMES[component["type"]]
         self.id = component.get("id")
         self.label = component.get("label")
         self.description = component.get("description")
-
 
 class media:
     def __init__(self, data: dict):
@@ -196,10 +166,7 @@ class media:
         self.proxy_url = data.get("proxy_url")
         self.placeholder = data.get("placeholder")
 
-
 class accessory:
-    # Accessory of the message
-    # Always a thumbnail or button component!
     def __init__(self, data: dict, message_details=None):
         self.component_name = COMPONENT_NAMES[data.get("type")]
         self.id = data.get("id")
@@ -212,9 +179,6 @@ class accessory:
         self.type = int(data.get("type", -1))
         self.flags = data.get("flags")
         if self.type == -1:
-            # I am lazy to properly handle this lol
-            # TASK: recheck whatever you did here!
-            # (Which I most likely won't be checking..)
             self.type = None
         self.media = media(data.get("media", {}))
 

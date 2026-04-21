@@ -2,14 +2,11 @@ import json
 
 from utils.misc import is_termux, run_system_command
 
-
 with open("config/misc.json", "r") as config_file:
     misc_dict = json.load(config_file)
 
-
 def notify(content, title):
     if misc_dict["hostMode"]:
-        # Notification isn't suppported in hosts and will trigger crash if unhandled
         return
 
     on_mobile = is_termux()

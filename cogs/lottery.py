@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import json
 import pytz
@@ -13,7 +9,6 @@ from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 from datetime import datetime, timezone
 
-
 def load_json_dict(file_path="utils/stats.json"):
     with open(file_path, "r") as config_file:
         return json.load(config_file)
@@ -23,9 +18,6 @@ def load_dict():
     global accounts_dict
     accounts_dict = load_json_dict()
 load_dict()
-
-
-
 
 class Lottery(commands.Cog):
     def __init__(self, bot):
@@ -38,20 +30,18 @@ class Lottery(commands.Cog):
             "checks": True,
             "id": "lottery"
         }
-    
 
     async def start_lottery(self):
         if str(self.bot.user.id) in accounts_dict:
             self.current_time_seconds = self.bot.time_in_seconds()
             self.last_lottery_time = accounts_dict[str(self.bot.user.id)].get("lottery", 0)
 
-            # Time difference calculation
             self.time_diff = self.current_time_seconds - self.last_lottery_time
 
             if self.time_diff < 0:
                 self.last_lottery_time = self.current_time_seconds
-            if self.time_diff < 86400:  # 86400 = seconds till a day(24hrs).
-                await asyncio.sleep(self.bot.calc_time())  # Wait until next 12:00 AM PST
+            if self.time_diff < 86400:
+                await asyncio.sleep(self.bot.calc_time())
 
             await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["shortCooldown"])
             await self.bot.put_queue(self.cmd)
@@ -102,6 +92,5 @@ class Lottery(commands.Cog):
                     with open("utils/stats.json", "w") as f:
                         json.dump(accounts_dict, f, indent=4)
 
-                
 async def setup(bot):
     await bot.add_cog(Lottery(bot))

@@ -4,7 +4,6 @@ import re
 
 from discord.ext import commands
 
-
 try:
     with open("utils/emojis.json", "r", encoding="utf-8") as file:
         emoji_dict = json.load(file)
@@ -13,7 +12,6 @@ except FileNotFoundError:
 except json.JSONDecodeError:
     print("Failed to decode JSON from the file.")
 
-
 def get_emoji_names(text, emoji_dict=emoji_dict):
     pattern = re.compile(
         r"<a:[a-zA-Z0-9_]+:[0-9]+>|:[a-zA-Z0-9_]+:|[\U0001F300-\U0001F6FF\U0001F700-\U0001F77F]"
@@ -21,7 +19,6 @@ def get_emoji_names(text, emoji_dict=emoji_dict):
     emojis = pattern.findall(text)
     emoji_names = [emoji_dict[char]["name"] for char in emojis if char in emoji_dict]
     return emoji_names
-
 
 class Others(commands.Cog):
     def __init__(self, bot):
@@ -50,7 +47,6 @@ class Others(commands.Cog):
             message.channel.id == self.bot.channel_id
             and message.author.id == self.bot.owo_bot_id
         ):
-            # Accept Rules logic (if encountered)
             if (
                 "**you must accept these rules to use the bot!**"
                 in message.content.lower()
@@ -69,8 +65,6 @@ class Others(commands.Cog):
             ):
                 return
 
-
-            # Lootbox and Crate Detection
             auto_use = self.bot.settings_dict.get("autoUse", {})
             if (
                 "** You received a **weapon crate**!" in message.content
@@ -78,7 +72,6 @@ class Others(commands.Cog):
             ):
                 if auto_use.get("autoCrate", False):
                     await self.bot.log("Found Crate! Using it...", "#E7DA90")
-                    # Wait a bit before using
                     await asyncio.sleep(self.bot.random.uniform(2.0, 4.0))
                     await self.bot.put_queue(self.crate_cmd)
 
@@ -90,11 +83,9 @@ class Others(commands.Cog):
                     await self.bot.log("Found Lootbox! Opening it...", "#E7DA90")
                     await asyncio.sleep(self.bot.random.uniform(2.0, 4.0))
                     await self.bot.put_queue(self.lootbox_cmd)
-                    
-                    # Assume gems might be replenished
+
                     self.bot.user_status["no_gems"] = False
 
-            # Auto Team (Zoo)
             elif (
                 "Create a team with the command `owo team add {animal}`"
                 in message.content
@@ -113,9 +104,9 @@ class Others(commands.Cog):
 
             elif "s zoo! **" in message.content and self.zoo:
                 animals = get_emoji_names(message.content)
-                animals.reverse() # Use strongest/latest
+                animals.reverse()
                 await asyncio.sleep(self.bot.random.uniform(1.5, 2.3))
-                three_animals = min(len(animals), 3)  # int
+                three_animals = min(len(animals), 3)
                 for i in range(three_animals):
                     zoo_cmd = {
                         "cmd_name": "team",
@@ -130,7 +121,6 @@ class Others(commands.Cog):
 
                 self.zoo = False
                 await self.bot.set_stat(True)
-
 
 async def setup(bot):
     await bot.add_cog(Others(bot))

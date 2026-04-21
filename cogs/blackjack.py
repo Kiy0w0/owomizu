@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2026 MizuNetwork
-Copyright (C) 2026 Kiy0w0
-"""
+   
 
 import asyncio
 import re
@@ -11,7 +7,6 @@ from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 
 from utils.notification import notify
-
 
 def find_optimal_move(e_hand, u_hand, soft=False):
     if e_hand <= 6:
@@ -31,7 +26,6 @@ def find_optimal_move(e_hand, u_hand, soft=False):
         else:
             return "hit" if u_hand < 17 else "stand"
 
-
 def fetch_bj_hands(embed):
     dealer_field_name = embed.fields[0].name if len(embed.fields) > 0 else None
     field_name = embed.fields[1].name if len(embed.fields) > 1 else None
@@ -45,14 +39,13 @@ def fetch_bj_hands(embed):
     else:
         return None
 
-
 class Blackjack(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.game_event = asyncio.Event()
 
         self.cmd = {
-            "cmd_name": "bj",  # TASK: Shortform handle via config
+            "cmd_name": "bj",
             "cmd_arguments": None,
             "prefix": True,
             "checks": True,
@@ -107,7 +100,6 @@ class Blackjack(commands.Cog):
             elif self.gamble_flags["goal_reached"]:
                 self.gamble_flags["goal_reached"] = False
 
-            # Balance check
             if (
                 amount_to_gamble > self.bot.user_status.get("balance", 0)
                 and self.bot.user_status.get("checked_cash", False)
@@ -207,11 +199,6 @@ class Blackjack(commands.Cog):
     async def cog_load(self):
         if not self.bot.settings_dict["gamble"]["blackjack"].get("enabled", False):
             try:
-                # If disabled, unload self unless we want it loaded waiting for toggle
-                # Actually standard practice here is to keep it loaded but inactive?
-                # But original code unloads it. Let's follow original logic but safely.
-                # await self.bot.unload_cog("cogs.blackjack") 
-                # Better log it.
                 await self.bot.log("Blackjack cog loaded but feature is disabled in settings.", "#555555")
             except Exception as e:
                 print(e)
@@ -243,7 +230,6 @@ class Blackjack(commands.Cog):
                             return
 
                         await self.bot.remove_queue(id="blackjack")
-                        # Handle Blackjack.
                         res = fetch_bj_hands(embed)
                         if not res:
                             return
@@ -329,7 +315,6 @@ class Blackjack(commands.Cog):
                                 "didn't win or lose blackjack..", "#ffafaf"
                             )
                             await self.send_blackjack()
-
 
 async def setup(bot):
     await bot.add_cog(Blackjack(bot))

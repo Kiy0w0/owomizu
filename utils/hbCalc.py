@@ -1,29 +1,7 @@
-"""
-The approach here is simple (if we count out the coding part).
-We are using greedy approach here, invest in the trait with possiblity to level up the highest,
-counting out the best solution to invest in duration, cost etc first...
-but hey this also works fine, users can disable the trait they dont want to invest in
-to prevent the code from investing essense in those.
-
-If in-case essense we have is not enough to level up any traits to next level,
-then it will focus on priorities that I have set instead.
-
-Whatever this is:
-https://www.geeksforgeeks.org/introduction-to-greedy-algorithm-data-structures-and-algorithm-tutorials/
-"""
-
-
-
+   
 
 def allocate_essence(input_data, prio_dict):
-    """
-    inc:  The base multiplier for the level cost calculation.
-    pow:  The exponent applied to (level+1) to compute cost.
-    base: The starting value for the stat.
-    upg:  The change in the stat per level (can be negative for improvements like cost reduction).
-    max:  The maximum level the trait can reach.
-    prio: The priority (set by me) according to what I believe needs to be upgraded first!
-    """
+
     traits = {
         "efficiency": {"inc": 10, "pow": 1.748, "base": 25, "upg": 1, "max": 215, "prio": 4},
         "duration":   {"inc": 10, "pow": 1.7,  "base": 0.5, "upg": 0.1, "max": 235, "prio": 2},
@@ -34,7 +12,7 @@ def allocate_essence(input_data, prio_dict):
     }
     for trait, prio in prio_dict.items():
         traits[trait]["prio"] = prio
-    """Total essense"""
+
     available_essence = input_data.get("essence", 0)
 
     """Fetch enabled traits"""
@@ -59,17 +37,16 @@ def allocate_essence(input_data, prio_dict):
     remaining = available_essence
 
     while remaining > 0:
-        best_trait = None    # Trait selected for a full upgrade (if any).
-        best_ratio = -1      # Highest benefit-to-required ratio found.
-        cost_for_best = None # The cost required for the best trait's full upgrade.
+        best_trait = None
+        best_ratio = -1
+        cost_for_best = None
 
         for t in allocation:
             lvl = current_levels[t]
             trait_data = traits[t]
 
-            
             if lvl >= trait_data["max"]:
-                """Trait already maxed out!"""
+
                 continue
 
             next_level = lvl + 1
@@ -80,18 +57,13 @@ def allocate_essence(input_data, prio_dict):
 
             """cost for next level"""
             required = max(0, full_cost - invested)
-            # max() prevents the value of `full_cost - invested` from going less than 0 (this should never happen!)
 
             if required == 0:
-                """
-                If 0 essence is required for next level,
-                This shouldn't be executed but letting it stay.
-                """
+
                 current_levels[t] += 1
                 current_invested[t] = 0
                 continue
 
-            """Get priority for the trait"""
             benefit = trait_data["prio"]
             ratio = benefit / required if required > 0 else 0
 
@@ -101,7 +73,7 @@ def allocate_essence(input_data, prio_dict):
                 cost_for_best = required
 
         if best_trait is not None:
-            """trait found that can be fully upgraded"""
+
             allocation[best_trait] += cost_for_best
             remaining -= cost_for_best
             """move the trait up by a level"""
@@ -109,7 +81,7 @@ def allocate_essence(input_data, prio_dict):
             """reset already invested amount to 0 (since we are at next level now)"""
             current_invested[best_trait] = 0
         else:
-            """Invest in best trait if upgrade is not possible"""
+
             best_trait = None
             best_ratio = -1
 
@@ -118,11 +90,10 @@ def allocate_essence(input_data, prio_dict):
                 trait_data = traits[t]
 
                 if lvl >= trait_data["max"]:
-                    """Skip if already maxed out."""
+
                     continue
 
                 next_level = lvl + 1
-                # ** == ^
                 full_cost = int(trait_data["inc"] * (next_level ** trait_data["pow"]))
                 invested = current_invested.get(t, 0)
                 required = max(0, full_cost - invested)
@@ -133,7 +104,6 @@ def allocate_essence(input_data, prio_dict):
                 benefit = trait_data["prio"]
                 ratio = benefit / required if required > 0 else 0
 
-                # Select the trait with best ratio.
                 if ratio > best_ratio:
                     best_ratio = ratio
                     best_trait = t
@@ -141,9 +111,9 @@ def allocate_essence(input_data, prio_dict):
             if best_trait is not None:
                 allocation[best_trait] += remaining
                 current_invested[best_trait] += remaining
-                remaining = 0  # All essence has now been allocated.
+                remaining = 0
             else:
-                """Break out of loop if no trait is eligible"""
+
                 break
 
     return allocation

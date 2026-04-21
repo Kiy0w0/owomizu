@@ -2,7 +2,6 @@ import aiohttp
 
 url = "https://owobot.com/api/status"
 
-
 def get_max_shards(json_data):
     max_shard = 0
     for item in json_data:
@@ -13,17 +12,8 @@ def get_max_shards(json_data):
                 max_shard = max_shard_in_item
     return max_shard + 1
 
-
 def get_shard_id(server_id, total_shards):
-    """
-    getShardId: function(t) {
-        var e = parseInt(this.search);
-        return parseInt(e.toString(2).slice(0, -22), 2) % t;
-    }
-    -where t is total shards of owo bot
 
-    code from :- owobot.com/status, a random js script there.
-    """
     e = int(server_id)
     """
     bin() returns binary of an int, 
@@ -33,20 +23,15 @@ def get_shard_id(server_id, total_shards):
     if len(binary_str) > 22:
         sliced_binary_str = binary_str[:-22]
     else:
-        sliced_binary_str = '0' #this will never be executed.
-    sliced_int = int(sliced_binary_str, 2) # the ,2) makes it back into integer
-    shard_id = sliced_int % total_shards # the final modulus (i hope thats what its called) calc.
+        sliced_binary_str = '0'
+    sliced_int = int(sliced_binary_str, 2)
+    shard_id = sliced_int % total_shards
     return shard_id
-
-
-
-# Calculate and print the shard ID
-
 
 async def delaycheck(session, server_id):
     try:
         async with session.get(url) as response:
-            response.raise_for_status()  # raises an HTTPError for bad responses (4xx, 5xx)
+            response.raise_for_status()
             json_data = await response.json()
     except aiohttp.ClientError as e:
         print(f"An error occurred: {e}")
@@ -61,6 +46,3 @@ async def delaycheck(session, server_id):
                     return i
     return None
 
-
-
-# delaycheck(None, server_id)

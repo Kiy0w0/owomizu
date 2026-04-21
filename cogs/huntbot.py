@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import asyncio
 import re
@@ -17,9 +13,8 @@ huntbot_time_regex = r"(\d+)([DHM])"
 
 def fetch_level_and_progress(value):
     if "[MAX]" in value:
-        # Level 1000, will return max.
         return 1000, 0
-    """Fetch level and essence investment from the given field.value"""
+
     pattern = r"Lvl (\d+) \[(\d+)\/\d+\]"
     match = re.search(pattern, value)
     """
@@ -29,11 +24,10 @@ def fetch_level_and_progress(value):
     return int(match.group(1)), int(match.group(2))
 
 def fetch_essence(name):
-    """Fetch essence from the given field.name"""
+
     pattern = r"Animal Essence - `(\d{1,3}(?:,\d{3})*)`"
     match = re.search(pattern, name)
     return int(match.group(1).replace(",", ""))
-
 
 class Huntbot(commands.Cog):
     def __init__(self, bot):
@@ -74,7 +68,6 @@ class Huntbot(commands.Cog):
             if value:
                 self.upgrade_details[trait]["enabled"] = True
 
-
     async def cog_load(self):
         if not self.bot.settings_dict["commands"]["autoHuntBot"]["enabled"]:
             try:
@@ -100,10 +93,9 @@ class Huntbot(commands.Cog):
             if isinstance(timeToSleep, list):
                 await self.bot.sleep_till(timeToSleep)
             else:
-                """Task: add min noise if required"""
+
                 await self.bot.sleep_till(timeToSleep, cd_list=False, noise=30)
 
-        """send the cmd"""
         self.cmd["cmd_arguments"] = str(
             self.bot.settings_dict["commands"]["autoHuntBot"]["cashToSpend"]
         )
@@ -127,7 +119,6 @@ class Huntbot(commands.Cog):
                     break
             if "animal essence" in field.name.lower():
                 self.upgrade_details["essence"] = fetch_essence(field.name)
-
 
     @commands.Cog.listener()
     async def on_message(self, message):
@@ -179,8 +170,6 @@ class Huntbot(commands.Cog):
                         )
                     else:
                         await self.bot.log(f"huntbot captcha solver failed - empty result. Waiting for password reset...", "#c25560")
-                        # Don't send anything, let it timeout and get "Please include your password!" message
-                        # which will trigger the password reset handler
                 else:
                     await self.bot.log(f"huntbot captcha message has no attachments - cannot solve", "#c25560")
             except Exception as e:
@@ -188,9 +177,7 @@ class Huntbot(commands.Cog):
 
         elif "Wrong password" in message.content or "Incorrect password" in message.content:
             await self.bot.log(f"huntbot wrong password - captcha solver failed. Waiting for password reset...", "#c25560")
-            # Don't send anything, let it timeout and get "Please include your password!" message
-            # which will trigger the password reset handler
-            
+
         elif "You successfully upgraded" in message.content:
             self.upgrade_event.set()
             await self.bot.remove_queue(id="upgrade")
@@ -208,9 +195,9 @@ class Huntbot(commands.Cog):
                             "gain": 4, "exp": 3, "radar": 1 
                         })
                         data = allocate_essence(self.upgrade_details, priorities)
-                        
+
                         sleeptime = self.bot.settings_dict["commands"]["autoHuntBot"]["upgrader"].get("sleeptime", [10, 15])
-                        
+
                         await self.bot.sleep_till(sleeptime)
                         for trait, essence_alloc in data.items():
                             self.upgrade_cmd["cmd_arguments"] = f"{trait} {essence_alloc}"
@@ -226,7 +213,6 @@ class Huntbot(commands.Cog):
                     await self.send_ah(
                         timeToSleep=self.bot.settings_dict["defaultCooldowns"]["briefCooldown"]
                     )
-
 
 async def setup(bot):
     await bot.add_cog(Huntbot(bot))

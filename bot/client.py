@@ -19,7 +19,6 @@ try:
     import discord
     from discord.ext import commands, tasks
 except ImportError:
-    # Termux/Mobile fallback handled in mizu.py, but for linting:
     pass
 
 from utils import state
@@ -27,14 +26,12 @@ from utils import helpers
 from utils.misspell import misspell_word
 from cogs.comp import headers as comp_headers
 
-# Constants
 VERSION = "1.5.5"
 MIZU_NETWORK_API = "https://api.ive.my.id"
 
 class MyClient(commands.Bot):
 
     def __init__(self, token, channel_id, global_settings_dict, *args, **kwargs):
-        # Handle intents
         if 'intents' not in kwargs:
             try:
                 if hasattr(discord, 'Intents'):
@@ -45,7 +42,7 @@ class MyClient(commands.Bot):
                     kwargs['intents'] = intents
             except (AttributeError, Exception):
                 pass
-        
+
         super().__init__(command_prefix="-", self_bot=True, *args, **kwargs)
         self.token = token
         self.channel_id = int(channel_id)
@@ -102,7 +99,7 @@ class MyClient(commands.Bot):
                 "in_monitor": False,
                 "last_ran": 0
             }
-            
+
     def get_nick(self, message):
         if message.guild and message.guild.me:
             return message.guild.me.display_name
@@ -139,8 +136,7 @@ class MyClient(commands.Bot):
 
     @tasks.loop(seconds=5)
     async def config_update_checker(self):
-        if state.config_updated and (time.time() - state.config_updated < 6): # Assuming simple boolean or timestamp
-             # Handled globally better, but keeping logic
+        if state.config_updated and (time.time() - state.config_updated < 6):
              await self.update_config()
 
     @tasks.loop(seconds=1)
@@ -164,9 +160,9 @@ class MyClient(commands.Bot):
             if safety_check.get("enabled", False) and helpers.compare_versions(VERSION, safety_check.get("version", "0.0.0")):
                 self.command_handler_status["captcha"] = True
                 await self.log(f"🛑 Safety Check Alert!\nReason: {safety_check.get('reason', 'Unknown')}\n(Triggered by {safety_check.get('author', 'System')})", "#5c0018")
-                
+
                 self.add_dashboard_log("system", f"Safety check triggered! Bot stopped: {safety_check.get('reason', 'Unknown')}", "error")
-                
+
                 if helpers.compare_versions(latest_version.get("version", "0.0.0"), safety_check.get("version", "0.0.0")):
                     await self.log(f"Please update to: v{latest_version.get('version', 'latest')}", "#33245e")
         except requests.exceptions.RequestException:
@@ -183,7 +179,7 @@ class MyClient(commands.Bot):
 
                 extension = f"cogs.{filename[:-3]}"
                 if extension in self.extensions:
-                    """skip if already loaded"""
+
                     self.refresh_commands_dict()
                     if not self.commands_dict[str(filename[:-3])]:
                         await self.unload_cog(extension)
@@ -227,7 +223,7 @@ class MyClient(commands.Bot):
 
                 await self.db.execute(sql, params)
                 await self.db.commit()
-                return  # Success, exit retry loop
+                return
             except Exception as e:
                 err_str = str(e).lower()
                 if "locked" in err_str and i < retries - 1:
@@ -400,7 +396,7 @@ class MyClient(commands.Bot):
         commands_dict = self.settings_dict["commands"]
         reaction_bot_dict = self.settings_dict["defaultCooldowns"]["reactionBot"]
         huntbot_active = commands_dict["autoHuntBot"]["enabled"]
-        
+
         self.commands_dict = {
             "autoenhance": self.settings_dict.get("autoEnhance", {}).get("enabled", False),
             "autosell": self.settings_dict.get("autoSell", {}).get("enabled", False),
@@ -444,13 +440,12 @@ class MyClient(commands.Bot):
                 "status": status
             }
             state.command_logs.append(log_entry)
-            
+
             if len(state.command_logs) > state.max_command_logs:
                 state.command_logs = state.command_logs[-state.max_command_logs:]
         except Exception as e:
             print(f"Error adding dashboard log: {e}")
-    
-    
+
     def refresh_settings(self):
         try:
             settings_path = f"config/{self.user.id}/settings.json"
@@ -503,13 +498,13 @@ class MyClient(commands.Bot):
         try:
             await asyncio.sleep(0)
             self.refresh_commands_dict()
-            
+
             if command == "useSlashCommands":
                 self.settings_dict["useSlashCommands"] = enabled
                 await self.log(f"Slash commands {'enabled' if enabled else 'disabled'}", "#40e0d0")
                 self.add_dashboard_log("system", f"Slash commands {'enabled' if enabled else 'disabled'}", "info")
                 return
-            
+
             if command == "channelSwitcher":
                 if "channelSwitcher" not in self.settings_dict or self.settings_dict["channelSwitcher"] is None:
                     self.settings_dict["channelSwitcher"] = {
@@ -518,11 +513,11 @@ class MyClient(commands.Bot):
                         "interval": [300, 600], 
                         "delayBeforeSwitch": [2, 4]
                     }
-                
+
                 self.settings_dict["channelSwitcher"]["enabled"] = enabled
                 await self.log(f"Channel Switcher {'enabled' if enabled else 'disabled'}", "#9dc3f5")
                 self.add_dashboard_log("system", f"Channel Switcher {'enabled' if enabled else 'disabled'}", "info")
-                
+
                 extension = 'cogs.channelswitcher'
                 if not enabled and extension in self.extensions:
                     await self.unload_cog(extension)
@@ -535,7 +530,7 @@ class MyClient(commands.Bot):
                         await self.log(f"Error - Failed to load Channel Switcher: {e}", "#c25560")
                         self.add_dashboard_log("system", f"Failed to enable Channel Switcher: {e}", "error")
                 return
-            
+
             ext_map = {
                 'hunt': 'cogs.hunt',
                 'battle': 'cogs.battle',
@@ -597,7 +592,7 @@ class MyClient(commands.Bot):
             if not isinstance(cmd_data, dict) or "id" not in cmd_data:
                 await self.log(f"Error - Command data missing 'id' field. Data: {cmd_data}", "#c25560")
                 return
-                
+
             while (
                 not self.command_handler_status["state"]
                 or self.command_handler_status["hold_handler"]
@@ -622,23 +617,16 @@ class MyClient(commands.Bot):
                 await self.log(f"Error - command with id: {cmd_data['id']} do not have a priority set in misc.json", "#c25560")
                 return
 
-            # --- SMART SYSTEM START ---
-            # Check if command is on cooldown based on last_ran and basecd
             base_cd = cnf[cmd_data["id"]].get("basecd", 0)
             elapsed = time.time() - self.cmds_state[cmd_data["id"]]["last_ran"]
-            
-            # Jika user maksa 'quick' (misal reaction bot), boleh skip check? 
-            # Tapi sebaiknya tetap safety check minimal.
-            # Kita kasih toleransi 1-2 detik.
+
             remaining = base_cd - elapsed
-            
+
             if remaining > 0.5 and not quick:
                  await self.log(f"⏳ Mizu Cooldown System: {cmd_data['id']} is on cooldown ({remaining:.1f}s left). Pausing...", "#555555")
                  await asyncio.sleep(remaining + 0.5) 
-                 # Cek ulang status bot setelah bangun tidur panjang
                  if not self.command_handler_status["state"]: 
                      return
-            # --- SMART SYSTEM END ---
 
             async with self.lock:
                 await self.queue.put((
@@ -685,26 +673,14 @@ class MyClient(commands.Bot):
                 await self.queue.put(item)
 
     def add_popup_queue(self, channel_name, captcha_type=None):
-        # Using helpers global lock? No, helpers.lock is specific.
-        # Original code used mizu.py lock.
-        # But popup queue is likely not threadsafe locally?
-        # Popup logic was in mizu.py. It might be broken here if popup_queue is not passed.
-        # I'll comment out popup logic here or assume it's not needed by bot client logic directly but by a cog?
-        # Actually MyClient called add_popup_queue.
-        # AND popup_queue was global in mizu.py.
-        # This requires popup_queue to be in state.py!
-        # I'll add popup_queue to state.py in next step properly.
-        # For now I will keep it but assuming it will fail, or I replace it with a pass.
-        # user has 'hostMode' usually off on Termux.
         pass
 
     async def log(self, text, color="#ffffff", bold=False, web_log=None, webhook_useless_log=None):
-        # Resolve defaults if None
         if web_log is None:
             web_log = self.global_settings_dict["website"]["enabled"]
         if webhook_useless_log is None:
             webhook_useless_log = self.global_settings_dict["webhook"]["webhookUselessLog"]
-            
+
         current_time = datetime.now().strftime("%H:%M:%S")
         if self.misc["debug"]["enabled"]:
             frame_info = traceback.extract_stack()[-2]
@@ -716,9 +692,7 @@ class MyClient(commands.Bot):
                 content_to_print,
                 color,
             )
-            # Log rotation here?
             if self.misc["debug"]["logInTextFile"]:
-                 # Just use logging module instead of manual write
                  logging.getLogger("bot").info(f"[{current_time}] {self.username} - {text}")
         else:
             helpers.printBox(f"{self.username}| {text}".center(helpers.console.size.width - 2), color)
@@ -783,27 +757,20 @@ class MyClient(commands.Bot):
             if self.random.uniform(1,100) < self.settings_dict["misspell"]["frequencyPercentage"]:
                 msg = misspell_word(message)
                 misspelled = True
-                
+
         if not self.command_handler_status["captcha"] or bypass:
             await self.wait_until_ready()
             if typingIndicator:
-                # Human-like typing calculation
-                # Average typing speed: 300 CPM (Characters Per Minute) -> 5 chars per second
-                # Base reaction time: 0.5s - 1.5s
-                # Typing time = (Length / 5) * random_variance
-                
+
                 char_length = len(msg)
                 base_reaction = self.random.uniform(0.5, 1.2)
                 typing_speed_variance = self.random.uniform(0.8, 1.3)
                 estimated_typing_time = (char_length / 6.0) * typing_speed_variance
-                
+
                 total_delay = base_reaction + estimated_typing_time
-                
-                # Cap delay to avoid overly slow responses for long messages
+
                 total_delay = min(total_delay, 4.0)
-                
-                # await self.log(f"Typing... ({total_delay:.2f}s)", "#888888")
-                
+
                 async with channel.typing():
                     await asyncio.sleep(total_delay)
                     await channel.send(msg, silent=silent)
@@ -871,9 +838,9 @@ class MyClient(commands.Bot):
                 self.user_status["net_earnings"] -= amount
             else:
                 self.user_status["net_earnings"] += amount
-        
+
         await self.update_cash_db()
-        
+
         if self.settings_dict.get("autoSell", {}).get("enabled", False):
             try:
                 autosell_cog = self.get_cog("AutoSell")
@@ -883,7 +850,6 @@ class MyClient(commands.Bot):
                 await self.log(f"Error checking auto-sell: {e}", "#c25560")
 
     async def setup_hook(self):
-        # Database connection
         try:
             self.db = await aiosqlite.connect("utils/data/db.sqlite", timeout=5)
             self.db.row_factory = aiosqlite.Row
@@ -893,7 +859,6 @@ class MyClient(commands.Bot):
             print(f"Failed to connect to database: {e}")
             self.db = None
 
-        # Randomise user
         if self.misc["debug"]["hideUser"]:
             x = [
                 "Sunny", "River", "Echo", "Sky", "Shadow", "Nova", "Jelly", "Pixel",
@@ -910,9 +875,7 @@ class MyClient(commands.Bot):
 
         helpers.printBox(f'-Loaded {self.username}[*].'.center(helpers.console.size.width - 2), 'bold royal_blue1 ')
         state.list_user_ids.append(self.user.id)
-        
 
-        # Fetch the channel
         self.cm = self.get_channel(self.channel_id)
         if not self.cm:
             try:
@@ -927,7 +890,6 @@ class MyClient(commands.Bot):
                 await self.log(f"Failed to fetch channel {self.channel_id}: {e}", "#c25560")
                 return
 
-        # Fetch slash commands
         self.slash_commands = []
         try:
             if hasattr(self.cm, 'application_commands'):
@@ -940,7 +902,6 @@ class MyClient(commands.Bot):
         except Exception as e:
             await self.log(f"Failed to fetch slash commands (Slash cmds disabled): {e}", "#ff9800")
 
-        # Add account to stats.json
         self.default_config = {
             self.user.id: {
                 "daily": 0,
@@ -957,7 +918,7 @@ class MyClient(commands.Bot):
                     accounts_dict = json.load(f)
             except:
                 accounts_dict = {}
-                
+
             if str(self.user.id) not in accounts_dict:
                 accounts_dict.update(self.default_config)
                 with open("utils/stats.json", "w") as f:

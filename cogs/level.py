@@ -1,23 +1,16 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import string
 import random
-
 
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 import asyncio
 
-
-
 quotes_url = "https://favqs.com/api/qotd"
 
 def generate_random_string(min, max):
-    """something like a list?"""
+
     characters = string.ascii_lowercase + ' '
     length = random.randint(min,max)
     random_string = "".join(random.choice(characters) for _ in range(length))
@@ -27,14 +20,12 @@ async def fetch_quotes(session):
     async with session.get(quotes_url) as response:
         if response.status == 200:
             data = await response.json()
-            quote = data["quote"]["body"]  # data[0]["quote"]
+            quote = data["quote"]["body"]
             return quote
-
-
 
 class Level(commands.Cog):
     def __init__(self, bot):
-        
+
         self.bot = bot
         self.last_level_grind_message = None
         self.cmd = {
@@ -45,7 +36,6 @@ class Level(commands.Cog):
         }
 
     async def start_level_grind(self):
-        #await asyncio.sleep(1)
         await self.bot.remove_queue(id="level")
         cnf = self.bot.settings_dict["commands"]["lvlGrind"]
         try:
@@ -59,9 +49,7 @@ class Level(commands.Cog):
             await self.bot.put_queue(self.cmd)
         except Exception as e:
             await self.bot.log(f"Error - start_level_grind(): {e}", "#c25560")
-        
-    
-    """gets executed when the cog is first loaded"""
+
     async def cog_load(self):
         if not self.bot.settings_dict["commands"]["lvlGrind"]["enabled"]:
             try:
@@ -79,7 +67,6 @@ class Level(commands.Cog):
         if message.channel.id == self.bot.cm.id and message.author.id == self.bot.user.id:
             if self.last_level_grind_message == message.content:
                 await self.start_level_grind()
-                
 
 async def setup(bot):
     await bot.add_cog(Level(bot))

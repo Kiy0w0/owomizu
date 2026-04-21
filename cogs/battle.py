@@ -1,14 +1,9 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import asyncio
 from typing import Optional
 
 from discord.ext import commands
-
 
 class Battle(commands.Cog):
     def __init__(self, bot):
@@ -108,12 +103,11 @@ class Battle(commands.Cog):
                             if message.reference is not None:
                                 referenced = await message.channel.fetch_message(message.reference.message_id)
                                 if not referenced.embeds and "You found a **weapon crate**!" in referenced.content:
-                                    pass  # Allow
+                                    pass
                                 else:
                                     return
         except Exception as e:
             await self.bot.log(f"Error - {e}, During battle on_message()", "#c25560")
-
 
 async def setup(bot):
     await bot.add_cog(Battle(bot))

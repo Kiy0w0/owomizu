@@ -1,26 +1,18 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import asyncio
 
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 
-
-
 class Giveaway(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    """Join previous giveaways"""
     async def join_previous_giveaways(self):
         await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["shortCooldown"])
         await self.bot.wait_until_ready()
-        
-        # Using briefcooldown here as using the long cooldown of giveaway joiner might look weird here.
+
         await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["briefCooldown"])
         for i in self.bot.settings_dict["giveawayJoiner"]["channelsToJoin"]:
             try:
@@ -28,7 +20,6 @@ class Giveaway(commands.Cog):
             except:
                 channel = None
             if not channel:
-                # To prevent giving error if channel id is invalid
                 await self.bot.log(f"giveaway channel seems to be invalid", "#ff5f00")
                 continue
             await self.bot.set_stat(False)
@@ -43,20 +34,19 @@ class Giveaway(commands.Cog):
 
             await self.bot.set_stat(True)
 
-    """gets executed when the cog is first loaded"""
     async def cog_load(self):
         if self.bot.settings_dict["giveawayJoiner"]["enabled"]:
-            """Run join_previous_giveaways when bot is ready"""
+
             asyncio.create_task(self.join_previous_giveaways())
         else:
             try:
                 asyncio.create_task(self.bot.unload_cog("cogs.giveaway"))
             except ExtensionNotLoaded:
                 pass
-    
+
     @commands.Cog.listener()
     async def on_message(self, message):
-        """Join Giveaways"""
+
         if message.channel.id in self.bot.settings_dict["giveawayJoiner"]["channelsToJoin"]:
             if message.embeds:
                 for embed in message.embeds:

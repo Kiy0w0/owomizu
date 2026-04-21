@@ -1,4 +1,3 @@
-# Standard Library
 import asyncio
 import itertools
 import json
@@ -19,11 +18,10 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from threading import Thread
 
-# Termux Detection (MUST be before discord import!)
 def is_termux():
     termux_prefix = os.environ.get("PREFIX")
     termux_home = os.environ.get("HOME")
-    
+
     if termux_prefix and "com.termux" in termux_prefix:
         return True
     elif termux_home and "com.termux" in termux_home:
@@ -33,11 +31,9 @@ def is_termux():
 
 on_mobile = is_termux()
 
-# Third-Party Libraries
 import aiosqlite
 import aiohttp
 
-# Discord import with Termux compatibility handling
 try:
     import discord
     from discord.ext import commands, tasks
@@ -65,8 +61,6 @@ from rich.align import Align
 from rich.console import Console
 from rich.panel import Panel
 
-
-# Local
 from utils.misspell import misspell_word
 from utils import state
 from utils import helpers
@@ -75,33 +69,29 @@ from utils.state import list_user_ids as listUserIds
 from bot.client import MyClient
 from dashboard import create_app
 
-app = create_app() # Initialize Flask app
+app = create_app()
 
 def run_flask():
     try:
         if global_settings_dict["website"]["enabled"]:
-             # Suppress Flask logging
             log = logging.getLogger('werkzeug')
             log.setLevel(logging.ERROR)
             app.run(host='0.0.0.0', port=global_settings_dict["website"]["port"])
     except Exception as e:
         print(f"Error starting Flask: {e}")
 
-"""Cntrl+c detect"""
 def handle_sigint(signal_number, frame):
     print("\nCtrl+C detected. Initiating graceful shutdown...")
-    
-    # Attempt to close all active bot instances
+
     for client in state.bot_instances:
         try:
             if client.loop.is_running():
-                # Schedule client.close() in the client's event loop
                 asyncio.run_coroutine_threadsafe(client.close(), client.loop)
         except Exception as e:
             print(f"Error closing client: {e}")
-            
+
     print("Waiting for connections to close...")
-    time.sleep(1.5) # Give asyncio time to clean up SSL transports
+    time.sleep(1.5)
     print("Exiting.")
     os._exit(0)
 
@@ -111,18 +101,15 @@ def setup_logging():
     handler = logging.handlers.RotatingFileHandler(
         filename='logs.txt',
         encoding='utf-8',
-        maxBytes=5 * 1024 * 1024,  # 5 MiB
+        maxBytes=5 * 1024 * 1024,
         backupCount=3,
     )
     formatter = logging.Formatter('[{asctime}] {name} - {message}', style='{')
     handler.setFormatter(formatter)
-    
+
     logger = logging.getLogger("bot")
     logger.setLevel(logging.INFO)
     logger.addHandler(handler)
-
-
-
 
 def clear():
     os.system('cls') if os.name == 'nt' else os.system('clear')
@@ -130,7 +117,6 @@ def clear():
 console = helpers.console
 lock = helpers.lock
 clear()
-
 
 def load_accounts_dict(file_path="utils/stats.json"):
     with open(file_path, "r") as config_file:
@@ -144,11 +130,8 @@ with open("config/misc.json", "r") as config_file:
     misc_dict = json.load(config_file)
     state.misc = misc_dict
 
-
 console.rule("[bold blue1]:>", style="navy_blue")
 console_width = console.size.width
-# listUserIds imported from state
-
 
 mizu_network_api = "https://api.ive.my.id"
 
@@ -172,14 +155,10 @@ def merge_dicts(main, small):
         else:
             main[key] = value
 
-
-
-# Global list to store real-time command logs (declared at top of file)
-max_command_logs = 500  # Keep only the last 500 commands
+max_command_logs = 500
 
 def add_command_log(account_id, command_type, message, status="info"):
-    """Add a command log entry"""
-    # Use shared state
+
     log_entry = {
         "timestamp": time.time(),
         "account_id": str(account_id),
@@ -188,16 +167,14 @@ def add_command_log(account_id, command_type, message, status="info"):
         "message": message,
         "status": status
     }
-    
+
     state.command_logs.append(log_entry)
-    
-    # Keep only the last max_command_logs entries
+
     if len(state.command_logs) > state.max_command_logs:
         state.command_logs = state.command_logs[-state.max_command_logs:]
 
 def refresh_bot_settings(changed_command=None, enabled=None):
-    """Refresh settings for all active bot instances and apply immediate toggle if provided."""
-    # Use shared state
+
     try:
         if not state.bot_instances:
             print("No active bot instances to refresh")
@@ -208,7 +185,6 @@ def refresh_bot_settings(changed_command=None, enabled=None):
             try:
                 if hasattr(client, 'refresh_settings') and hasattr(client, 'user') and client.user:
                     client.refresh_settings()
-                    # Apply immediate toggle on the client's loop
                     if changed_command is not None and enabled is not None and hasattr(client, 'apply_toggle'):
                         asyncio.run_coroutine_threadsafe(client.apply_toggle(changed_command, enabled), client.loop)
                     active_clients.append(client)
@@ -227,19 +203,6 @@ def refresh_bot_settings(changed_command=None, enabled=None):
     except Exception as e:
         print(f"Error refreshing bot settings: {e}")
 
-
-# Legacy routes removed. All routes are now in dashboard/routes.py
-
-
-
-""""""
-
-
-
-
-
-# Note: is_termux() and on_mobile already defined at the top of the file (line 22-33)
-
 if not on_mobile and not misc_dict["hostMode"]:
     try:
         if global_settings_dict["batteryCheck"]["enabled"]:
@@ -247,12 +210,6 @@ if not on_mobile and not misc_dict["hostMode"]:
     except Exception as e:
         print(f"ImportError: {e}")
 
-
-# For time related stuff
-
-
-
-# For battery check
 def batteryCheckFunc():
     cnf = global_settings_dict["batteryCheck"]
     try:
@@ -302,26 +259,23 @@ if global_settings_dict["batteryCheck"]["enabled"]:
 
 def popup_main_loop():
     root = tk.Tk()
-    root.withdraw()  # Hide the root window
+    root.withdraw()
 
     while True:
         msg, username, channelname, captchatype = popup_queue.get()
         print(msg, username, channelname, captchatype)
-        # Create a new popup window
         popup = tk.Toplevel(root)
         popup.configure(bg="#000000")
         try:
-            icon_path = "static/imgs/logo.png"  # Path to your icon image file
+            icon_path = "static/imgs/logo.png"
             icon = tk.PhotoImage(file=icon_path)
             popup.iconphoto(True, icon)
         except Exception as e:
             print(f"Failed to load icon: {e}")
-        # Determine screen dimensions
         screen_width = popup.winfo_screenwidth()
         screen_height = popup.winfo_screenheight()
-        # Calculate popup window position and size
-        popup_width = min(500, int(screen_width * 0.8))  # Limit maximum width to 500px or 80% of screen width
-        popup_height = min(300, int(screen_height * 0.8))  # Limit maximum height to 300px or 80% of screen height
+        popup_width = min(500, int(screen_width * 0.8))
+        popup_height = min(300, int(screen_height * 0.8))
         x_position = (screen_width - popup_width) // 2
         y_position = (screen_height - popup_height) // 2
         popup.geometry(f"{popup_width}x{popup_height}+{x_position}+{y_position}")
@@ -341,22 +295,15 @@ def popup_main_loop():
         button = tk.Button(popup, text="OK", command=popup.destroy)
         button.pack(pady=10)
         try:
-            popup.grab_set()  # Restrict input focus to the popup
+            popup.grab_set()
         except tk.TclError as e:
             print(f"Grab failed: {e}")
         finally:
-            popup.focus_set()  # Ensure the popup has focus
-            popup.lift()  # Bring the popup to the top
+            popup.focus_set()
+            popup.lift()
 
         popup.wait_window()
 
-
-# MyClient logic moved to bot/client.py
-
-# get_local_ip moved to utils.helpers
-
-
-"""Handle Weekly runtime"""
 def handle_weekly_runtime(path="utils/data/weekly_runtime.json"):
     while True:
         try:
@@ -375,18 +322,16 @@ def handle_weekly_runtime(path="utils/data/weekly_runtime.json"):
         except Exception as e:
             print(f"Error when handling weekly runtime:\n{e}")
 
-        # update every 15 seconds
         time.sleep(15)
 
 def _default_weekly_runtime():
-    """Return a fresh weekly runtime dict."""
+
     data = {str(d): [0, 0] for d in range(7)}
     data["last_checked"] = 0
     return data
 
 def start_runtime_loop(path="utils/data/weekly_runtime.json"):
     try:
-        # Handle missing or corrupt file
         weekly_runtime_dict = None
         if os.path.exists(path) and os.path.getsize(path) > 0:
             try:
@@ -402,7 +347,7 @@ def start_runtime_loop(path="utils/data/weekly_runtime.json"):
         now = time.time()
         last_checked = weekly_runtime_dict.get("last_checked", 0)
 
-        if now - last_checked > 604800: # 604800 -> seconds in a week
+        if now - last_checked > 604800:
             for day in map(str, range(7)):
                 weekly_runtime_dict[day] = [0, 0]
 
@@ -417,9 +362,8 @@ def start_runtime_loop(path="utils/data/weekly_runtime.json"):
     except Exception as e:
         print(f"Error when attempting to start runtime handler:\n{e}")
 
-
 def _build_database_schema(db_path="utils/data/db.sqlite"):
-    """Create all tables and populate initial data. Called after integrity is confirmed."""
+
     conn = sqlite3.connect(db_path)
     c = conn.cursor()
 
@@ -443,14 +387,8 @@ def _build_database_schema(db_path="utils/data/db.sqlite"):
     conn.commit()
     conn.close()
 
-
 def create_database(db_path="utils/data/db.sqlite"):
-    """
-    Create or verify the SQLite database.
-    If the database is corrupted (malformed disk image), automatically
-    backs it up and recreates it from scratch so the bot doesn't crash.
-    """
-    # Check integrity first (catches "database disk image is malformed")
+
     if os.path.exists(db_path):
         try:
             conn = sqlite3.connect(db_path, timeout=5)
@@ -461,7 +399,6 @@ def create_database(db_path="utils/data/db.sqlite"):
                 raise sqlite3.DatabaseError(f"Integrity check failed: {result[0]}")
 
         except sqlite3.DatabaseError as e:
-            # Database is corrupt — back it up and delete it
             backup_path = db_path + f".corrupted_{int(time.time())}.bak"
             printBox(
                 f"⚠️  Database corruption detected!\n"
@@ -478,11 +415,8 @@ def create_database(db_path="utils/data/db.sqlite"):
                 printBox(f"Could not backup db: {rename_err}\nDeleting instead.", "bold red")
                 os.remove(db_path)
 
-    # Build fresh schema (creates file if not exists, or populates existing clean one)
     _build_database_schema(db_path)
 
-
-# ----------STARTING BOT----------#
 def fetch_json(url, description="data"):
     try:
         response = requests.get(url, timeout=10)
@@ -493,7 +427,7 @@ def fetch_json(url, description="data"):
         return {}
 
 def fetch_mizu_api(endpoint):
-    """Fetch data from Mizu OwO API endpoints"""
+
     try:
         url = f"{mizu_network_api}/{endpoint}"
         response = requests.get(url, timeout=10)
@@ -504,22 +438,20 @@ def fetch_mizu_api(endpoint):
         return {}
 
 def get_api_announcements():
-    """Get current announcements from API"""
+
     return fetch_mizu_api("announcements.json")
 
 def get_api_features():
-    """Get available features from API"""
+
     return fetch_mizu_api("features.json")
 
 def get_api_themes():
-    """Get available themes from API"""
+
     return fetch_mizu_api("themes.json")
 
 def get_api_status():
-    """Get system status from API"""
+
     return fetch_mizu_api("status.json")
-
-
 
 def run_bots(tokens_and_channels):
     threads = []
@@ -531,28 +463,17 @@ def run_bots(tokens_and_channels):
         thread.join()
 
 def run_bot(token, channel_id, global_settings_dict):
-    """Original run_bot function for backwards compatibility"""
-    # Use shared state
-    
-    # Create and set event loop for this thread (required for Termux compatibility)
-    
+
     if not token or not isinstance(token, str) or len(token) < 50 or token.count('.') < 2:
         printBox(f"Error: Invalid token format passed to run_bot!\nToken: {token[:15]}... (hidden)\nReason: Token seems too short or malformed (must contain 2 dots).", "bold red")
         return
 
-    # Validated token
-    
-    # Create a new event loop for this thread (Crucial for Termux/Linux threading)
-    # loop = asyncio.new_event_loop()
-    # asyncio.set_event_loop(loop)
-    
     try:
         logging.getLogger("discord.client").setLevel(logging.ERROR)
 
         while True:
             client = MyClient(token, channel_id, global_settings_dict)
-            
-            # Add client to global instances list
+
             state.bot_instances.append(client)
 
             if not on_mobile:
@@ -560,7 +481,6 @@ def run_bot(token, channel_id, global_settings_dict):
                     client.run(token, log_level=logging.ERROR)
 
                 except Exception as e:
-                    # Check for CurlError if defined (imported in main)
                     if 'CurlError' in globals() and isinstance(e, globals()['CurlError']):
                          if "WS_SEND" in str(e) and "55" in str(e):
                             printBox("Broken pipe error detected. Restarting bot...", "bold red")
@@ -570,20 +490,16 @@ def run_bot(token, channel_id, global_settings_dict):
                             printBox(f"Curl error: {e}", "bold red")
                             if client in state.bot_instances: state.bot_instances.remove(client)
                             break
-                    
+
                     printBox(f"Unknown error when running bot: {e}", "bold red")
                     if client in state.bot_instances: state.bot_instances.remove(client)
 
             else:
-                # Mobile (Termux) – uses discord.py-self without curl_cffi.
-                # Retry loop: keep reconnecting on recoverable errors (network drops,
-                # server resets, etc.). Only exit on fatal errors like bad token.
                 try:
                     client.run(token, log_level=logging.ERROR)
                 except Exception as e:
                     error_str = str(e)
                     if "Improper token" in error_str or "401" in error_str:
-                        # Fatal – bad token, no point retrying
                         printBox(
                             f"[Termux] Critical Error: Invalid Token!\n"
                             f"Make sure there are no extra spaces, newlines, or quotes around\n"
@@ -601,33 +517,29 @@ def run_bot(token, channel_id, global_settings_dict):
                             state.bot_instances.remove(client)
                         break
                     elif "Cannot connect" in error_str or "Connection" in error_str or "TimeoutError" in error_str:
-                        # Recoverable network error – retry after a short delay
                         printBox(f"[Termux] Network error, retrying in 10s...\n{e}", "bold yellow")
                         if client in state.bot_instances:
                             state.bot_instances.remove(client)
                         time.sleep(10)
-                        continue  # restart the while True loop
+                        continue
                     else:
                         printBox(f"[Termux] Unknown error: {e}\nRetrying in 10s...", "bold yellow")
                         if client in state.bot_instances:
                             state.bot_instances.remove(client)
                         time.sleep(10)
-                        continue  # retry unknown errors too
+                        continue
                 else:
-                    # client.run() returned normally (clean disconnect)
                     if client in state.bot_instances:
                         state.bot_instances.remove(client)
                     if getattr(client, "should_exit", False):
                         break
-                    # Otherwise treat as recoverable, restart
                     printBox("[Termux] Bot disconnected, restarting...", "bold yellow")
                     time.sleep(5)
                     continue
-            
-            # Ensure removal if loop continues naturally
+
             if client in state.bot_instances:
                 state.bot_instances.remove(client)
-            
+
             if getattr(client, "should_exit", False):
                 break
 
@@ -635,7 +547,7 @@ def run_bot(token, channel_id, global_settings_dict):
         printBox(f"Error starting bot: {e}", "bold red")
 
 def stop_batch(active_clients):
-    """Gracefully stop a batch of clients"""
+
     printBox(f"Stopping batch of {len(active_clients)} bots...", "bold yellow")
     for client in active_clients:
         try:
@@ -643,79 +555,63 @@ def stop_batch(active_clients):
                 asyncio.run_coroutine_threadsafe(client.close(), client.loop)
         except Exception as e:
             print(f"Error closing client: {e}")
-            
-    # Wait for them to actually close
+
     time.sleep(5)
-    
-    # Clean up state
+
     for client in active_clients:
         if client in state.bot_instances:
             state.bot_instances.remove(client)
 
 def run_rotation_mode(tokens_and_channels):
-    """Run bots in rotation/shift mode"""
+
     rotation_config = global_settings_dict["accountRotation"]
     batch_size = rotation_config["accountsPerShift"]
     shift_duration = rotation_config["shiftDurationMinutes"] * 60
     cooldown = rotation_config["cooldownBetweenShiftsSeconds"]
-    
-    # Create batches
+
     batches = [tokens_and_channels[i:i + batch_size] for i in range(0, len(tokens_and_channels), batch_size)]
     total_batches = len(batches)
-    
+
     if total_batches == 0:
         printBox("No tokens to rotate!", "bold red")
         return
 
     printBox(f"Rotation Mode: {total_batches} batches found. Shift duration: {rotation_config['shiftDurationMinutes']}m", "bold cyan")
-    
+
     while True:
         for i, batch in enumerate(batches):
             printBox(f"Starting Batch {i+1}/{total_batches}", "bold green")
-            
-            # Start the threads for this batch
+
             batch_threads = []
             for token, channel_id in batch:
                 thread = Thread(target=run_bot, args=(token, channel_id, global_settings_dict))
                 thread.start()
                 batch_threads.append(thread)
-            
-            # Wait for the shift duration
-            # Check every second to allow quick exit on Ctrl+C
+
             end_time = time.time() + shift_duration
             while time.time() < end_time:
                 time.sleep(1)
-            
-            # Stop the current batch
-            # We need to find which clients correspond to this batch
-            # Actually, we can just stop ALL active clients since we only run one batch at a time
-            # But to be safe, we close all in state.bot_instances
-            
-            active_clients = list(state.bot_instances) # Create copy
+
+            active_clients = list(state.bot_instances)
             stop_batch(active_clients)
-            
-            # Join threads to ensure they are cleaned up
+
             for t in batch_threads:
                 t.join(timeout=5)
-                
+
             printBox(f"Batch {i+1} finished. Cooling down for {cooldown}s...", "bold blue")
             time.sleep(cooldown)
 
 if __name__ == "__main__":
     setup_logging()
-    # Version check disabled to prevent reinstall loop
     if not misc_dict["console"]["compactMode"]:
         console.print(mizuPanel)
         console.rule(f"[bold blue1]version - {version}", style="navy_blue")
 
-    # Load environment variables
     from dotenv import load_dotenv
     load_dotenv()
 
-    # Try loading tokens from environment variable first
     tokens_env = os.getenv("TOKENS")
     if tokens_env:
-        # Format: "token1 channel1;token2 channel2"
         raw_tokens = [entry.strip().split() for entry in tokens_env.split(';') if entry.strip()]
         tokens_and_channels = []
         for t in raw_tokens:
@@ -725,14 +621,14 @@ if __name__ == "__main__":
             elif len(t) == 1:
                 print(f"Warning: Token ending in ...{token_clean[-5:]} is missing Channel ID. Defaulting to 0.")
                 tokens_and_channels.append([token_clean, "0"])
-        
+
         printBox("Loaded tokens from .env file", "bold green")
     elif os.path.exists("tokens.txt"):
         tokens_and_channels = []
         for line in open("tokens.txt", "r"):
             parts = line.strip().split()
             if not parts: continue
-            
+
             token_clean = parts[0].strip().strip('"').strip("'")
 
             if len(parts) >= 2:
@@ -748,19 +644,15 @@ if __name__ == "__main__":
 
     printBox(f'-Received {token_len} tokens.'.center(console_width - 2 ),'bold cyan' )
 
-    # Create database or modify if required
     create_database()
 
-    # Weekly runtime thread
     start_runtime_loop()
 
     if global_settings_dict["website"]["enabled"]:
-        # get ip
         ip = get_local_ip()
         printBox(f'Website Dashboard: http://{ip}:{global_settings_dict["website"]["port"]}'.center(console_width - 2 ), 'bold cyan')
     try:
         if misc_dict["news"]:
-            # Fetch news from API
             news_json = fetch_mizu_api("news.json")
             if news_json.get("available"):
                 printBox(
@@ -768,8 +660,7 @@ if __name__ == "__main__":
                     f"bold {news_json.get('color', 'white')}",
                     title=news_json.get("title", "📢 News")
                 )
-            
-            # Fetch and display announcements from API
+
             announcements_json = get_api_announcements()
             if announcements_json.get("current_announcements"):
                 for announcement in announcements_json["current_announcements"]:
@@ -786,16 +677,12 @@ if __name__ == "__main__":
         console.print("Star the repo in our github page if you want us to continue maintaining this proj :>.", style = "thistle1")
     console.rule(style="navy_blue")
 
-
     if not on_mobile:
-        # To catch `Broken pipe` error
         try:
             from curl_cffi.curl import CurlError
         except ImportError:
-            # curl_cffi not available (Termux/ARM), use fallback
             CurlError = Exception
-    
-    # Start Flask thread (Always run dashboard)
+
     flask_thread = threading.Thread(target=run_flask)
     flask_thread.daemon = True
     flask_thread.start()
@@ -805,7 +692,7 @@ if __name__ == "__main__":
             import tkinter as tk
             from tkinter import PhotoImage
             from queue import Queue
-            
+
             popup_queue = Queue()
 
             main_bot_thread = threading.Thread(target=run_bots, args=(tokens_and_channels,))

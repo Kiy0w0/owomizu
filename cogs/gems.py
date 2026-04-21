@@ -5,13 +5,11 @@ import time
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 
-
 """
 REF :- 
 gem code - https://github.com/ChristopherBThai/Discord-OwO-Bot/blob/master/src/commands/commandList/shop/inventory.js
 small numbers - https://github.com/ChristopherBThai/Discord-OwO-Bot/blob/master/src/commands/commandList/shop/util/shopUtil.js
 """
-
 
 gem_tiers = {
     "common": ["051", "065", "072", "079"],
@@ -22,7 +20,6 @@ gem_tiers = {
     "legendary": ["056", "070", "077", "084"],
     "fabled": ["057", "071", "078", "085"],
 }
-
 
 def convert_small_numbers(small_number):
     numbers = {
@@ -40,17 +37,15 @@ def convert_small_numbers(small_number):
     normal_string = "".join(numbers.get(char, char) for char in small_number)
     return int(normal_string)
 
-
 def find_gems_available(message):
     available_gems = {
-        "fabled": {"057": 0, "071": 0, "078": 0, "085": 0},  # fabled
-        "legendary": {"056": 0, "070": 0, "077": 0, "084": 0},  # legendary
-        "mythical": {"055": 0, "069": 0, "076": 0, "083": 0},  # mythical
-        "epic": {"054": 0, "068": 0, "075": 0, "082": 0},  # epic
-        "rare": {"053": 0, "067": 0, "074": 0, "081": 0},  # rare
-        "uncommon": {"052": 0, "066": 0, "073": 0, "080": 0},  # uncommon
-        "common": {"051": 0, "065": 0, "072": 0, "079": 0},  # common
-        # hunt, emp, luck, special
+        "fabled": {"057": 0, "071": 0, "078": 0, "085": 0},
+        "legendary": {"056": 0, "070": 0, "077": 0, "084": 0},
+        "mythical": {"055": 0, "069": 0, "076": 0, "083": 0},
+        "epic": {"054": 0, "068": 0, "075": 0, "082": 0},
+        "rare": {"053": 0, "067": 0, "074": 0, "081": 0},
+        "uncommon": {"052": 0, "066": 0, "073": 0, "080": 0},
+        "common": {"051": 0, "065": 0, "072": 0, "079": 0},
     }
     """
     Example output:-
@@ -66,11 +61,9 @@ def find_gems_available(message):
                 break
     return available_gems
 
-
 def len_gems_in_use(msg):
     to_check = ("gem1", "gem3", "gem4", "star")
     return sum(1 for gem in to_check if gem in msg)
-
 
 class Gems(commands.Cog):
     def __init__(self, bot):
@@ -103,11 +96,11 @@ class Gems(commands.Cog):
     def enabled_gem_types(self):
         cnf = self.bot.settings_dict["autoUse"]["gems"]["gemsToUse"]
         now = time.time()
-        
+
         expired = [k for k, v in self._blocked_gems.items() if now >= v]
         for k in expired:
             del self._blocked_gems[k]
-            
+
         return {
             "huntGem":      cnf["huntGem"]      and "huntGem"      not in self._blocked_gems,
             "empoweredGem": cnf["empoweredGem"] and "empoweredGem" not in self._blocked_gems,
@@ -194,7 +187,6 @@ class Gems(commands.Cog):
                     if gems[gem_id] > 0:
                         gems[gem_id] -= 1
                     if gems[gem_id] < 0:
-                        # Huh?
                         gems[gem_id] = 0
                     break
 
@@ -253,14 +245,9 @@ class Gems(commands.Cog):
                     if gem_id in gems:
                         gems[gem_id] = 0
 
-        """print(available_gems)
-        print("to")
-        print(temp_available_gems)"""
-
         return self.find_gems_to_use(temp_available_gems)
 
     def process_result(self, result):
-        # Find the group with the highest number of items
         max_group = max(result, key=len, default=None)
         return max_group
 
@@ -270,7 +257,6 @@ class Gems(commands.Cog):
             or not self.bot.settings_dict["autoUse"]["gems"]["enabled"]
         ):
             try:
-                # asyncio.create_task(self.bot.unload_cog("cogs.gems"))
                 pass
             except ExtensionNotLoaded:
                 pass
@@ -282,29 +268,20 @@ class Gems(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        
+
         if (
             message.channel.id != self.bot.channel_id
             or message.author.id != self.bot.owo_bot_id
         ):
             return
-            
-        # Optimization: Check if gems automation is enabled
+
         if not self.bot.settings_dict["autoUse"]["gems"]["enabled"]:
             return
 
-        # Handle 'caught' message (Hunt result)
         if "caught" in message.content and f"<@{self.bot.user.id}>" in message.content:
             if self.bot.user_status["no_gems"]:
                 return
-            
-            # Check if any gem is missing from the message
-            # But wait, 'caught' message doesn't show active gems, it just shows loot.
-            # We need to check inventory periodically or rely on 'empowered by' message.
-            # The logic here seems to force inventory check after a hunt to be sure?
-            
-            # Original code logic:
-            # await self.bot.set_stat(False)
+
             self.inventory_check = True
             await self.bot.put_queue(self.inv_cmd, priority=True)
 
@@ -325,7 +302,6 @@ class Gems(commands.Cog):
                 if self.available_gems:
                     await self.use_gems(self.available_gems, result)
                 else:
-                    # await self.bot.set_stat(False)
                     await self.bot.put_queue(self.inv_cmd, priority=True)
                     self.cache_gems_in_use = result
 
@@ -333,7 +309,7 @@ class Gems(commands.Cog):
             await self.bot.remove_queue(id="inv")
             self.available_gems = find_gems_available(message.content)
             self.already_checked = False
-            
+
             if self.inventory_check:
                 await self.use_gems(self.available_gems, full=True)
                 self.inventory_check = False
@@ -362,10 +338,9 @@ class Gems(commands.Cog):
                         )
                         self.bot.add_dashboard_log("gems", f"{gem_key} already active, skipping {mins}min", "warning")
                     blocked_any = True
-                    
+
             if blocked_any:
                 await self.bot.remove_queue(id="gems")
-
 
 async def setup(bot):
     await bot.add_cog(Gems(bot))

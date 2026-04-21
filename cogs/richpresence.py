@@ -1,6 +1,4 @@
-"""
-Mizu OwO Bot - Rich Presence Cog
-"""
+   
 
 from discord.ext import commands, tasks
 import discord

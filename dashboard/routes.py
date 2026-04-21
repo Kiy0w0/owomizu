@@ -1,4 +1,3 @@
-# Standard Library
 import json
 import random
 import time
@@ -8,17 +7,12 @@ import aiosqlite
 import asyncio
 from datetime import datetime
 
-# Third-Party Libraries
-# Third-Party Libraries
 from flask import jsonify, render_template, request, Blueprint
 from utils import state
 
-# Create Blueprint
 bp = Blueprint('dashboard', __name__)
 
-# Helper Functions
 async def get_from_db(command):
-    # Async database utility
     try:
         async with aiosqlite.connect("utils/data/db.sqlite") as db:
             db.row_factory = aiosqlite.Row
@@ -51,12 +45,10 @@ def merge_dicts(main, small):
             main[key] = value
 
 def get_weekday():
-    # Simple implementation, assuming 0-6
     return str(datetime.now().weekday())
 
-version = "1.5.5"  # Ideally imported from main config
+version = "1.5.5"
 
-# Routes
 @bp.route("/")
 def home():
     return render_template("index.html", version=version)
@@ -68,7 +60,6 @@ def dashboard():
 @bp.route("/settings")
 def settings_page():
     return render_template("settings.html", version=version)
-
 
 @bp.route('/api/console', methods=['GET'])
 def get_console_logs():
@@ -101,7 +92,6 @@ async def fetch_gamble_data():
 @bp.route('/api/fetch_cowoncy_data', methods=['GET'])
 async def fetch_cowoncy_data():
     global_settings = load_global_settings()
-
 
     try:
         rows = await get_from_db("SELECT user_id, hour, earnings FROM cowoncy_earnings ORDER BY hour")
@@ -174,7 +164,7 @@ def fetch_weekly_runtime():
     try:
         with open("utils/data/weekly_runtime.json", "r") as config_file:
             data_dict = json.load(config_file)
-        
+
         runtime_data = [(val[1] - val[0]) / 60 for val in data_dict.values() if isinstance(val, list)]
         cur_hour = get_weekday()
 
@@ -198,20 +188,18 @@ def get_settings():
 @bp.route('/api/dashboard/status', methods=['GET'])
 def get_dashboard_status():
     try:
-        # Simple status based on active user IDs from loaded bot instances
-        # Need to access global listUserIds if possible, or infer from bot_instances
         active_accounts = len(state.bot_instances)
-        
+
         captcha_status = False
         sleep_status = False
-        
+
         for bot_instance in state.bot_instances:
             if hasattr(bot_instance, 'command_handler_status'):
                 if bot_instance.command_handler_status.get("captcha", False):
                     captcha_status = True
                 if bot_instance.command_handler_status.get("sleep", False):
                     sleep_status = True
-                    
+
         if active_accounts > 0:
             if captcha_status:
                 bot_status = "captcha"
@@ -221,8 +209,7 @@ def get_dashboard_status():
                 bot_status = "online"
         else:
             bot_status = "offline"
-        
-        # Total accounts estimate
+
         try:
            with open("tokens.txt", "r") as f:
                total_accounts = len(f.readlines())
@@ -260,23 +247,22 @@ async def get_dashboard_stats():
             "captchas_solved": 0,
             "accounts": []
         }
-        
-        # Get data from database
+
         try:
             account_rows = await get_from_db("SELECT user_id, cowoncy, captchas FROM user_stats")
             total_cowoncy = 0
             total_captchas = 0
-            
+
             for row in account_rows:
                 user_id = row["user_id"]
                 cowoncy = row["cowoncy"] or 0
                 captchas = row["captchas"] or 0
-                
+
                 total_cowoncy += cowoncy
                 total_captchas += captchas
-                
+
                 user_display = f"User-{str(user_id)[-4:]}"
-                
+
                 stats_data["accounts"].append({
                     "user_id": user_id,
                     "user_display": user_display,
@@ -284,28 +270,28 @@ async def get_dashboard_stats():
                     "cowoncy_formatted": f"{cowoncy:,}",
                     "captchas": captchas
                 })
-            
+
             stats_data["balance"] = total_cowoncy
             stats_data["balance_formatted"] = f"{total_cowoncy:,}"
             stats_data["captchas_solved"] = total_captchas
-            
+
             hunt_rows = await get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
             battle_rows = await get_from_db("SELECT count FROM commands WHERE name = 'battle'")
-            
+
             stats_data["hunts_today"] = hunt_rows[0]["count"] if hunt_rows else 0
             stats_data["battles_today"] = battle_rows[0]["count"] if battle_rows else 0
-            
+
             all_commands = await get_from_db("SELECT SUM(count) as total FROM commands")
             stats_data["commands_executed"] = all_commands[0]["total"] if all_commands and all_commands[0]["total"] else 0
-            
+
         except Exception as db_error:
             print(f"Database error in dashboard stats: {db_error}")
-        
+
         if hasattr(state, 'start_time'):
             stats_data["uptime"] = int(time.time() - state.start_time)
-        
+
         return jsonify(stats_data)
-        
+
     except Exception as e:
         print(f"Error fetching dashboard stats: {e}")
         return jsonify({
@@ -330,7 +316,7 @@ def get_dashboard_logs():
                 level = "warning"
             elif "success" in log.lower() or "completed" in log.lower() or "won" in log.lower():
                 level = "success"
-            
+
             formatted_logs.append({
                 "id": i,
                 "timestamp": datetime.now().strftime("%H:%M:%S"),
@@ -355,7 +341,7 @@ async def get_dashboard_activity():
                 ORDER BY latest DESC 
                 LIMIT 10
             """)
-            
+
             for cmd in recent_commands:
                 activities.append({
                     "time": "Recently",
@@ -365,7 +351,7 @@ async def get_dashboard_activity():
                 })
         except Exception as db_error:
             print(f"Database error in activity: {db_error}")
-            
+
         recent_website_logs = state.website_logs[-5:] if state.website_logs else []
         for log in recent_website_logs:
             activity_type = "info"
@@ -382,14 +368,14 @@ async def get_dashboard_activity():
             elif "error" in log.lower():
                 activity_type = "error"
                 icon = "fas fa-exclamation-circle"
-                
+
             activities.append({
                 "time": "Just now",
                 "message": log,
                 "type": activity_type,
                 "icon": icon
             })
-        
+
         return jsonify(activities[-10:])
     except Exception as e:
         print(f"Error fetching dashboard activity: {e}")
@@ -401,7 +387,7 @@ def get_dashboard_analytics():
         now_ts = time.time()
         one_min_ago = now_ts - 60
         active_accounts = {}
-        
+
         try:
             for client in state.bot_instances:
                 if hasattr(client, 'user') and client.user:
@@ -483,10 +469,10 @@ def update_settings():
         new_settings = request.get_json()
         current_settings = load_settings() 
         merge_dicts(current_settings, new_settings)
-        
+
         with open("config/settings.json", "w") as config_file:
             json.dump(current_settings, config_file, indent=4)
-        
+
         state.config_updated = True
         return jsonify({"status": "success", "message": "Settings updated successfully"})
     except Exception as e:
@@ -503,22 +489,22 @@ async def get_stats():
             stats_data["balance"] = total_cowoncy
         except:
             stats_data["balance"] = 0
-        
+
         try:
             rows = await get_from_db("SELECT count FROM commands WHERE name = 'hunt'")
             hunt_count = rows[0]["count"] if rows else 0
             stats_data["hunts_today"] = hunt_count
         except:
             stats_data["hunts_today"] = 0
-        
+
         try:
             rows = await get_from_db("SELECT count FROM commands WHERE name = 'battle'")
             battle_count = rows[0]["count"] if rows else 0
             stats_data["battles_today"] = battle_count
         except:
             stats_data["battles_today"] = 0
-        
-        stats_data["uptime"] = int(time.time() % 86400) # Simplified
+
+        stats_data["uptime"] = int(time.time() % 86400)
         return jsonify(stats_data)
     except Exception as e:
         print(f"Error fetching stats: {e}")
@@ -547,58 +533,39 @@ def toggle_quick_setting():
         data = request.get_json()
         command = data.get('command')
         enabled = data.get('enabled')
-        
+
         if command not in ['hunt', 'battle', 'daily', 'owo', 'channelSwitcher', 'useSlashCommands', 'stopHuntingWhenNoGems']:
             return jsonify({"status": "error", "message": "Invalid command"}), 400
-            
-        # Update settings file
+
         settings = load_settings()
-        
+
         if command == 'channelSwitcher':
             if 'channelSwitcher' not in settings:
                 settings['channelSwitcher'] = {}
             settings['channelSwitcher']['enabled'] = enabled
-            
+
         elif command == 'useSlashCommands':
             settings['useSlashCommands'] = enabled
-            
+
         elif command == 'stopHuntingWhenNoGems':
             settings['stopHuntingWhenNoGems'] = enabled
-            
+
         else:
-            # Command toggles
             if command not in settings['commands']:
                 settings['commands'][command] = {}
             settings['commands'][command]['enabled'] = enabled
-            
-        # Save settings
+
         with open("config/settings.json", "w") as f:
             json.dump(settings, f, indent=4)
-            
-        # Trigger update in running bots
-        # In this refactored version, we rely on the bot polling config_updated or similar mechanism
-        # But we also have refresh_bot_settings logic in mizu.py. 
-        # Since we moved routes here, we can't directly call mizu.py functions easily without circular imports.
-        # Ideally, we set a flag in shared state.
+
         state.config_updated = True
-            
-        # Also try to apply immediately if we have access to bot instances
-        # This part requires re-implementing refresh_bot_settings logic here or making it shared.
-        # For now, let's just use the state flag.
-        
-        # If we want to emulate the original behavior of immediate application:
-        # We can iterate through state.bot_instances and call their method if they are Objects
-        # However, calling async methods from Flask sync route requires a new loop or run_coroutine_threadsafe.
-        # For simplicity in this step, we just rely on state flag.
-        
-        # Advanced: Try to trigger immediate update if possible
+
         if state.bot_instances:
-            loop = asyncio.get_event_loop_policy().get_event_loop() # This might not work if loop is in another thread
-            # Skipping complex async interaction for now to keep refactor safe.
+            loop = asyncio.get_event_loop_policy().get_event_loop()
             pass
 
         return jsonify({"status": "success", "message": f"{command} toggled successfully"})
-        
+
     except Exception as e:
         print(f"Error toggling setting: {e}")
         return jsonify({"status": "error", "message": f"Failed to toggle {command}"}), 500
@@ -617,13 +584,12 @@ def save_autoenhance_settings():
     try:
         new_settings = request.get_json()
         settings = load_settings()
-        
-        # Update autoEnhance section
+
         settings["autoEnhance"] = new_settings
-        
+
         with open("config/settings.json", "w") as f:
             json.dump(settings, f, indent=4)
-            
+
         state.config_updated = True
         return jsonify({"status": "success", "message": "AutoEnhance settings saved successfully"})
     except Exception as e:
@@ -632,33 +598,28 @@ def save_autoenhance_settings():
 
 @bp.route('/api/dashboard/command-logs', methods=['GET'])
 def get_command_logs():
-    """Get real-time command logs for dashboard"""
+
     try:
-        # Get query parameters for filtering
         log_type = request.args.get('type', 'all')
         account_id = request.args.get('account', 'all')
         limit = int(request.args.get('limit', 100))
-        
-        # Filter logs
+
         filtered_logs = state.command_logs
-        
+
         if log_type != 'all':
             filtered_logs = [log for log in filtered_logs if log.get('command_type') == log_type]
-        
+
         if account_id != 'all':
             filtered_logs = [log for log in filtered_logs if log.get('account_id') == account_id]
-        
-        # Get the most recent logs
+
         recent_logs = filtered_logs[-limit:] if len(filtered_logs) > limit else filtered_logs
-        
-        # Format timestamps for display
+
         for log in recent_logs:
-            # Check if timestamp is a float (epoch) or struct_time
             if isinstance(log.get('timestamp'), (int, float)):
                 log['formatted_time'] = time.strftime("%H:%M:%S", time.localtime(log['timestamp']))
             elif not log.get('formatted_time'):
                  log['formatted_time'] = "00:00:00"
-        
+
         return jsonify({
             "logs": recent_logs,
             "total_count": len(state.command_logs),
@@ -670,7 +631,7 @@ def get_command_logs():
 
 @bp.route('/api/dashboard/quest-tracker', methods=['GET'])
 def get_quest_tracker():
-    """Get quest tracker status and progress"""
+
     try:
         quest_data = {
             "enabled": False,
@@ -678,11 +639,9 @@ def get_quest_tracker():
             "rare_catches": {"mythical": 0, "fabled": 0, "legendary": 0},
             "detected": False
         }
-        
-        # Get quest data from active bot instances
+
         for client in state.bot_instances:
             if hasattr(client, 'user') and client.user:
-                # Try to get quest cog
                 quest_cog = client.get_cog('Quest')
                 if quest_cog:
                     quest_status = quest_cog.get_quest_status()
@@ -693,9 +652,9 @@ def get_quest_tracker():
                         "detected": quest_status["detected"]
                     }
                     break
-                    
+
         return jsonify(quest_data)
-        
+
     except Exception as e:
         print(f"Error getting quest tracker: {e}")
         return jsonify({
@@ -707,13 +666,13 @@ def get_quest_tracker():
 
 @bp.route('/api/dashboard/quest-tracker-settings', methods=['GET'])
 def get_quest_tracker_settings():
-    """Get quest tracker settings"""
+
     try:
         settings_path = "config/settings.json"
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
-            
+
             quest_settings = settings.get("questTracker", {})
             return jsonify({
                 "enabled": quest_settings.get("enabled", False),
@@ -732,30 +691,28 @@ def get_quest_tracker_settings():
                 "trackProgress": True,
                 "notifyOnCompletion": True
             })
-            
+
     except Exception as e:
         print(f"Error getting quest tracker settings: {e}")
         return jsonify({"error": "Failed to get quest tracker settings"}), 500
 
 @bp.route('/api/dashboard/terminate', methods=['POST'])
 def dashboard_terminate():
-    """Terminate all bot instances and exit process."""
+
     try:
-        # Close all discord clients gracefully
         for client in list(state.bot_instances):
             try:
                 asyncio.run_coroutine_threadsafe(client.close(), client.loop)
             except:
                 pass
-        
-        # Schedule process exit
+
         def delayed_exit():
             time.sleep(1)
             os._exit(0)
-            
+
         import threading
         threading.Thread(target=delayed_exit).start()
-        
+
         return jsonify({"success": True, "message": "Terminating process..."})
     except Exception as e:
         print(f"Error terminating process: {e}")
@@ -763,15 +720,15 @@ def dashboard_terminate():
 
 @bp.route('/api/dashboard/quest-tracker-settings', methods=['POST'])
 def save_quest_tracker_settings():
-    """Save quest tracker settings"""
+
     try:
         data = request.get_json()
-        
+
         settings_path = "config/settings.json"
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
-            
+
             settings["questTracker"] = {
                 "enabled": data.get("enabled", False),
                 "autoCheckQuests": data.get("autoCheckQuests", True),
@@ -780,12 +737,10 @@ def save_quest_tracker_settings():
                 "trackProgress": data.get("trackProgress", True),
                 "notifyOnCompletion": data.get("notifyOnCompletion", True)
             }
-            
+
             with open(settings_path, 'w') as f:
                 json.dump(settings, f, indent=4)
-            
-            # Log the change
-            # Direct append to shared state instead of calling unavailable add_command_log
+
             for user_id in state.list_user_ids:
                 log_entry = {
                     "timestamp": time.time(),
@@ -796,33 +751,30 @@ def save_quest_tracker_settings():
                     "status": "info"
                 }
                 state.command_logs.append(log_entry)
-                # Cap logs
                 if len(state.command_logs) > state.max_command_logs:
                     state.command_logs = state.command_logs[-state.max_command_logs:]
-        
-        # Refresh bot settings
+
         state.config_updated = True
-        
+
         return jsonify({
             "success": True,
             "message": "Quest Tracker settings saved successfully"
         })
-        
+
     except Exception as e:
         print(f"Error saving quest tracker settings: {e}")
         return jsonify({"error": "Failed to save quest tracker settings"}), 500
 
 @bp.route('/api/dashboard/quick-settings', methods=['GET'])
 def get_quick_settings():
-    """Get current quick settings status"""
+
     try:
-        # Read from main settings file
         settings_path = "config/settings.json"
-        
+
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
-            
+
             return jsonify({
                 "hunt": settings.get("commands", {}).get("hunt", {}).get("enabled", False),
                 "battle": settings.get("commands", {}).get("battle", {}).get("enabled", False), 
@@ -834,27 +786,26 @@ def get_quick_settings():
             })
         else:
             return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False})
-            
+
     except Exception as e:
         print(f"Error getting quick settings: {e}")
         return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False})
 
 @bp.route('/api/dashboard/security-settings', methods=['GET'])
 def get_security_settings():
-    """Get current security settings"""
+
     try:
-        # Read from main settings file
         settings_path = "config/settings.json"
-        
+
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
-            
+
             default_cooldowns = settings.get("defaultCooldowns", {})
             command_handler = default_cooldowns.get("commandHandler", {})
             between_commands = command_handler.get("betweenCommands", [1.7, 2.7])
             captcha_restart = default_cooldowns.get("captchaRestart", [3.7, 5.6])
-            
+
             return jsonify({
                 "delay_min": between_commands[0],
                 "delay_max": between_commands[1],
@@ -874,7 +825,7 @@ def get_security_settings():
                 "random_delays": False,
                 "silent_mode": False
             })
-            
+
     except Exception as e:
         print(f"Error getting security settings: {e}")
         return jsonify({
@@ -889,42 +840,37 @@ def get_security_settings():
 
 @bp.route('/api/dashboard/security-settings', methods=['POST'])
 def save_security_settings():
-    """Save security settings"""
+
     try:
         data = request.get_json()
-        
-        # Update main settings file
+
         settings_path = "config/settings.json"
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
-            
-            # Update delay settings
+
             if "defaultCooldowns" not in settings:
                 settings["defaultCooldowns"] = {}
             if "commandHandler" not in settings["defaultCooldowns"]:
                 settings["defaultCooldowns"]["commandHandler"] = {}
-            
+
             settings["defaultCooldowns"]["commandHandler"]["betweenCommands"] = [
                 float(data.get("delay_min", 1.7)),
                 float(data.get("delay_max", 2.7))
             ]
-            
+
             settings["defaultCooldowns"]["captchaRestart"] = [
                 float(data.get("captcha_restart_min", 3.7)),
                 float(data.get("captcha_restart_max", 5.6))
             ]
-            
-            # Anti-Detection removed from UI; enforce safe defaults
+
             settings["typingIndicator"] = False
             settings["randomDelays"] = False
             settings["silentMode"] = data.get("silent_mode", False)
-            
-            # Save updated settings
+
             with open(settings_path, 'w') as f:
                 json.dump(settings, f, indent=4)
-            
-            # Log the change for all active bot instances
+
             for user_id in state.list_user_ids:
                 log_entry = {
                     "timestamp": time.time(),
@@ -937,31 +883,30 @@ def save_security_settings():
                 state.command_logs.append(log_entry)
                 if len(state.command_logs) > state.max_command_logs:
                     state.command_logs = state.command_logs[-state.max_command_logs:]
-        
-        # Refresh bot settings for all active instances
+
         state.config_updated = True
-        
+
         return jsonify({
             "success": True, 
             "message": "Security settings saved successfully"
         })
-        
+
     except Exception as e:
         print(f"Error saving security settings: {e}")
         return jsonify({"error": "Failed to save security settings"}), 500
 
 @bp.route('/api/dashboard/gambling-settings', methods=['GET'])
 def get_gambling_settings():
-    """Get current Gambling settings"""
+
     try:
         settings_path = "config/settings.json"
-        
+
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
-            
+
             gamble = settings.get("gamble", {})
-            
+
             return jsonify({
                 "allottedAmount": gamble.get("allottedAmount", 30000),
                 "goalSystem": gamble.get("goalSystem", {
@@ -983,7 +928,6 @@ def get_gambling_settings():
                 })
             })
         else:
-            # Return default values
             return jsonify({
                 "allottedAmount": 30000,
                 "goalSystem": {
@@ -1004,33 +948,31 @@ def get_gambling_settings():
                     "cooldown": [16, 18]
                 }
             })
-            
+
     except Exception as e:
         print(f"Error getting Gambling settings: {e}")
         return jsonify({"error": "Failed to get Gambling settings"}), 500
 
 @bp.route('/api/dashboard/gambling-settings', methods=['POST'])
 def save_gambling_settings():
-    """Save Gambling settings"""
+
     try:
         data = request.get_json()
-        
+
         settings_path = "config/settings.json"
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
-            
-            # Update Gambling settings
+
             if "gamble" not in settings:
                 settings["gamble"] = {}
-            
+
             settings["gamble"]["allottedAmount"] = int(data.get("allottedAmount", 30000))
             settings["gamble"]["goalSystem"] = data.get("goalSystem", {
                 "enabled": False,
                 "amount": 300
             })
-            
-            # Coinflip settings
+
             coinflip = data.get("coinflip", {})
             settings["gamble"]["coinflip"] = {
                 "enabled": coinflip.get("enabled", False),
@@ -1039,8 +981,7 @@ def save_gambling_settings():
                 "cooldown": coinflip.get("cooldown", [16, 18]),
                 "options": coinflip.get("options", ["t"])
             }
-            
-            # Slots settings
+
             slots = data.get("slots", {})
             settings["gamble"]["slots"] = {
                 "enabled": slots.get("enabled", False),
@@ -1048,12 +989,10 @@ def save_gambling_settings():
                 "multiplierOnLose": float(slots.get("multiplierOnLose", 2)),
                 "cooldown": slots.get("cooldown", [16, 18])
             }
-            
-            # Save updated settings
+
             with open(settings_path, 'w') as f:
                 json.dump(settings, f, indent=4)
-            
-            # Log the change for all active bot instances
+
             for user_id in state.list_user_ids:
                 log_entry = {
                     "timestamp": time.time(),
@@ -1066,15 +1005,157 @@ def save_gambling_settings():
                 state.command_logs.append(log_entry)
                 if len(state.command_logs) > state.max_command_logs:
                     state.command_logs = state.command_logs[-state.max_command_logs:]
-        
-        # Refresh bot settings for all active instances
+
         state.config_updated = True
-        
+
         return jsonify({
             "success": True,
             "message": "Gambling settings saved successfully"
         })
-        
+
     except Exception as e:
         print(f"Error saving Gambling settings: {e}")
         return jsonify({"error": "Failed to save Gambling settings"}), 500
+
+@bp.route('/api/control', methods=['POST', 'GET'])
+def vps_control():
+
+    try:
+        global_settings = load_global_settings()
+        api_key = global_settings.get("apiKey", "").strip()
+
+        if not api_key:
+            return jsonify({
+                "status": "error",
+                "message": "API key not configured. Set 'apiKey' in config/global_settings.json"
+            }), 403
+
+        if request.method == "GET":
+            data = request.args.to_dict()
+        else:
+            data = request.get_json(silent=True) or request.form.to_dict()
+
+        if not data:
+            return jsonify({"status": "error", "message": "No data provided"}), 400
+
+        if data.get("key", "") != api_key:
+            return jsonify({"status": "error", "message": "Invalid API key"}), 403
+
+        action = data.get("action", "").lower()
+
+        if action == "status":
+            accounts = []
+            for bot in state.bot_instances:
+                if hasattr(bot, 'user') and bot.user:
+                    h = bot.command_handler_status
+                    state_str = (
+                        "captcha" if h.get("captcha") else
+                        "sleeping" if h.get("sleep") else
+                        "paused"   if not h.get("state", True) else
+                        "running"
+                    )
+                    accounts.append({
+                        "user_id": str(bot.user.id),
+                        "username": getattr(bot, "username", str(bot.user.id)),
+                        "state": state_str,
+                        "balance": bot.user_status.get("balance", 0),
+                        "net_earnings": bot.user_status.get("net_earnings", 0),
+                    })
+            settings = load_settings()
+            return jsonify({
+                "status": "ok",
+                "active_accounts": len(accounts),
+                "accounts": accounts,
+                "features": {
+                    "hunt":     settings.get("commands", {}).get("hunt", {}).get("enabled", False),
+                    "battle":   settings.get("commands", {}).get("battle", {}).get("enabled", False),
+                    "coinflip": settings.get("gamble", {}).get("coinflip", {}).get("enabled", False),
+                    "pray":     settings.get("commands", {}).get("pray", {}).get("enabled", False),
+                    "curse":    settings.get("commands", {}).get("curse", {}).get("enabled", False),
+                    "gems":     settings.get("autoUse", {}).get("gems", {}).get("enabled", False),
+                }
+            })
+
+        elif action == "pause":
+            for bot in state.bot_instances:
+                if hasattr(bot, 'command_handler_status'):
+                    bot.command_handler_status["state"] = False
+                    if hasattr(bot, 'state_event'):
+                        bot.state_event.clear()
+                    bot.add_dashboard_log("system", "Bot paused via VPS API", "warning")
+            return jsonify({"status": "ok", "message": "All bots paused"})
+
+        elif action == "resume":
+            for bot in state.bot_instances:
+                if hasattr(bot, 'command_handler_status'):
+                    bot.command_handler_status["state"] = True
+                    if hasattr(bot, 'state_event'):
+                        bot.state_event.set()
+                    bot.add_dashboard_log("system", "Bot resumed via VPS API", "success")
+            return jsonify({"status": "ok", "message": "All bots resumed"})
+
+        elif action == "toggle":
+            command = data.get("command", "")
+            enabled = str(data.get("enabled", "true")).lower() in ("1", "true", "yes", "on")
+            settings = load_settings()
+
+            NESTED_TOGGLES = {
+                "coinflip": ("gamble", "coinflip", "enabled"),
+                "slots":    ("gamble", "slots",    "enabled"),
+                "blackjack":("gamble", "blackjack","enabled"),
+                "gems":     ("autoUse","gems",     "enabled"),
+            }
+            SIMPLE_TOGGLES = {"hunt", "battle", "owo", "pray", "curse", "sell", "sac", "lottery"}
+
+            if command in NESTED_TOGGLES:
+                keys = NESTED_TOGGLES[command]
+                node = settings
+                for k in keys[:-1]:
+                    node = node.setdefault(k, {})
+                node[keys[-1]] = enabled
+            elif command in SIMPLE_TOGGLES:
+                settings.setdefault("commands", {}).setdefault(command, {})["enabled"] = enabled
+            elif command == "daily":
+                settings["autoDaily"] = enabled
+            else:
+                return jsonify({"status": "error", "message": f"Unknown command: {command}"}), 400
+
+            with open("config/settings.json", "w") as f:
+                json.dump(settings, f, indent=4)
+            state.config_updated = True
+
+            return jsonify({
+                "status": "ok",
+                "message": f"{command} {'enabled' if enabled else 'disabled'}"
+            })
+
+        elif action == "reload":
+            state.config_updated = True
+            return jsonify({"status": "ok", "message": "Config reload triggered"})
+
+        elif action == "help":
+            return jsonify({
+                "status": "ok",
+                "actions": {
+                    "status":  "Get bot status and feature flags",
+                    "pause":   "Pause all bot instances",
+                    "resume":  "Resume all bot instances",
+                    "toggle":  "Toggle a feature. Params: command=<name>, enabled=<true|false>",
+                    "reload":  "Trigger a config reload on all bots",
+                    "help":    "Show this help",
+                },
+                "toggle_commands": [
+                    "hunt", "battle", "owo", "pray", "curse", "sell", "sac",
+                    "lottery", "daily", "coinflip", "slots", "blackjack", "gems"
+                ]
+            })
+
+        else:
+            return jsonify({
+                "status": "error",
+                "message": f"Unknown action '{action}'. Use action=help to see available actions."
+            }), 400
+
+    except Exception as e:
+        print(f"Error in VPS control API: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500

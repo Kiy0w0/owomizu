@@ -15,7 +15,6 @@ keyboard_neighbors = {
     'y': ['t', 'u'], 'z': ['x']
 }
 
-
 def swap_letter(word):
     if len(word) < 2:
         return word
@@ -62,5 +61,4 @@ def misspell_word(word):
         cumulative += probability
         if percentage <= cumulative:
             return function(word)
-    # Fallback
     return replace_with_neighbor(word)

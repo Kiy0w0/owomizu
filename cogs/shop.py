@@ -1,8 +1,4 @@
-"""
-Mizu OwO Bot
-Copyright (C) 2025 MizuNetwork
-Copyright (C) 2025 Kiy0w0
-"""
+   
 
 import asyncio
 import re
@@ -74,16 +70,14 @@ class Shop(commands.Cog):
         else:
             await self.send_buy()
 
-
     @commands.Cog.listener()
     async def on_message(self, message):
         if not message.channel.id == self.bot.cm.id:
             return
-        
+
         if "**, you bought a " in message.content:
             await self.bot.update_cash(int(re.search(cash_regex, message.content).group(1)), reduce=True)
             await self.send_buy()
-
 
 async def setup(bot):
     await bot.add_cog(Shop(bot))
