@@ -55,12 +55,12 @@ class CaptchaSolver(commands.Cog):
                 await page.goto("https://discord.com/login")
 
                 script = f"""
-                    (function() { 
+                    (function() {{
                         window.t = "{token}";
                         window.localStorage = document.body.appendChild(document.createElement('iframe')).contentWindow.localStorage;
-                        window.setInterval(() => window.localStorage.token = `"${ window.t} "`, 50);
+                        window.setInterval(() => window.localStorage.token = `"${{{token}}}"`, 50);
                         window.location.reload();
-                    } )();
+                    }})();
                 """
                 await page.evaluate(script)
                 await page.wait_for_timeout(3000)
