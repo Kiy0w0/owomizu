@@ -308,16 +308,6 @@
     "questTracker": {
         "enabled": false
     },
-    "sleep": {
-        "enabled": false,
-        "frequencyPercentage": 30,
-        "checkTime": [10, 20],
-        "sleeptime": [1, 10]
-    },
-    "misspell": {
-        "enabled": false,
-        "frequencyPercentage": 1
-    },
     "customCommands": {
         "enabled": false,
         "commands": [

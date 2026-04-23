@@ -145,7 +145,7 @@ mizuArt = r"""
 M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "1.5.5"
+version = "1.6.0"
 debug_print = True
 
 def merge_dicts(main, small):
@@ -661,15 +661,15 @@ if __name__ == "__main__":
                     title=news_json.get("title", "📢 News")
                 )
 
-            announcements_json = get_api_announcements()
-            if announcements_json.get("current_announcements"):
-                for announcement in announcements_json["current_announcements"]:
-                    if announcement.get("show_on_startup", True):
-                        printBox(
-                            f'{announcement.get("message", "")}'.center(console_width - 2),
-                            f"bold {announcement.get('color', '#4fd1c7')}",
-                            title=announcement.get("title", "📢 Announcement")
-                        )
+            # announcements_json = get_api_announcements()
+            # if announcements_json.get("current_announcements"):
+            #     for announcement in announcements_json["current_announcements"]:
+            #         if announcement.get("show_on_startup", True):
+            #             printBox(
+            #                 f'{announcement.get("message", "")}'.center(console_width - 2),
+            #                 f"bold {announcement.get('color', '#4fd1c7')}",
+            #                 title=announcement.get("title", "📢 Announcement")
+            #             )
     except Exception as e:
         print(f"Error - {e}, while attempting to fetch news and announcements")
 

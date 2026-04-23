@@ -47,7 +47,7 @@ def merge_dicts(main, small):
 def get_weekday():
     return str(datetime.now().weekday())
 
-version = "1.5.5"
+version = "1.6.0"
 
 @bp.route("/")
 def home():

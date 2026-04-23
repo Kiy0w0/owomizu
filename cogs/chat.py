@@ -1,50 +1,17 @@
-   
-
 import asyncio
 import json
 import os
 from discord.ext import commands
+
 
 class Chat(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._timed_pause_task = None
 
-    def _save_settings(self):
-
-        try:
-            with open("config/settings.json", "w") as f:
-                json.dump(self.bot.settings_dict, f, indent=4)
-        except Exception as e:
-            self.bot.loop.create_task(
-                self.bot.log(f"[chat] Failed to save settings: {e}", "#c25560")
-            )
-
-    async def _toggle_command(self, cmd_key: str, enabled: bool, channel):
-        node = self.bot.settings_dict.setdefault("commands", {}).setdefault(cmd_key, {})
-        node["enabled"] = enabled
-        self._save_settings()
-        status = "enabled" if enabled else "disabled"
-        await channel.send(
-            f"{'▶️' if enabled else '⏹️'} **{cmd_key.title()}** {status}!",
-            silent=True,
-        )
-
-    async def _toggle_nested(self, *keys, enabled: bool, channel):
-        node = self.bot.settings_dict
-        for k in keys[:-1]:
-            node = node.setdefault(k, {})
-        node[keys[-1]] = enabled
-        self._save_settings()
-        label = ".".join(str(k) for k in keys)
-        status = "enabled" if enabled else "disabled"
-        await channel.send(
-            f"{'▶️' if enabled else '⏹️'} **{label}** {status}!", silent=True
-        )
-
     async def cog_load(self):
-        cnf = self.bot.global_settings_dict.get('textCommands', {})
-        p = cnf.get('prefix', '.')
+        cnf = self.bot.global_settings_dict.get("textCommands", {})
+        p = cnf.get("prefix", ".")
         await self.bot.log(
             f"💬 Text Commands Ready! (prefix: '{p}')\n"
             f"  {p}help               → Show all commands\n"
@@ -52,20 +19,14 @@ class Chat(commands.Cog):
             f"  {p}resume             → Resume farming\n"
             f"  {p}status             → Check bot status\n"
             f"  {p}restart            → Restart bot\n"
-            f"  {p}stop               → Stop bot\n"
-            f"  {p}cf <on|off>        → Toggle auto-coinflip\n"
-            f"  {p}prey <on|off>      → Toggle auto-pray\n"
-            f"  {p}curse <on|off>     → Toggle auto-curse\n"
-            f"  {p}gems <on|off>      → Toggle gem auto-use\n"
-            f"  {p}hunt <on|off>      → Toggle hunt\n"
-            f"  {p}battle <on|off>    → Toggle battle",
-            "#9dc3f5"
+            f"  {p}stop               → Stop bot",
+            "#9dc3f5",
         )
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        cnf = self.bot.global_settings_dict['textCommands']
-        p = cnf['prefix']
+        cnf = self.bot.global_settings_dict["textCommands"]
+        p = cnf["prefix"]
         content = message.content.strip()
         content_lower = content.lower()
 
@@ -107,13 +68,8 @@ class Chat(commands.Cog):
                 f"`{p}resume`       — Resume farming\n"
                 f"`{p}status`       — Show current status & balance\n"
                 f"`{p}restart`      — Restart bot process\n"
-                f"`{p}stop`         — Permanently stop bot\n"
-                f"`{p}cf  on|off`   — Toggle auto coinflip\n"
-                f"`{p}pray on|off`  — Toggle auto pray\n"
-                f"`{p}curse on|off` — Toggle auto curse\n"
-                f"`{p}gems on|off`  — Toggle gem auto-use\n"
-                f"`{p}hunt on|off`  — Toggle hunt command\n"
-                f"`{p}battle on|off`— Toggle battle command",
+                f"`{p}stop`         — Permanently stop bot\n\n"
+                f"To toggle features, edit `config/settings.json` directly.",
                 silent=True,
             )
 
@@ -139,6 +95,7 @@ class Chat(commands.Cog):
                 await ch.send(
                     f"⏸️ Bot paused for **{duration_mins}** minutes!", silent=True
                 )
+
                 async def _auto_resume():
                     await asyncio.sleep(duration_mins * 60)
                     if not self.bot.command_handler_status["state"]:
@@ -180,16 +137,10 @@ class Chat(commands.Cog):
                 else "🔒 Captcha" if is_captcha
                 else "✅ Running"
             )
-            cf_on  = self.bot.settings_dict.get("gamble", {}).get("coinflip", {}).get("enabled", False)
-            pray_on = self.bot.settings_dict.get("commands", {}).get("pray", {}).get("enabled", False)
-            curse_on = self.bot.settings_dict.get("commands", {}).get("curse", {}).get("enabled", False)
-            gems_on = self.bot.settings_dict.get("autoUse", {}).get("gems", {}).get("enabled", False)
             await ch.send(
                 f"**{self.bot.username} Status**\n"
                 f"State: {state_str}\n"
-                f"Balance: 🪙 {bal:,}  |  Earnings: 🪙 {earnings:,}\n"
-                f"Coinflip: {'✅' if cf_on else '❌'}  |  Pray: {'✅' if pray_on else '❌'}  |  "
-                f"Curse: {'✅' if curse_on else '❌'}  |  Gems: {'✅' if gems_on else '❌'}",
+                f"Balance: 🪙 {bal:,}  |  Earnings: 🪙 {earnings:,}",
                 silent=True,
             )
 
@@ -197,52 +148,9 @@ class Chat(commands.Cog):
             await self.bot.log("Restarting Mizu...", "#e0aa3e")
             self.bot.add_dashboard_log("system", "Bot restarting by user command", "warning")
             await self.bot.close()
-            import os, sys
+            import sys
             os.execl(sys.executable, sys.executable, *sys.argv)
 
-        elif content_lower.startswith(f"{p}cf "):
-            arg = content_lower.split(f"{p}cf ", 1)[1].strip()
-            if arg in ("on", "off"):
-                await self._toggle_nested("gamble", "coinflip", "enabled",
-                                          enabled=(arg == "on"), channel=ch)
-            else:
-                await ch.send(f"Usage: `{p}cf on` or `{p}cf off`", silent=True)
-
-        elif content_lower.startswith(f"{p}pray "):
-            arg = content_lower.split(f"{p}pray ", 1)[1].strip()
-            if arg in ("on", "off"):
-                await self._toggle_command("pray", enabled=(arg == "on"), channel=ch)
-            else:
-                await ch.send(f"Usage: `{p}pray on` or `{p}pray off`", silent=True)
-
-        elif content_lower.startswith(f"{p}curse "):
-            arg = content_lower.split(f"{p}curse ", 1)[1].strip()
-            if arg in ("on", "off"):
-                await self._toggle_command("curse", enabled=(arg == "on"), channel=ch)
-            else:
-                await ch.send(f"Usage: `{p}curse on` or `{p}curse off`", silent=True)
-
-        elif content_lower.startswith(f"{p}gems "):
-            arg = content_lower.split(f"{p}gems ", 1)[1].strip()
-            if arg in ("on", "off"):
-                await self._toggle_nested("autoUse", "gems", "enabled",
-                                          enabled=(arg == "on"), channel=ch)
-            else:
-                await ch.send(f"Usage: `{p}gems on` or `{p}gems off`", silent=True)
-
-        elif content_lower.startswith(f"{p}hunt "):
-            arg = content_lower.split(f"{p}hunt ", 1)[1].strip()
-            if arg in ("on", "off"):
-                await self._toggle_command("hunt", enabled=(arg == "on"), channel=ch)
-            else:
-                await ch.send(f"Usage: `{p}hunt on` or `{p}hunt off`", silent=True)
-
-        elif content_lower.startswith(f"{p}battle "):
-            arg = content_lower.split(f"{p}battle ", 1)[1].strip()
-            if arg in ("on", "off"):
-                await self._toggle_command("battle", enabled=(arg == "on"), channel=ch)
-            else:
-                await ch.send(f"Usage: `{p}battle on` or `{p}battle off`", silent=True)
 
 async def setup(bot):
     await bot.add_cog(Chat(bot))
