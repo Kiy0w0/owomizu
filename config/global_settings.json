@@ -46,7 +46,21 @@
         "notifyGemsStatus": true,
         "notifyError": false,
         "dailySummaryTime": "00:00",
-        "webhookUselessLog": false
+        "webhookUselessLog": false,
+        "animal_log": {
+            "enabled": false,
+            "rank": {
+                "common": false,
+                "uncommon": false,
+                "rare": false,
+                "epic": false,
+                "mythical": true,
+                "gem": true,
+                "legendary": true,
+                "fabled": true,
+                "hidden": true
+            }
+        }
     },
     "console": {
         "runConsoleCommandOnCaptcha": false,

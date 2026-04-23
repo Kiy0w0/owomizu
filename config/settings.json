@@ -16,7 +16,9 @@
                 15,
                 20
             ],
-            "useShortForm": true
+            "useShortForm": true,
+            "showStreakInConsole": false,
+            "notifyStreakLoss": false
         },
         "sell": {
             "enabled": false,
@@ -49,7 +51,11 @@
                 400
             ],
             "userid": [],
-            "pingUser": false
+            "pingUser": false,
+            "customChannel": {
+                "enabled": false,
+                "channelId": 0
+            }
         },
         "curse": {
             "enabled": true,
@@ -58,7 +64,11 @@
                 400
             ],
             "userid": [],
-            "pingUser": false
+            "pingUser": false,
+            "customChannel": {
+                "enabled": false,
+                "channelId": 0
+            }
         },
         "lottery": {
             "enabled": false,
@@ -190,7 +200,7 @@
         "autoCrate": false,
         "autoLootbox": false,
         "gems": {
-            "enabled": false,
+            "enabled": true,
             "disable_hunts_if_no_gems": false,
             "gemsToUse": {
                 "huntGem": true,
@@ -297,6 +307,31 @@
     },
     "questTracker": {
         "enabled": false
+    },
+    "sleep": {
+        "enabled": false,
+        "frequencyPercentage": 30,
+        "checkTime": [10, 20],
+        "sleeptime": [1, 10]
+    },
+    "misspell": {
+        "enabled": false,
+        "frequencyPercentage": 1
+    },
+    "customCommands": {
+        "enabled": false,
+        "commands": [
+            {
+                "enabled": false,
+                "command": "owo daily",
+                "cooldown": 86400
+            },
+            {
+                "enabled": false,
+                "command": "owo quest",
+                "cooldown": 3600
+            }
+        ]
     },
     "autoDaily": true,
     "cashCheck": true,

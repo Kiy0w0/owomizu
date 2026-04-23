@@ -1,14 +1,14 @@
-   
-
 import asyncio
 from typing import Optional
 
 from discord.ext import commands
 
+
 class Battle(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self._battle_task: Optional[asyncio.Task] = None
+        self._streak: int = 0
 
     async def cog_load(self):
         if (
@@ -23,9 +23,8 @@ class Battle(commands.Cog):
             self._battle_task = asyncio.create_task(self._battle_loop())
 
     async def cog_unload(self):
-        task = self._battle_task
-        if task is not None:
-            task.cancel()
+        if self._battle_task:
+            self._battle_task.cancel()
 
     def _get_cooldown(self):
         cd = self.bot.settings_dict["commands"]["battle"]["cooldown"]
@@ -90,24 +89,59 @@ class Battle(commands.Cog):
             except asyncio.CancelledError:
                 break
             except Exception as e:
-                await self.bot.log(f"Error - {e}, in battle _battle_loop()", "#c25560")
+                await self.bot.log(f"Error - {e}, in battle loop", "#c25560")
                 await asyncio.sleep(5)
 
     @commands.Cog.listener()
     async def on_message(self, message):
         try:
-            if message.channel.id == self.bot.cm.id and message.author.id == self.bot.owo_bot_id:
-                if message.embeds:
-                    for embed in message.embeds:
-                        if embed.author.name is not None and "goes into battle!" in embed.author.name.lower():
-                            if message.reference is not None:
-                                referenced = await message.channel.fetch_message(message.reference.message_id)
-                                if not referenced.embeds and "You found a **weapon crate**!" in referenced.content:
+            if message.channel.id != self.bot.cm.id:
+                return
+            if message.author.id != self.bot.owo_bot_id:
+                return
+            if not message.embeds:
+                return
+
+            battle_cfg = self.bot.settings_dict["commands"]["battle"]
+            show_streak = battle_cfg.get("showStreakInConsole", False)
+            notify_loss = battle_cfg.get("notifyStreakLoss", False)
+
+            for embed in message.embeds:
+                if embed.author and embed.author.name:
+                    name_lower = embed.author.name.lower()
+                    if "goes into battle!" in name_lower:
+                        if message.reference:
+                            try:
+                                ref = await message.channel.fetch_message(
+                                    message.reference.message_id
+                                )
+                                if not ref.embeds and "You found a **weapon crate**!" in ref.content:
                                     pass
                                 else:
                                     return
+                            except Exception:
+                                pass
+
+                    if f"{self.bot.user.name}" in embed.author.name:
+                        if "won the battle" in name_lower or "won" in name_lower:
+                            self._streak += 1
+                            if show_streak:
+                                await self.bot.log(
+                                    f"Battle won! Streak: {self._streak}", "#51cf66"
+                                )
+                        elif "lost" in name_lower or "fled" in name_lower:
+                            if notify_loss and self._streak > 0:
+                                await self.bot.log(
+                                    f"Battle streak lost at {self._streak}!", "#ff9800"
+                                )
+                                self.bot.add_dashboard_log(
+                                    "battle", f"Streak lost at {self._streak}", "warning"
+                                )
+                            self._streak = 0
+
         except Exception as e:
-            await self.bot.log(f"Error - {e}, During battle on_message()", "#c25560")
+            await self.bot.log(f"Error - {e}, in battle on_message", "#c25560")
+
 
 async def setup(bot):
     await bot.add_cog(Battle(bot))

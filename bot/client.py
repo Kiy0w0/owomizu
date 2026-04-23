@@ -23,7 +23,7 @@ except ImportError:
 
 from utils import state
 from utils import helpers
-from utils.misspell import misspell_word
+from utils.misspell import misspell_word, should_misspell
 from cogs.comp import headers as comp_headers
 
 VERSION = "1.5.5"
@@ -426,7 +426,9 @@ class MyClient(commands.Bot):
             "safety": self.settings_dict.get("safety", {}).get("enabled", False),
             "sell": commands_dict["sell"]["enabled"],
             "shop": commands_dict["shop"]["enabled"],
-            "slots": self.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False)
+            "slots": self.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False),
+            "customcommands": self.settings_dict.get("customCommands", {}).get("enabled", False),
+            "sleepsystem": self.settings_dict.get("sleep", {}).get("enabled", False),
         }
 
     def add_dashboard_log(self, command_type, message, status="info"):
@@ -736,11 +738,14 @@ class MyClient(commands.Bot):
             await self.log(f"Error - {e}, during webhookSender.", "#c25560")
 
     def calculate_correction_time(self, command):
-        command = command.replace(" ", "") 
-        base_delay = self.random_float(self.settings_dict["misspell"]["baseDelay"]) 
-        rectification_time = sum(self.random_float(self.settings_dict["misspell"]["errorRectificationTimePerLetter"]) for _ in command)  
-        total_time = base_delay + rectification_time
-        return total_time
+        command = command.replace(" ", "")
+        cnf = self.settings_dict.get("misspell", {})
+        base_delay = self.random_float(cnf.get("baseDelay", [0.03, 0.07]))
+        rectification_time = sum(
+            self.random_float(cnf.get("errorRectificationTimePerLetter", [0.04, 0.09]))
+            for _ in command
+        )
+        return base_delay + rectification_time
 
     async def send(self, message, color=None, bypass=False, channel=None, silent=None, typingIndicator=None):
         if silent is None:
@@ -753,10 +758,9 @@ class MyClient(commands.Bot):
         disable_log = self.misc["console"]["disableCommandSendLog"]
         msg = message
         misspelled = False
-        if self.settings_dict["misspell"]["enabled"]:
-            if self.random.uniform(1,100) < self.settings_dict["misspell"]["frequencyPercentage"]:
-                msg = misspell_word(message)
-                misspelled = True
+        if should_misspell(self.settings_dict):
+            msg = misspell_word(message)
+            misspelled = True
 
         if not self.command_handler_status["captcha"] or bypass:
             await self.wait_until_ready()
