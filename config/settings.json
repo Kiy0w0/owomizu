@@ -6,7 +6,7 @@
             "enabled": true,
             "cooldown": [
                 15,
-                20
+                16
             ],
             "useShortForm": true
         },
@@ -14,11 +14,9 @@
             "enabled": true,
             "cooldown": [
                 15,
-                20
+                16
             ],
-            "useShortForm": true,
-            "showStreakInConsole": false,
-            "notifyStreakLoss": false
+            "useShortForm": true
         },
         "sell": {
             "enabled": false,
@@ -51,24 +49,16 @@
                 400
             ],
             "userid": [],
-            "pingUser": false,
-            "customChannel": {
-                "enabled": false,
-                "channelId": 0
-            }
+            "pingUser": false
         },
         "curse": {
-            "enabled": true,
+            "enabled": false,
             "cooldown": [
                 310,
                 400
             ],
             "userid": [],
-            "pingUser": false,
-            "customChannel": {
-                "enabled": false,
-                "channelId": 0
-            }
+            "pingUser": false
         },
         "lottery": {
             "enabled": false,
@@ -80,9 +70,7 @@
                 10,
                 15
             ],
-            "useQuoteInstead": false,
-            "minLengthForRandomString": 5,
-            "maxLengthForRandomString": 15
+            "useQuoteInstead": false
         },
         "cookie": {
             "enabled": false,
@@ -103,7 +91,7 @@
             "enabled": true,
             "cooldown": [
                 10,
-                15
+                12
             ]
         },
         "autoHuntBot": {
@@ -153,15 +141,7 @@
                 20
             ]
         },
-        "blackjack": {
-            "enabled": false,
-            "startValue": 100,
-            "multiplierOnLose": 2,
-            "cooldown": [
-                15,
-                20
-            ]
-        }
+        "blackjack": {}
     },
     "giveawayJoiner": {
         "enabled": false,
@@ -173,7 +153,7 @@
         "messageRangeToCheck": 6
     },
     "sleep": {
-        "enabled": true,
+        "enabled": false,
         "frequencyPercentage": 50,
         "checkTime": [
             10,
@@ -185,7 +165,7 @@
         ]
     },
     "misspell": {
-        "enabled": true,
+        "enabled": false,
         "frequencyPercentage": 1,
         "baseDelay": [
             0.03,
@@ -194,133 +174,6 @@
         "errorRectificationTimePerLetter": [
             0.04,
             0.09
-        ]
-    },
-    "autoUse": {
-        "autoCrate": false,
-        "autoLootbox": false,
-        "gems": {
-            "enabled": true,
-            "disable_hunts_if_no_gems": false,
-            "gemsToUse": {
-                "huntGem": true,
-                "empoweredGem": true,
-                "luckyGem": true,
-                "specialGem": true
-            },
-            "tiers": {
-                "common": true,
-                "uncommon": true,
-                "rare": true,
-                "epic": true,
-                "mythical": true,
-                "legendary": true,
-                "fabled": true
-            },
-            "order": {
-                "lowestToHighest": true
-            }
-        }
-    },
-    "autoSell": {
-        "enabled": false,
-        "triggerWhenCashBelow": 10000,
-        "sellCommand": "c u r",
-        "maxTriggersPerHour": 5,
-        "cooldownAfterSell": [
-            60,
-            120
-        ]
-    },
-    "bossBattle": {
-        "enabled": false,
-        "joinChancePercent": 80
-    },
-    "channelSwitcher": {
-        "enabled": false,
-        "interval": [
-            1800,
-            3600
-        ],
-        "users": []
-    },
-    "safety": {
-        "enabled": false,
-        "runTimeMinutes": 120,
-        "sleepTimeMinutes": 15,
-        "workSchedule": {
-            "enabled": false,
-            "startHour": 7,
-            "endHour": 23
-        },
-        "autoStop": {
-            "enabled": false,
-            "triggers": [],
-            "delayTriggers": [],
-            "delayDuration": 300
-        }
-    },
-    "autoRandomCommands": {
-        "enabled": false,
-        "onlyWhenActive": true
-    },
-    "autoEnhance": {
-        "enabled": false,
-        "autoUseGems": {
-            "enabled": false,
-            "cooldownMinutes": 10,
-            "useLowestFirst": true,
-            "tiers": {
-                "common": true,
-                "uncommon": true,
-                "rare": true,
-                "epic": true,
-                "mythical": true,
-                "legendary": true,
-                "fabled": true
-            },
-            "gemTypes": {
-                "huntGem": true,
-                "empoweredGem": true,
-                "luckyGem": true,
-                "specialGem": true
-            }
-        },
-        "autoInvestEssence": {
-            "enabled": false,
-            "cooldownMinutes": 30,
-            "minEssenceRequired": 100,
-            "maxEfficiencyLevel": 50,
-            "maxDurationLevel": 50,
-            "maxInvestmentPerTime": 50
-        }
-    },
-    "autoTransfer": {
-        "enabled": false,
-        "destinationId": 0,
-        "triggerAmount": 500000,
-        "keepAmount": 50000
-    },
-    "autoEquip": {
-        "enabled": false,
-        "interval_minutes": 60
-    },
-    "questTracker": {
-        "enabled": false
-    },
-    "customCommands": {
-        "enabled": false,
-        "commands": [
-            {
-                "enabled": false,
-                "command": "owo daily",
-                "cooldown": 86400
-            },
-            {
-                "enabled": false,
-                "command": "owo quest",
-                "cooldown": 3600
-            }
         ]
     },
     "autoDaily": true,
@@ -348,8 +201,8 @@
         ],
         "commandHandler": {
             "betweenCommands": [
-                3,
-                6
+                0.5,
+                1.5
             ],
             "beforeReaddingToQueue": 7
         },

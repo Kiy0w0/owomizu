@@ -26,8 +26,7 @@ from utils import helpers
 from utils.misspell import misspell_word, should_misspell
 from cogs.comp import headers as comp_headers
 
-VERSION = "1.6.0"
-MIZU_NETWORK_API = "https://api.ive.my.id"
+VERSION = "BETA 2.0"
 
 class MyClient(commands.Bot):
 
@@ -153,22 +152,7 @@ class MyClient(commands.Bot):
 
     @tasks.loop(seconds=7)
     async def safety_check_loop(self):
-        try:
-            safety_check = requests.get(f"{MIZU_NETWORK_API}/safety_check.json", timeout=10).json()
-            latest_version = requests.get(f"{MIZU_NETWORK_API}/version.json", timeout=10).json()
-
-            if safety_check.get("enabled", False) and helpers.compare_versions(VERSION, safety_check.get("version", "0.0.0")):
-                self.command_handler_status["captcha"] = True
-                await self.log(f"🛑 Safety Check Alert!\nReason: {safety_check.get('reason', 'Unknown')}\n(Triggered by {safety_check.get('author', 'System')})", "#5c0018")
-
-                self.add_dashboard_log("system", f"Safety check triggered! Bot stopped: {safety_check.get('reason', 'Unknown')}", "error")
-
-                if helpers.compare_versions(latest_version.get("version", "0.0.0"), safety_check.get("version", "0.0.0")):
-                    await self.log(f"Please update to: v{latest_version.get('version', 'latest')}", "#33245e")
-        except requests.exceptions.RequestException:
-            pass
-        except Exception as e:
-            await self.log(f"Failed to perform safety check: {str(e)}", "#c25560")
+        pass
 
     async def start_cogs(self):
         files = os.listdir(helpers.resource_path("./cogs"))

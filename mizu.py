@@ -133,7 +133,7 @@ with open("config/misc.json", "r") as config_file:
 console.rule("[bold blue1]:>", style="navy_blue")
 console_width = console.size.width
 
-mizu_network_api = "https://api.ive.my.id"
+
 
 mizuArt = r"""
  ███╗   ███╗██╗███████╗██╗   ██╗
@@ -145,7 +145,7 @@ mizuArt = r"""
 M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "1.6.0"
+version = "1.6.5"
 debug_print = True
 
 def merge_dicts(main, small):
@@ -426,32 +426,7 @@ def fetch_json(url, description="data"):
         printBox(f"Failed to fetch {description}: {e}", "bold red")
         return {}
 
-def fetch_mizu_api(endpoint):
 
-    try:
-        url = f"{mizu_network_api}/{endpoint}"
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        return response.json()
-    except requests.RequestException as e:
-        printBox(f"Failed to fetch from Mizu API ({endpoint}): {e}", "bold red")
-        return {}
-
-def get_api_announcements():
-
-    return fetch_mizu_api("announcements.json")
-
-def get_api_features():
-
-    return fetch_mizu_api("features.json")
-
-def get_api_themes():
-
-    return fetch_mizu_api("themes.json")
-
-def get_api_status():
-
-    return fetch_mizu_api("status.json")
 
 def run_bots(tokens_and_channels):
     threads = []
@@ -651,27 +626,7 @@ if __name__ == "__main__":
     if global_settings_dict["website"]["enabled"]:
         ip = get_local_ip()
         printBox(f'Website Dashboard: http://{ip}:{global_settings_dict["website"]["port"]}'.center(console_width - 2 ), 'bold cyan')
-    try:
-        if misc_dict["news"]:
-            news_json = fetch_mizu_api("news.json")
-            if news_json.get("available"):
-                printBox(
-                    f'{news_json.get("content", "no content found..? this is an error! should be safe to ignore")}'.center(console_width - 2),
-                    f"bold {news_json.get('color', 'white')}",
-                    title=news_json.get("title", "📢 News")
-                )
 
-            # announcements_json = get_api_announcements()
-            # if announcements_json.get("current_announcements"):
-            #     for announcement in announcements_json["current_announcements"]:
-            #         if announcement.get("show_on_startup", True):
-            #             printBox(
-            #                 f'{announcement.get("message", "")}'.center(console_width - 2),
-            #                 f"bold {announcement.get('color', '#4fd1c7')}",
-            #                 title=announcement.get("title", "📢 Announcement")
-            #             )
-    except Exception as e:
-        print(f"Error - {e}, while attempting to fetch news and announcements")
 
     if not misc_dict["console"]["hideStarRepoMessage"]:
         console.print("Star the repo in our github page if you want us to continue maintaining this proj :>.", style = "thistle1")
