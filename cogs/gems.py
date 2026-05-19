@@ -17,6 +17,10 @@ gem_tiers = {
 }
 
 
+def compute_missing_types(active_types: set, required_types: set) -> set:
+    return required_types - active_types
+
+
 def convert_small_numbers(small_number):
     numbers = {
         "⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4",
@@ -59,6 +63,8 @@ class Gems(commands.Cog):
         self.cache_gems_in_use = {}
         self.prev_count = 0
         self.count = 0
+        self._active_gem_types: set = set()
+        self._last_inv_time: float = 0.0
 
         self.gem_cmd = {
             "cmd_name": self.bot.alias["use"]["normal"],
@@ -83,6 +89,10 @@ class Gems(commands.Cog):
             "specialGem":   cnf["specialGem"],
         }
 
+    def _required_types(self) -> set:
+        enabled = self.enabled_gem_types()
+        return {k for k, v in enabled.items() if v}
+
     async def use_gems(self, available_gems, gems_in_use=None, full=False):
         if not full:
             result = self.find_specific_gems_to_use(gems_in_use, available_gems)
@@ -93,10 +103,11 @@ class Gems(commands.Cog):
             self.gem_cmd["cmd_arguments"] = ""
             for item in result:
                 self.gem_cmd["cmd_arguments"] += f"{item[1:]} "
-            await self.bot.log(f"Auto-using gems: {self.gem_cmd['cmd_arguments']} 💎", "#00d1d1")
+            await self.bot.log(f"Auto-using gems: {self.gem_cmd['cmd_arguments']}", "#00d1d1")
             await self.bot.put_queue(self.gem_cmd, priority=True)
             self.reduce_used_gems(result)
-            if getattr(self.bot, 'hunt_disabled', False):
+            self._last_inv_time = time.time()
+            if getattr(self.bot, "hunt_disabled", False):
                 self.bot.hunt_disabled = False
         else:
             if not full:
@@ -105,10 +116,10 @@ class Gems(commands.Cog):
                 await self.bot.log("Warn: No gems to use.", "#924444")
                 self.bot.user_status["no_gems"] = True
                 if (
-                    not getattr(self.bot, 'hunt_disabled', False)
+                    not getattr(self.bot, "hunt_disabled", False)
                     and self.bot.settings_dict["autoUse"]["gems"]["disable_hunts_if_no_gems"]
                 ):
-                    await self.bot.log("Disabling hunt since there is no gems to be used.", "#C51818")
+                    await self.bot.log("Disabling hunt — no gems available.", "#C51818")
                     self.bot.hunt_disabled = True
 
     def fetch_gems_in_use(self, msg):
@@ -135,9 +146,9 @@ class Gems(commands.Cog):
                         gems_in_use.append(value)
 
         gems_not_in_use = [x for x in all_gem_type if x not in gems_in_use]
-        gems_required_to_use = self.enabled_gem_types()
+        gems_required = self.enabled_gem_types()
         for gem in gems_not_in_use:
-            if gems_required_to_use[gem]:
+            if gems_required[gem]:
                 return result, True
 
         return result, False
@@ -207,7 +218,7 @@ class Gems(commands.Cog):
             except ExtensionNotLoaded:
                 pass
         else:
-            await self.bot.log("Gem Automation Loaded 💎", "#00d1d1")
+            await self.bot.log("Gem Automation Loaded", "#00d1d1")
 
     async def cog_unload(self):
         await self.bot.remove_queue(id="gems")
@@ -225,7 +236,14 @@ class Gems(commands.Cog):
             return
 
         if "caught" in message.content:
+            self._active_gem_types.clear()
             if self.bot.user_status["no_gems"]:
+                return
+            required = self._required_types()
+            if not required:
+                return
+            now = time.time()
+            if now - self._last_inv_time < 15:
                 return
             await self.bot.set_stat(False)
             self.inventory_check = True
@@ -234,16 +252,34 @@ class Gems(commands.Cog):
         if "hunt is empowered by" in message.content:
             if self.bot.user_status["no_gems"]:
                 return
+
+            active_now = set()
+            if "gem1" in message.content:
+                active_now.add("huntGem")
+            if "gem3" in message.content:
+                active_now.add("empoweredGem")
+            if "gem4" in message.content:
+                active_now.add("luckyGem")
+            if "star" in message.content:
+                active_now.add("specialGem")
+
+            required = self._required_types()
+            missing = compute_missing_types(active_now, required)
+            self._active_gem_types = active_now
+
+            if not missing:
+                self.already_checked = True
+                return
+
             if self.already_checked:
                 count = len_gems_in_use(message.content)
                 if count == self.count:
                     return
-                else:
-                    self.already_checked = False
-                    self.count = count
+                self.already_checked = False
+                self.count = count
 
-            result, required = self.fetch_gems_in_use(message.content)
-            if result and required:
+            result, required_flag = self.fetch_gems_in_use(message.content)
+            if result and required_flag:
                 if self.available_gems:
                     await self.use_gems(self.available_gems, result)
                 else:
