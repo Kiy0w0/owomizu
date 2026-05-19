@@ -1,4 +1,4 @@
-# 🌊 Owomizu Update - v1.6.6
+# 🌊 Owomizu Update - v1.7.0
 
 Major update hari ini! Kita mem-porting banyak fitur-fitur keren dan stabil dari repositori **Svetlana** dan **Betasense** agar Owomizu makin pintar, aman, dan efisien.
 
@@ -18,6 +18,14 @@ Berikut ini fitur-fitur baru yang sekarang ada di Owomizu:
 *   **Security & Ban Detection (Advanced)**: Keamanan ekstra! Bot sekarang mendeteksi pola teks aneh/tersembunyi dari OWO (lewat unicode normalization) buat ngenalin tanda-tanda "ban" atau peringatan *captcha*. Bakal otomatis berenti dan ngasih notifikasi ke webhook kamu!
 
 Udah di-*test* lewat Automated Testing (TDD) dan 42 dari 42 test lolos dengan mulus, jadi stabilitasnya terjamin!
+
+---
+
+### 🎁 Premium Beta Benefits ($1 - $10 Value)
+Khusus untuk pengguna versi **Beta**, kalian mendapatkan benefit eksklusif yang biasanya hanya ada di bot berbayar/premium:
+1. **Zero Command Spam (Worth $3)**: Hemat kuota & rate-limit aman berkat fitur Gem Cache pintar. Gak perlu lagi bolak-balik manggil `/inventory` yang bikin akun dicurigai Discord.
+2. **Advanced Antiban & Webhook Alert (Worth $5)**: Perlindungan otomatis dari ban manual admin OwO menggunakan pendeteksian pola unicode teks. Ditambah notifikasi real-time langsung ke Discord Server kamu pas ada captcha.
+3. **Database Tracker Integration (Worth $2)**: Monitoring performa farming harian kamu secara rapi langsung tersimpan di SQLite lokal.
 
 ---
 *Mizu Network*
