@@ -64,9 +64,12 @@ class Reactionbot(commands.Cog):
                 await self.send_cmd(cmd)
 
     async def send_cmd(self, cmd):
+        cmd_id = cmd if cmd != "curse" else "pray"
+        if self.bot.cmds_state.get(cmd_id, {}).get("in_queue", False):
+            return
         await self.bot.sleep_till(self.bot.settings_dict["defaultCooldowns"]["reactionBot"]["cooldown"])
         await self.bot.put_queue(self.fetch_cmd(cmd), quick=True, priority=True)
-        self.cmd_states[cmd if cmd!="curse" else "pray"] = time.time()
+        self.cmd_states[cmd if cmd != "curse" else "pray"] = time.time()
 
     async def startup_handler(self):
         await self.bot.set_stat(False)

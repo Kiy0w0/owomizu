@@ -145,7 +145,7 @@ mizuArt = r"""
 M I Z U   N E T W O R K   水
 """
 mizuPanel = Panel(Align.center(mizuArt), style="cyan ", highlight=False)
-version = "1.7.0"
+version = "1.8.0 >_<"
 debug_print = True
 
 def merge_dicts(main, small):

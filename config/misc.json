@@ -176,6 +176,11 @@
             "priority": 7,
             "basecd": 5,
             "log_color": "#00d7af"
+        },
+        "army": {
+            "priority": 6,
+            "basecd": 30,
+            "log_color": "#b5a642"
         }
     },
     "alias": {

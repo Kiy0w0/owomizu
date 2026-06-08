@@ -2,6 +2,11 @@
     "setprefix": "owo ",
     "useSlashCommands": false,
     "commands": {
+        "army": {
+            "enabled": false,
+            "cooldown": [30, 60]
+        },
+
         "hunt": {
             "enabled": true,
             "cooldown": [

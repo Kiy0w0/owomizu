@@ -413,6 +413,7 @@ class MyClient(commands.Bot):
             "slots": self.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False),
             "customcommands": self.settings_dict.get("customCommands", {}).get("enabled", False),
             "sleepsystem": self.settings_dict.get("sleep", {}).get("enabled", False),
+            "army": self.settings_dict.get("commands", {}).get("army", {}).get("enabled", False),
         }
 
     def add_dashboard_log(self, command_type, message, status="info"):

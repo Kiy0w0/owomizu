@@ -1,11 +1,11 @@
-   
-
 import threading
 import time
 import re
 import os
+import sys
 import asyncio
 import tempfile
+import unicodedata
 
 from discord.ext import commands, tasks
 from discord import DMChannel
@@ -57,8 +57,11 @@ def get_path(path):
 
     return None
 
+def normalize(text):
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode("ascii")
+
 def clean(msg):
-    return re.sub(r"[^a-zA-Z]", "", msg)
+    return re.sub(r"[^a-zA-Z0-9]", "", normalize(msg))
 
 def is_termux():
 
@@ -114,9 +117,18 @@ class Captcha(commands.Cog):
         self._captcha_image_path: str | None = None
         self._captcha_channel = None
         self._solving_active: bool = False
+        self._warning_pattern = re.compile(r"\((\d+)/(\d+)\)")
+        self._kill_task: asyncio.Task | None = None
 
         self._driver = None
         self._last_verify_url: str | None = None
+
+    async def _kill_code(self):
+        await asyncio.sleep(600)
+        if self.bot.command_handler_status["captcha"]:
+            await self.bot.log("Captcha not solved within 10 minutes. Exiting.", "#d70000")
+            self.bot.add_dashboard_log("captcha", "Auto-exit: captcha timeout (10 min)", "error")
+            os._exit(0)
 
     def _init_driver(self):
 
@@ -337,6 +349,9 @@ class Captcha(commands.Cog):
 
         if message.channel.id == self.bot.dm.id and message.author.id == self.bot.owo_bot_id:
             if "I have verified that you are human! Thank you! :3" in message.content:
+                if self._kill_task and not self._kill_task.done():
+                    self._kill_task.cancel()
+                    self._kill_task = None
                 self._cleanup_captcha()
 
                 time_to_sleep = self.bot.random_float(self.bot.settings_dict['defaultCooldowns']['captchaRestart'])
@@ -378,6 +393,32 @@ class Captcha(commands.Cog):
         if message.channel.id in {self.bot.dm.id, self.bot.cm.id} and message.author.id == self.bot.owo_bot_id:
 
             content_lower_raw = message.content.lower()
+
+            warning_match = self._warning_pattern.search(message.content)
+            if warning_match and not self.bot.command_handler_status["captcha"]:
+                current = int(warning_match.group(1))
+                total = int(warning_match.group(2))
+                is_dm = get_channel_name(message.channel) == "owo DMs"
+                targets_me = (
+                    is_dm
+                    or self.bot.user.name.lower() in content_lower_raw
+                    or f"<@{self.bot.user.id}>" in message.content
+                    or (message.guild and any(str(self.bot.user.id) in str(m.id) for m in message.mentions))
+                )
+                if targets_me:
+                    await self.bot.log(f"⚠️ OwO Warning detected ({current}/{total})! Pausing bot.", "#f39c12")
+                    self.bot.add_dashboard_log("captcha", f"OwO warning ({current}/{total}) - bot paused", "warning")
+                    self.bot.command_handler_status["captcha"] = True
+                    self.captcha_handler(message.channel, "Link")
+                    if self.bot.global_settings_dict["webhook"]["enabled"]:
+                        await self.bot.webhookSender(
+                            msg=f"-{self.bot.username} [+] OwO Warning ({current}/{total})",
+                            desc=f"**User** : <@{self.bot.user.id}>\n**Warning** : `({current}/{total})`\n**Link** : [Message]({message.jump_url})",
+                            colors="#f39c12",
+                            webhook_url=self.bot.global_settings_dict["webhook"].get("webhookCaptchaUrl", None),
+                        )
+                    return
+
             CAPTCHA_PLAIN_PHRASES = [
                 "please complete your captcha",
                 "verify that you are human",
@@ -433,6 +474,10 @@ class Captcha(commands.Cog):
 
                 channel_name = get_channel_name(message.channel)
                 self.bot.add_dashboard_log("captcha", f"Captcha detected in {channel_name}! Bot stopped automatically", "error")
+
+                if self.bot.global_settings_dict.get("captcha", {}).get("stopCodeIfFailedToSolve", False):
+                    if not self._kill_task or self._kill_task.done():
+                        self._kill_task = asyncio.create_task(self._kill_code())
 
                 auto_solved = False
                 if SOLVER_AVAILABLE and message.attachments and self.bot.global_settings_dict.get("captcha", {}).get("autoSolve", {}).get("enabled", False):
