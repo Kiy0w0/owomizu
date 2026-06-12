@@ -45,24 +45,39 @@ cd owomizu
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-playwright install chromium
 ```
 
 Using a virtual environment keeps things clean and avoids dependency conflicts with other Python projects on your system.
+
+> **Note:** The captcha web solver uses **Selenium** with Chrome (installed automatically via `webdriver-manager`). Make sure Chrome/Chromium is installed on your system for browser-based captcha solving.
 
 ---
 
 ## Setting Up Your Token
 
-Create `tokens.txt` in the bot folder. One account per line:
+### Option A: Interactive Setup (Recommended)
 
+Run the setup wizard:
+
+```bash
+python3 setup.py
 ```
-YOUR_DISCORD_TOKEN CHANNEL_ID
+
+It asks for your token, channel ID, and lets you pick a farming style (Safe or Aggressive). Config files are generated automatically.
+
+### Option B: Manual Setup
+
+Create `.env` in the bot folder:
+
+```env
+TOKENS="YOUR_DISCORD_TOKEN CHANNEL_ID"
 ```
+
+> **Note:** The old `tokens.txt` method still works but is deprecated. Use `.env` instead.
 
 **Getting your token:**
 1. Open Discord in your browser
-2. Press `F12` → Console tab
+2. Press `F12` -> Console tab
 3. Paste this:
 ```javascript
 window.webpackChunkdiscord_app.push([[Math.random()],{},req=>{for(const m of Object.values(req.c).map(m=>m?.exports).filter(Boolean)){if(m.default?.getToken!==undefined)return copy(m.default.getToken());if(m.getToken!==undefined)return copy(m.getToken());}}]);
@@ -70,8 +85,8 @@ window.webpackChunkdiscord_app.push([[Math.random()],{},req=>{for(const m of Obj
 4. Token is now copied to clipboard.
 
 **Getting a Channel ID:**
-- Discord Settings → Advanced → enable **Developer Mode**
-- Right-click the channel → **Copy ID**
+- Discord Settings -> Advanced -> enable **Developer Mode**
+- Right-click the channel -> **Copy ID**
 
 ---
 
@@ -143,7 +158,6 @@ cd owomizu
 git pull origin main
 source venv/bin/activate
 pip install -r requirements.txt --upgrade
-playwright install chromium
 ```
 
 ---
@@ -168,11 +182,11 @@ kill -9 <PID>
 ```
 Or just change the port in `config/global_settings.json` under `website.port`.
 
-**Playwright / Chromium issues:**
+**Selenium / Chrome issues:**
 ```bash
-pip install playwright --upgrade
-playwright install chromium --with-deps
+pip install selenium webdriver-manager --upgrade
 ```
+Make sure Chrome or Chromium is installed on your system.
 
 ---
 

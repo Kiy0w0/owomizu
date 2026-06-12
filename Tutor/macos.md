@@ -39,17 +39,33 @@ cd owomizu
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-playwright install chromium
 ```
+
+> **Note:** The captcha web solver uses **Selenium** with Chrome (installed automatically via `webdriver-manager`). Make sure Chrome is installed for browser-based captcha solving.
 
 ---
 
 ## Setting Up Your Token
 
-Create `tokens.txt` in the bot folder:
+### Option A: Interactive Setup (Recommended)
+
+Run the setup wizard:
+
+```bash
+python3 setup.py
 ```
-YOUR_DISCORD_TOKEN CHANNEL_ID
+
+It asks for your token, channel ID, and lets you pick a farming style (Safe or Aggressive). Config files are generated automatically.
+
+### Option B: Manual Setup
+
+Create `.env` in the bot folder:
+
+```env
+TOKENS="YOUR_DISCORD_TOKEN CHANNEL_ID"
 ```
+
+> **Note:** The old `tokens.txt` method still works but is deprecated. Use `.env` instead.
 
 **Getting your token:**
 1. Open Discord in Safari or Chrome at [discord.com](https://discord.com)
@@ -61,8 +77,8 @@ window.webpackChunkdiscord_app.push([[Math.random()],{},req=>{for(const m of Obj
 4. Token is copied to clipboard.
 
 **Getting a Channel ID:**
-- Discord → Settings → Advanced → turn on **Developer Mode**
-- Right-click any channel → **Copy ID**
+- Discord -> Settings -> Advanced -> turn on **Developer Mode**
+- Right-click any channel -> **Copy ID**
 
 ---
 
@@ -127,7 +143,6 @@ cd owomizu
 git pull origin main
 source venv/bin/activate
 pip install -r requirements.txt --upgrade
-playwright install chromium
 ```
 
 ---
@@ -147,16 +162,16 @@ open /Applications/Python\ 3.12/Install\ Certificates.command
 ```
 
 **Port 5000 conflict (macOS uses it for AirPlay Receiver):**
-Go to System Settings → General → AirDrop & Handoff → turn off **AirPlay Receiver**. Or just change the port in `config/global_settings.json`.
+Go to System Settings -> General -> AirDrop & Handoff -> turn off **AirPlay Receiver**. Or just change the port in `config/global_settings.json`.
 
-**Playwright / Chromium won't install:**
+**Selenium / Chrome won't work:**
 ```bash
-pip install playwright --upgrade
-playwright install chromium --with-deps
+pip install selenium webdriver-manager --upgrade
 ```
+Make sure Chrome is installed on your system.
 
 **"Operation not permitted" on first run:**
-macOS may ask for terminal permissions. Allow it in System Settings → Privacy & Security → Full Disk Access.
+macOS may ask for terminal permissions. Allow it in System Settings -> Privacy & Security -> Full Disk Access.
 
 ---
 
