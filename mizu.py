@@ -76,7 +76,9 @@ def run_flask():
         if global_settings_dict["website"]["enabled"]:
             log = logging.getLogger('werkzeug')
             log.setLevel(logging.ERROR)
-            app.run(host='0.0.0.0', port=global_settings_dict["website"]["port"])
+            enable_host = global_settings_dict["website"].get("enableHost", False)
+            host = '0.0.0.0' if enable_host else '127.0.0.1'
+            app.run(host=host, port=global_settings_dict["website"]["port"])
     except Exception as e:
         print(f"Error starting Flask: {e}")
 

@@ -6,6 +6,18 @@
             "enabled": false,
             "cooldown": [30, 60]
         },
+        "mail": {
+            "enabled": false,
+            "cooldown": [3600, 7200]
+        },
+        "pup": {
+            "enabled": false,
+            "cooldown": [300, 400]
+        },
+        "piku": {
+            "enabled": false,
+            "cooldown": [300, 400]
+        },
 
         "hunt": {
             "enabled": true,

@@ -24,6 +24,7 @@ except ImportError:
 from utils import state
 from utils import helpers
 from utils.misspell import misspell_word, should_misspell
+from utils.headers import generate_headers
 from cogs.comp import headers as comp_headers
 
 VERSION = "BETA 2.0"
@@ -56,6 +57,7 @@ class MyClient(commands.Bot):
         self.cash_check = False
         self.boss_channel_id = 0
         self.local_headers = {}
+        self.hcaptcha_client = None
         self.gain_or_lose = 0
         self.checks = []
         self.dm, self.cm = None,None
@@ -414,6 +416,14 @@ class MyClient(commands.Bot):
             "customcommands": self.settings_dict.get("customCommands", {}).get("enabled", False),
             "sleepsystem": self.settings_dict.get("sleep", {}).get("enabled", False),
             "army": self.settings_dict.get("commands", {}).get("army", {}).get("enabled", False),
+            "mail": self.settings_dict.get("commands", {}).get("mail", {}).get("enabled", False),
+            "pupiku": self.settings_dict.get("commands", {}).get("pup", {}).get("enabled", False) or self.settings_dict.get("commands", {}).get("piku", {}).get("enabled", False),
+            "looper": (
+                self.settings_dict.get("commands", {}).get("owo", {}).get("enabled", False)
+                or self.settings_dict.get("commands", {}).get("pray", {}).get("enabled", False)
+                or self.settings_dict.get("commands", {}).get("curse", {}).get("enabled", False)
+                or self.settings_dict.get("commands", {}).get("lvlGrind", {}).get("enabled", False)
+            ),
         }
 
     def add_dashboard_log(self, command_type, message, status="info"):
@@ -838,6 +848,32 @@ class MyClient(commands.Bot):
             except Exception as e:
                 await self.log(f"Error checking auto-sell: {e}", "#c25560")
 
+    async def setup_captcha_solver(self):
+        hcaptcha_cfg = self.global_settings_dict.get("captcha", {}).get("hcaptchaSolver", {})
+        if not hcaptcha_cfg.get("enabled") or not hcaptcha_cfg.get("apiKey"):
+            return
+
+        try:
+            self.local_headers = await generate_headers()
+            self.local_headers["Authorization"] = self.token
+
+            from captcha_solver.hcaptcha import HCaptchaSolver
+            self.hcaptcha_client = HCaptchaSolver(hcaptcha_cfg["apiKey"])
+
+            if self.hcaptcha_client.balance < 30:
+                await self.log(
+                    f"⚠️ hCaptcha solver enabled but low balance ({self.hcaptcha_client.balance})",
+                    "#ff9800",
+                )
+            else:
+                await self.log(
+                    f"🧩 hCaptcha solver ready (balance: {self.hcaptcha_client.balance})",
+                    "#00bcd4",
+                )
+        except Exception as e:
+            self.hcaptcha_client = None
+            await self.log(f"⚠️ Failed to init hCaptcha solver: {e}", "#ff9800")
+
     async def setup_hook(self):
         try:
             self.db = await aiosqlite.connect("utils/data/db.sqlite", timeout=5)
@@ -861,6 +897,8 @@ class MyClient(commands.Bot):
         self.safety_check_loop.start()
         if self.session is None:
             self.session = aiohttp.ClientSession()
+
+        await self.setup_captcha_solver()
 
         helpers.printBox(f'-Loaded {self.username}[*].'.center(helpers.console.size.width - 2), 'bold royal_blue1 ')
         state.list_user_ids.append(self.user.id)

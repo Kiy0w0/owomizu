@@ -1,161 +1,162 @@
-import re
 import asyncio
+import re
 import time
+
 from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
+
+from utils.quest_helper.quest_types import QUEST_IDS
+
+_RESPONSE_WINDOW = 12.0
+_TITLE_RE = re.compile(r"\*\*\d+\.\s(.+?)\*\*")
+_PROGRESS_RE = re.compile(r"Progress:\s*\[(\d+)/(\d+)\]")
+_LOCKED_RE = re.compile(r"🔒 Locked")
+
+_ACTIONS = {
+    "owo": ("owo", "", False),
+    "gamble": ("owo", "cf 1 h", False),
+    "action_send": ("owo", "hug {uid}", False),
+}
+
+
+def _parse_first_active_quest(text: str) -> dict | None:
+    titles = list(_TITLE_RE.finditer(text))
+    if not titles:
+        return None
+    for i, match in enumerate(titles):
+        title = match.group(1).strip()
+        seg_start = match.end()
+        seg_end = titles[i + 1].start() if i + 1 < len(titles) else len(text)
+        segment = text[seg_start:seg_end]
+        if _LOCKED_RE.search(segment):
+            continue
+        prog = _PROGRESS_RE.search(segment)
+        if not prog:
+            continue
+        current, total = int(prog.group(1)), int(prog.group(2))
+        if current >= total:
+            continue
+        return {"title": title, "progress_current": current, "progress_target": total}
+    return None
+
 
 class Quest(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.active = False
         self.current_quest = None
-        self.quest_msg_id = None
-        self.max_retries = 3
+        self._send_ts = 0.0
+        self._quest_cmd = {
+            "cmd_name": "owo",
+            "cmd_arguments": "quest",
+            "prefix": False,
+            "checks": True,
+            "id": "quest_check",
+        }
 
-        self.regex_title = re.compile(r"\*\*\d+\.\s(.+?)\*\*")
-        self.regex_progress = re.compile(r"Progress:\s*\[(\d+)/(\d+)\]")
-        self.regex_locked = re.compile(r"🔒 Locked")
-
-        self.quest_channel_id = self.bot.channel_id
+    def _config(self):
+        return self.bot.settings_dict.get("questTracker", {})
 
     async def cog_load(self):
-        if not self.bot.settings_dict.get("questTracker", {}).get("enabled", True):
-             await self.bot.log("Quest System disabled (enable questTracker to use)", "#9dc3f5")
-        else:
-            await self.bot.log("Quest Automation System Loaded 📜", "#51cf66")
-            self.bot.loop.create_task(self.quest_loop())
+        if not self._config().get("enabled", False):
+            try:
+                asyncio.create_task(self.bot.unload_cog("cogs.quest"))
+            except ExtensionNotLoaded:
+                pass
+            return
+        await self.bot.log("Quest Automation Loaded.", "#51cf66")
+        asyncio.create_task(self._loop())
 
-    async def quest_loop(self):
-
+    async def _loop(self):
         await self.bot.wait_until_ready()
-
         while not self.bot.is_closed():
             while (
-                self.bot.command_handler_status["captcha"] 
+                self.bot.command_handler_status["captcha"]
                 or not self.bot.command_handler_status["state"]
                 or self.bot.command_handler_status["sleep"]
             ):
                 await asyncio.sleep(10)
-
             try:
-                await self.check_quest()
-
-                if self.current_quest and not self.current_quest['is_locked'] and not self.current_quest['finished']:
-                    await self.solve_quest(self.current_quest)
-
-                sleep_time = self.bot.random.uniform(300, 600)
-                await asyncio.sleep(sleep_time)
-
+                await self._check_quest()
+                if self.current_quest:
+                    await self._solve(self.current_quest)
+                await asyncio.sleep(self.bot.random.uniform(300, 600))
             except Exception as e:
-                await self.bot.log(f"Quest Loop Error: {e}", "#c25560")
+                await self.bot.log(f"Quest loop error: {e}", "#c25560")
                 await asyncio.sleep(60)
 
-    async def check_quest(self):
-
-        cmd = {
-            "cmd_name": "owo",
-            "cmd_arguments": "quest",
-            "prefix": False,
-            "id": "quest_check"
-        }
-        await self.bot.put_queue(cmd)
-
+    async def _check_quest(self):
+        self._send_ts = time.monotonic()
         self.current_quest = None
+        await self.bot.put_queue(self._quest_cmd)
+        await asyncio.sleep(6)
 
-        await asyncio.sleep(5) 
-
-    async def solve_quest(self, quest):
-
-        title = quest['title'].lower()
-        pro_current = quest['progress_current']
-        pro_target = quest['progress_target']
-
-        if pro_current >= pro_target:
-            return
-
-        action_cmd = None
-
-        if "say 'owo'" in title:
-            action_cmd = "owo"
-        elif "gamble" in title:
-            action_cmd = "owo cf 1 h" 
-        elif "use an action command" in title:
-            action_cmd = f"owo hug <@{self.bot.user.id}>"
-
-        if action_cmd:
-            await self.bot.log(f"Quest Action: {title} ({pro_current}/{pro_target})", "#9b59b6")
-
-            cmd = {
-                "cmd_name": action_cmd.split()[0],
-                "cmd_arguments": " ".join(action_cmd.split()[1:]),
-                "id": "quest_action",
-                "prefix": False
-            }
-
-            if action_cmd.startswith("owo "):
-                cmd["cmd_name"] = "owo"
-                cmd["cmd_arguments"] = action_cmd[4:]
-
-            await self.bot.put_queue(cmd)
-
-            await asyncio.sleep(self.bot.random.uniform(15, 25))
+    def _valid_response(self) -> bool:
+        return self._send_ts > 0 and (time.monotonic() - self._send_ts) <= _RESPONSE_WINDOW
 
     @commands.Cog.listener()
     async def on_message(self, message):
         if message.author.id != self.bot.owo_bot_id:
             return
-
-        if message.channel.id != self.quest_channel_id:
+        if message.channel.id != self.bot.cm.id:
             return
-
+        if not self._valid_response():
+            return
         if not message.embeds:
             return
 
-        embed = message.embeds[0]
+        emb = message.embeds[0]
+        text = ""
+        if emb.description:
+            text += emb.description + "\n"
+        for field in emb.fields:
+            text += f"{field.name}\n{field.value}\n"
 
-        if embed.author and "Quest Log" in embed.author.name:
-            desc = embed.description
-            if not desc:
-                return
+        if "You finished all of your quests" in text:
+            self._send_ts = 0.0
+            return
 
-            if "You finished all of your quests!" in desc:
-                self.current_quest = {'finished': True, 'title': 'All Done'}
-                return
+        quest = _parse_first_active_quest(text)
+        if quest:
+            self.current_quest = quest
+            self._send_ts = 0.0
 
-            lines = desc.split('\n')
+    async def _solve(self, quest: dict):
+        title = quest["title"].lower()
+        remaining = quest["progress_target"] - quest["progress_current"]
+        if remaining <= 0:
+            return
 
-            found_quest = None
+        quest_data = QUEST_IDS.get(title)
+        if not quest_data:
+            return
 
-            for line in lines:
-                if not line.strip(): continue
+        quest_id = quest_data["id"]
+        action = _ACTIONS.get(quest_id)
+        if not action:
+            return
 
-                if "🔒 Locked" in line:
-                    continue
+        cmd_name, cmd_args, use_prefix = action
+        if "{uid}" in cmd_args:
+            cmd_args = cmd_args.replace("{uid}", f"<@{self.bot.user.id}>")
 
-                title_match = self.regex_title.search(line)
-                if not title_match: continue
-                title = title_match.group(1)
+        await self.bot.log(
+            f"Quest: {title} ({quest['progress_current']}/{quest['progress_target']})",
+            "#9b59b6",
+        )
 
-                prog_match = self.regex_progress.search(line)
-                if not prog_match: continue
+        cooldown = self.bot.settings_dict["defaultCooldowns"].get("shortCooldown", [10, 15])
+        for _ in range(min(remaining, 5)):
+            if self.bot.command_handler_status["captcha"]:
+                break
+            await self.bot.put_queue({
+                "cmd_name": cmd_name,
+                "cmd_arguments": cmd_args,
+                "prefix": use_prefix,
+                "checks": True,
+                "id": "quest_action",
+            })
+            await asyncio.sleep(self.bot.random_float(cooldown))
 
-                curr = int(prog_match.group(1))
-                target = int(prog_match.group(2))
-
-                if curr < target:
-                    found_quest = {
-                        'title': title,
-                        'progress_current': curr,
-                        'progress_target': target,
-                        'is_locked': False,
-                        'finished': False
-                    }
-                    break 
-
-            if found_quest:
-                self.current_quest = found_quest
-            else:
-                self.current_quest = None
 
 async def setup(bot):
     await bot.add_cog(Quest(bot))

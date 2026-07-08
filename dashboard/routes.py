@@ -9,8 +9,14 @@ from datetime import datetime
 
 from flask import jsonify, render_template, request, Blueprint
 from utils import state
+from dashboard.auth import enforce_auth
 
 bp = Blueprint('dashboard', __name__)
+
+
+@bp.before_request
+def require_authentication():
+    return enforce_auth()
 
 async def get_from_db(command):
     try:

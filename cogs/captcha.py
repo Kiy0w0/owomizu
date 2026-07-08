@@ -260,6 +260,43 @@ class Captcha(commands.Cog):
         self._solve_attempt = 0
         self._solving_active = False
 
+    async def _try_hcaptcha(self, message):
+        if message.attachments:
+            return False
+
+        cfg = self.bot.global_settings_dict.get("captcha", {}).get("hcaptchaSolver", {})
+        if not cfg.get("enabled") or self.bot.hcaptcha_client is None:
+            return False
+
+        await self.bot.log("🧩 hCaptcha-Solver: working on it...", "#f39c12")
+        self.bot.add_dashboard_log("captcha", "hCaptcha solver started", "warning")
+
+        try:
+            solved = await self.bot.hcaptcha_client.solve(
+                self.bot.local_headers,
+                cfg.get("retries", 3),
+            )
+        except Exception as e:
+            await self.bot.log(f"🧩 hCaptcha-Solver crashed: {e}", "#c25560")
+            self.bot.add_dashboard_log("captcha", f"hCaptcha solver error: {e}", "error")
+            return False
+
+        if not solved:
+            await self.bot.log("❌ hCaptcha-Solver couldn't finish it.", "#d70000")
+            self.bot.add_dashboard_log("captcha", "hCaptcha solver failed", "error")
+            return False
+
+        balance = self.bot.hcaptcha_client.balance
+        remaining = balance // 30
+        await self.bot.log(
+            f"✅ hCaptcha cleared! ~{remaining} solves left (balance {balance})",
+            "#51cf66",
+        )
+        self.bot.add_dashboard_log(
+            "captcha", f"hCaptcha solved, ~{remaining} solves left", "success"
+        )
+        return True
+
     def captcha_handler(self, channel, captcha_type):
         if self.bot.misc["hostMode"]:
             return
@@ -504,6 +541,8 @@ class Captcha(commands.Cog):
                         await self.bot.log(f"🧩 Auto-Solver error: {e}", "#c25560")
                         self.bot.add_dashboard_log("captcha", f"Auto-Solver error: {e}", "error")
 
+                hcaptcha_solved = await self._try_hcaptcha(message)
+
                 verify_url = None
                 if message.components:
                     for comp in message.components:
@@ -513,14 +552,14 @@ class Captcha(commands.Cog):
                                     verify_url = child.url
                                     break
 
-                if verify_url:
+                if verify_url and not hcaptcha_solved:
                     self._last_verify_url = verify_url
                     if self.bot.global_settings_dict.get("captcha", {}).get("autoSolve", {}).get("enabled", False):
                         asyncio.create_task(self._handle_web_captcha(verify_url))
                 else:
                     self._last_verify_url = None
 
-                if not auto_solved and not self._solving_active:
+                if not auto_solved and not self._solving_active and not hcaptcha_solved:
                     self.captcha_handler(message.channel, "Link")
                 if self.bot.global_settings_dict["webhook"]["enabled"]:
                     await self.bot.webhookSender(

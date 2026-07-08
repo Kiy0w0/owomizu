@@ -181,6 +181,21 @@
             "priority": 6,
             "basecd": 30,
             "log_color": "#b5a642"
+        },
+        "mail": {
+            "priority": 6,
+            "basecd": 3600,
+            "log_color": "#4c9d9e"
+        },
+        "pup": {
+            "priority": 8,
+            "basecd": 300,
+            "log_color": "#f1c40f"
+        },
+        "piku": {
+            "priority": 8,
+            "basecd": 300,
+            "log_color": "#e67e22"
         }
     },
     "alias": {

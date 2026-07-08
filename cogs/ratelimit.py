@@ -3,6 +3,7 @@ import re
 import time
 
 from discord.ext import commands
+from utils.delaycheck import is_owo_responsive
 
 
 def parse_slowdown_wait(content: str) -> int:
@@ -73,6 +74,17 @@ class RateLimitHandler(commands.Cog):
         self.bot.command_handler_status["rate_limited"] = True
         await self._trigger_idle_activities()
         await asyncio.sleep(pause_duration)
+
+        guild_id = self.bot.cm.guild.id if self.bot.cm and self.bot.cm.guild else 0
+        if guild_id:
+            responsive = await is_owo_responsive(self.bot.session, guild_id)
+            if not responsive:
+                await self.bot.log(
+                    "Shard latency too high after rate limit pause — extending wait 30s",
+                    "#ff9800",
+                )
+                self.bot.add_dashboard_log("system", "High shard latency — delaying resume 30s", "warning")
+                await asyncio.sleep(30)
 
         self.bot.command_handler_status["rate_limited"] = False
         self._paused = False

@@ -19,6 +19,7 @@ mdurl
 multidict
 numpy
 pillow
+onnxruntime
 playsound3
 plyer
 protobuf

@@ -8,8 +8,8 @@
         "enabled": true,
         "port": 1200,
         "refreshInterval": 15,
-        "password": "kimchaewonbae",
-        "enableHost": true
+        "password": "",
+        "enableHost": false
     },
     "account": {
         "startupDelay": [
@@ -102,6 +102,11 @@
         },
         "autoSolve": {
             "enabled": true
+        },
+        "hcaptchaSolver": {
+            "enabled": false,
+            "apiKey": "",
+            "retries": 3
         },
         "stopCodeIfFailedToSolve": false
     },

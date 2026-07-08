@@ -1,5 +1,3 @@
-   
-
 import asyncio
 import time
 import random
@@ -12,6 +10,11 @@ class RPP(commands.Cog):
         self.bot = bot
         self.last_command_time = 0
         self.commands_sent = 0
+        self.startupFinished = False
+        self.command_status = {
+            "pup": {"command_send_time": 0, "command_resp_time": 0},
+            "piku": {"command_send_time": 0, "command_resp_time": 0},
+        }
 
     async def cog_load(self):
         if not self.bot.settings_dict.get("autoRandomCommands", {}).get("enabled", False):
