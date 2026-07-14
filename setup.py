@@ -1,10 +1,7 @@
-
 import os
 import json
-import time
 import sys
 import subprocess
-import shutil
 
 CYAN = "\033[1;36m"
 GREEN = "\033[1;32m"
@@ -12,11 +9,14 @@ YELLOW = "\033[1;33m"
 RED = "\033[1;31m"
 RESET = "\033[m"
 
+
 def clear():
     os.system("cls" if os.name == "nt" else "clear")
 
+
 def is_termux():
     return os.path.isdir("/data/data/com.termux")
+
 
 def install_dependencies():
     print(f"{CYAN}[0] Checking dependencies...{RESET}")
@@ -27,13 +27,14 @@ def install_dependencies():
             print(f"{CYAN}[0] Installing Termux specific dependencies...{RESET}")
             try:
                 subprocess.check_call(["pkg", "install", "python-numpy", "python-pillow", "termux-api", "-y"])
-            except:
+            except subprocess.CalledProcessError:
                 pass
 
         print(f"{GREEN}[✓] Dependencies installed!{RESET}\n")
-    except Exception as e:
+    except subprocess.CalledProcessError as e:
         print(f"{RED}[!] Error installing dependencies: {e}{RESET}")
         print(f"{YELLOW}Continuing anyway...{RESET}\n")
+
 
 def print_banner():
     clear()
@@ -48,7 +49,8 @@ def print_banner():
  M I Z U   N E T W O R K   水
     """)
     print(f"{RESET}")
-    print(f"{GREEN}Interactive Setup Wizard{RESET}\n")
+    print(f"{GREEN}Interactive Setup Wizard — v1.8.0 >_<{RESET}\n")
+
 
 def main():
     print_banner()
@@ -78,7 +80,7 @@ def main():
 
     with open(".env", "w") as f:
         f.write('TOKENS="' + ";".join(tokens) + '"\n')
-    print(f"{GREEN}Checking... Accounts saved to .env!{RESET}\n")
+    print(f"{GREEN}Accounts saved to .env!{RESET}\n")
 
     print(f"{YELLOW}[2] Behavior Profile{RESET}")
     print("Choose a farming style:")
@@ -104,7 +106,22 @@ def main():
                 "cookie": {"enabled": False, "userid": 0, "pingUser": False},
                 "shop": {"enabled": False, "itemsToBuy": [1], "cooldown": [10, 16]},
                 "owo": {"enabled": True, "cooldown": [10, 15]},
-                "autoHuntBot": {"enabled": True, "cashToSpend": 10000, "upgrader": {"enabled": True, "sleeptime": [10, 15], "priorities": {"efficiency": 4, "duration": 2, "cost": 5, "gain": 4, "exp": 3, "radar": 1}}}
+                "autoHuntBot": {
+                    "enabled": True,
+                    "cashToSpend": 10000,
+                    "upgrader": {
+                        "enabled": True,
+                        "sleeptime": [10, 15],
+                        "priorities": {
+                            "efficiency": 4,
+                            "duration": 2,
+                            "cost": 5,
+                            "gain": 4,
+                            "exp": 3,
+                            "radar": 1
+                        }
+                    }
+                }
             },
             "gamble": {
                 "allottedAmount": 0,
@@ -115,7 +132,7 @@ def main():
             },
             "giveawayJoiner": {"enabled": False, "channelsToJoin": [], "cooldown": [40, 100], "messageRangeToCheck": 6},
             "sleep": {"enabled": True, "frequencyPercentage": 50, "checkTime": [10, 20], "sleeptime": [300, 600]},
-             "misspell": {
+            "misspell": {
                 "enabled": True,
                 "frequencyPercentage": 1,
                 "baseDelay": [0.03, 0.07],
@@ -124,13 +141,13 @@ def main():
             "autoDaily": True,
             "cashCheck": True,
             "defaultCooldowns": {
-                 "longCooldown": [400, 600],
-                 "moderateCooldown": [70, 200],
-                 "shortCooldown": [10, 60],
-                 "briefCooldown": [1, 3],
-                 "captchaRestart": [5, 10],
-                 "commandHandler": {"betweenCommands": [2, 4], "beforeReaddingToQueue": 7},
-                 "reactionBot": {"hunt_and_battle": True, "owo": False, "pray_and_curse": False, "cooldown": [1, 2]}
+                "longCooldown": [400, 600],
+                "moderateCooldown": [70, 200],
+                "shortCooldown": [10, 60],
+                "briefCooldown": [1, 3],
+                "captchaRestart": [5, 10],
+                "commandHandler": {"betweenCommands": [2, 4], "beforeReaddingToQueue": 7},
+                "reactionBot": {"hunt_and_battle": True, "owo": False, "pray_and_curse": False, "cooldown": [1, 2]}
             },
             "richPresence": {
                 "enabled": True,
@@ -156,8 +173,7 @@ def main():
             base_settings["sleep"]["enabled"] = False
             base_settings["misspell"]["enabled"] = False
 
-        if not os.path.exists("config"):
-            os.makedirs("config")
+        os.makedirs("config", exist_ok=True)
 
         with open("config/settings.json", "w") as f:
             json.dump(base_settings, f, indent=4)
@@ -166,6 +182,7 @@ def main():
     print(f"{CYAN}Setup Complete!{RESET}")
     print("You can now run the bot using:")
     print(f"{GREEN}python mizu.py{RESET}")
+
 
 if __name__ == "__main__":
     main()
