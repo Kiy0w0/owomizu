@@ -225,7 +225,7 @@ class Captcha(commands.Cog):
             await self.bot.log(f"🧩 Auto-Solver: Attempt {strategy_index + 1}/{self._solve_max_retries + 1} using [{name}]...", "#f39c12")
             self.bot.add_dashboard_log("captcha", f"Auto-Solver attempt {strategy_index + 1} [{name}]", "warning")
 
-            loop = asyncio.get_event_loop()
+            loop = asyncio.get_running_loop()
             img_path = self._captcha_image_path
             answer = await loop.run_in_executor(None, solve_captcha, img_path, strategy_index)
 

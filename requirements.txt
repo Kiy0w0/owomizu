@@ -1,4 +1,4 @@
-aiohttp<3.10
+aiohttp>=3.10
 aiosignal
 aiosqlite
 attrs
@@ -6,7 +6,6 @@ blinker
 certifi
 charset-normalizer
 click
-discord-protos
 discord.py-self==2.1.0
 Flask[async]
 frozenlist
@@ -36,6 +35,5 @@ python-dotenv
 pypresence
 ddddocr
 opencv-python-headless
-ultralytics
 selenium
 webdriver-manager

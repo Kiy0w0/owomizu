@@ -123,8 +123,8 @@ class Hunt(commands.Cog):
                     if isinstance(cd, list)
                     else float(cd)
                 )
-                deadline = asyncio.get_event_loop().time() + sleep_time
-                while asyncio.get_event_loop().time() < deadline:
+                deadline = asyncio.get_running_loop().time() + sleep_time
+                while asyncio.get_running_loop().time() < deadline:
                     if (
                         self.bot.command_handler_status["captcha"]
                         or self.bot.command_handler_status["sleep"]
@@ -132,7 +132,7 @@ class Hunt(commands.Cog):
                         or self.bot.command_handler_status.get("rate_limited", False)
                     ):
                         break
-                    await asyncio.sleep(min(1.0, deadline - asyncio.get_event_loop().time()))
+                    await asyncio.sleep(min(1.0, deadline - asyncio.get_running_loop().time()))
 
             except asyncio.CancelledError:
                 break

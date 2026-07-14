@@ -566,9 +566,7 @@ def toggle_quick_setting():
 
         state.config_updated = True
 
-        if state.bot_instances:
-            loop = asyncio.get_event_loop_policy().get_event_loop()
-            pass
+
 
         return jsonify({"status": "success", "message": f"{command} toggled successfully"})
 
