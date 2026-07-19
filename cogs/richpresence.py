@@ -4,6 +4,8 @@ from discord.ext import commands, tasks
 import discord
 import asyncio
 
+from utils.richpresence import build_activity_kwargs
+
 STATUS_MAP = {
     "online":    discord.Status.online,
     "idle":      discord.Status.idle,
@@ -35,10 +37,8 @@ class RichPresence(commands.Cog):
         if self.bot.global_settings_dict.get("offlineStatus", False):
             return
         try:
-            activity = discord.Activity(
-                type=discord.ActivityType.playing,
-                name="OwOMIZU ON TOP",
-            )
+            cfg = self.bot.settings_dict.get("richPresence", {})
+            activity = discord.Activity(**build_activity_kwargs(cfg))
             await self.bot.change_presence(activity=activity, status=self._get_discord_status())
         except Exception as e:
             if self.bot.misc["debug"]["enabled"]:

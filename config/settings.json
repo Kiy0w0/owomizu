@@ -4,23 +4,34 @@
     "commands": {
         "army": {
             "enabled": false,
-            "cooldown": [30, 60]
+            "cooldown": [
+                30,
+                60
+            ]
         },
         "mail": {
             "enabled": false,
-            "cooldown": [3600, 7200]
+            "cooldown": [
+                3600,
+                7200
+            ]
         },
         "pup": {
             "enabled": false,
-            "cooldown": [300, 400]
+            "cooldown": [
+                300,
+                400
+            ]
         },
         "piku": {
             "enabled": false,
-            "cooldown": [300, 400]
+            "cooldown": [
+                300,
+                400
+            ]
         },
-
         "hunt": {
-            "enabled": true,
+            "enabled": false,
             "cooldown": [
                 15,
                 16
@@ -238,6 +249,11 @@
         "mode": "ninja",
         "status": "online",
         "activityType": "playing",
-        "text": "Visual Studio Code"
+        "text": "OwOMIZU ON TOP",
+        "applicationId": "902025373464809482",
+        "largeImage": "1528033802260320348",
+        "largeText": "OwOMizu",
+        "smallImage": "1528030681115136060",
+        "smallText": "online"
     }
 }
