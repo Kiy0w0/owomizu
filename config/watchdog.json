@@ -1,0 +1,5 @@
+{
+    "enabled": false,
+    "stallMinutes": 15,
+    "checkInterval": [60, 90]
+}

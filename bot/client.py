@@ -25,6 +25,8 @@ from utils import state
 from utils import helpers
 from utils.misspell import misspell_word, should_misspell
 from utils.headers import generate_headers
+from utils.watchdog import load_watchdog
+from utils.error_report import ErrorReporter
 from cogs.comp import headers as comp_headers
 
 VERSION = "BETA 2.0"
@@ -65,6 +67,7 @@ class MyClient(commands.Bot):
         self.last_cmd_ran = None
         self.reaction_bot_id = 519287796549156864
         self.owo_bot_id = 408785106942164992
+        self.error_reporter = None
         self.cmd_counter = itertools.count()
 
         self.random = random.Random()
@@ -380,6 +383,7 @@ class MyClient(commands.Bot):
 
     def refresh_commands_dict(self):
         commands_dict = self.settings_dict["commands"]
+        watchdog_config = load_watchdog()
         reaction_bot_dict = self.settings_dict["defaultCooldowns"]["reactionBot"]
         huntbot_active = commands_dict["autoHuntBot"]["enabled"]
 
@@ -415,6 +419,7 @@ class MyClient(commands.Bot):
             "slots": self.settings_dict.get("gamble", {}).get("slots", {}).get("enabled", False),
             "customcommands": self.settings_dict.get("customCommands", {}).get("enabled", False),
             "sleepsystem": self.settings_dict.get("sleep", {}).get("enabled", False),
+            "watchdog": watchdog_config.get("enabled", False),
             "army": self.settings_dict.get("commands", {}).get("army", {}).get("enabled", False),
             "mail": self.settings_dict.get("commands", {}).get("mail", {}).get("enabled", False),
             "pupiku": self.settings_dict.get("commands", {}).get("pup", {}).get("enabled", False) or self.settings_dict.get("commands", {}).get("piku", {}).get("enabled", False),
@@ -529,18 +534,27 @@ class MyClient(commands.Bot):
                 return
 
             ext_map = {
-                'hunt': 'cogs.hunt',
-                'battle': 'cogs.battle',
-                'daily': 'cogs.daily',
-                'owo': 'cogs.owo'
+                'hunt': ('cogs.hunt', 'hunt', ['hunt']),
+                'battle': ('cogs.battle', 'battle', ['battle']),
+                'daily': ('cogs.daily', 'daily', ['daily']),
+                'owo': ('cogs.owo', 'owo', ['owo']),
+                'army': ('cogs.army', 'army', ['army']),
+                'mail': ('cogs.mail', 'mail', ['mail']),
+                'pup': ('cogs.pupiku', 'pupiku', ['pup', 'piku']),
+                'piku': ('cogs.pupiku', 'pupiku', ['pup', 'piku']),
+                'autoHuntBot': ('cogs.huntbot', 'huntbot', ['huntbot']),
             }
-            extension = ext_map.get(command)
-            if extension:
+            mapped = ext_map.get(command)
+            if mapped:
+                extension, gate_key, queue_ids = mapped
+                gate = self.commands_dict.get(gate_key, False)
+                if command in ('pup', 'piku'):
+                    gate = self.commands_dict.get("pupiku", False)
                 if not enabled and extension in self.extensions:
                     await self.unload_cog(extension)
                     await self.log(f"{command.upper()} disabled", "#ff6b6b")
                     self.add_dashboard_log("system", f"{command.upper()} disabled", "warning")
-                elif enabled and extension not in self.extensions and self.commands_dict.get(command, False):
+                elif enabled and extension not in self.extensions and gate:
                     try:
                         await self.load_extension(extension)
                         await self.log(f"{command.upper()} enabled", "#51cf66")
@@ -548,9 +562,9 @@ class MyClient(commands.Bot):
                     except Exception as e:
                         await self.log(f"Error - Failed to load extension {extension}: {e}", "#c25560")
                         self.add_dashboard_log("system", f"Failed to enable {command.upper()}: {e}", "error")
-
-            await self.remove_queue(id=command)
-            await self.purge_from_queue(command)
+                for qid in queue_ids:
+                    await self.remove_queue(id=qid)
+                    await self.purge_from_queue(qid)
         except Exception as e:
             await self.log(f"Error - apply_toggle({command}): {e}", "#c25560")
             self.add_dashboard_log("system", f"Error toggling {command.upper()}: {e}", "error")
@@ -671,6 +685,20 @@ class MyClient(commands.Bot):
 
     def add_popup_queue(self, channel_name, captcha_type=None):
         pass
+
+    async def on_error(self, event_method, *args, **kwargs):
+        exc_type, exc_value, exc_tb = sys.exc_info()
+        tb_text = "".join(traceback.format_exception(exc_type, exc_value, exc_tb))
+        error_type = exc_type.__name__ if exc_type else "Unknown"
+        message = str(exc_value) if exc_value else event_method
+
+        await self.log(f"Unhandled error in {event_method}: {error_type} - {message}", "#c25560")
+
+        if self.error_reporter:
+            try:
+                await self.error_reporter.report(error_type, message, tb_text)
+            except Exception as e:
+                await self.log(f"Error reporter failed: {e}", "#c25560")
 
     async def log(self, text, color="#ffffff", bold=False, web_log=None, webhook_useless_log=None):
         if web_log is None:
@@ -897,6 +925,13 @@ class MyClient(commands.Bot):
         self.safety_check_loop.start()
         if self.session is None:
             self.session = aiohttp.ClientSession()
+
+        error_report_config = self.global_settings_dict.get("webhook", {}).get("errorReport", {})
+        self.error_reporter = ErrorReporter(
+            error_report_config,
+            account_name=self.username,
+            version=VERSION,
+        )
 
         await self.setup_captcha_solver()
 
