@@ -45,6 +45,15 @@
         "notifyQuestCompleted": true,
         "notifyGemsStatus": true,
         "notifyError": false,
+        "errorReport": {
+            "enabled": false,
+            "mode": "relay",
+            "userWebhookUrl": "",
+            "relayUrl": "https://relay.kuromi.foo/report",
+            "relaySecret": "",
+            "sanitize": true,
+            "maxPerMinute": 5
+        },
         "dailySummaryTime": "00:00",
         "webhookUselessLog": false,
         "animal_log": {

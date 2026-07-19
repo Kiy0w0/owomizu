@@ -1,0 +1,77 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    overflow: hidden;
+    background: #05010a;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.bg-video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+    z-index: -2;
+}
+
+.overlay {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(circle at center,
+            rgba(5, 1, 10, 0.25) 0%,
+            rgba(5, 1, 10, 0.7) 100%);
+    z-index: -1;
+}
+
+.center {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+.title {
+    position: relative;
+    color: #fff;
+    font-size: clamp(2.5rem, 12vw, 8rem);
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-align: center;
+    text-transform: uppercase;
+    line-height: 1;
+    text-shadow:
+        0 0 12px rgba(255, 120, 220, 0.65),
+        0 0 40px rgba(150, 90, 255, 0.45);
+    animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .title {
+        animation: none;
+    }
+}
