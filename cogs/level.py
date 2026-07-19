@@ -7,6 +7,8 @@ from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 import asyncio
 
+from utils.danger import is_allowed
+
 quotes_url = "https://favqs.com/api/qotd"
 
 def generate_random_string(min, max):
@@ -40,7 +42,7 @@ class Level(commands.Cog):
         cnf = self.bot.settings_dict["commands"]["lvlGrind"]
         try:
             await self.bot.sleep_till(cnf["cooldown"])
-            if cnf["useQuoteInstead"]:
+            if cnf["useQuoteInstead"] and is_allowed("allowLevelQuotes"):
                 self.last_level_grind_message = await fetch_quotes(self.bot.session)
             else:
                 self.last_level_grind_message = generate_random_string(cnf["minLengthForRandomString"], cnf["maxLengthForRandomString"])

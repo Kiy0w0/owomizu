@@ -5,6 +5,8 @@ from discord.ext import commands, tasks
 from datetime import datetime, timezone
 from discord.ext.commands import ExtensionNotLoaded
 
+from utils.danger import is_allowed
+
 class ChannelSwitcher(commands.Cog):
 
     def __init__(self, bot):
@@ -95,9 +97,12 @@ class ChannelSwitcher(commands.Cog):
 
     async def cog_load(self):
 
-        if not self.bot.settings_dict["channelSwitcher"]["enabled"]:
+        if not self.bot.settings_dict["channelSwitcher"]["enabled"] or not is_allowed("allowChannelSwitcher"):
             try:
-                await self.bot.log("ℹ️ Channel Switcher is disabled in settings", "#9dc3f5")
+                if self.bot.settings_dict["channelSwitcher"]["enabled"] and not is_allowed("allowChannelSwitcher"):
+                    await self.bot.log("Channel Switcher is gated. Set allowChannelSwitcher to true in config/danger.json to enable.", "#ff9800")
+                else:
+                    await self.bot.log("ℹ️ Channel Switcher is disabled in settings", "#9dc3f5")
                 asyncio.create_task(self.bot.unload_cog("cogs.channelSwitcher"))
             except ExtensionNotLoaded:
                 pass

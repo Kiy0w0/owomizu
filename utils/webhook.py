@@ -4,6 +4,8 @@ import json
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 
+from utils.webhook_content import get_template, render
+
 class DiscordWebhook:
 
     def __init__(self, webhook_url: str, username: str = "Mizu OwO Bot", avatar_url: str = None):
@@ -102,15 +104,24 @@ class DiscordWebhook:
         user_id_to_ping: str = None
     ):
 
+        tpl = get_template("captcha")
+        values = {
+            "account_name": account_name,
+            "channel_name": channel_name,
+            "captcha_type": captcha_type,
+        }
+
         embed = self.create_embed(
-            title="🚨 CAPTCHA DETECTED",
-            description=f"**Account:** {account_name}\n**Channel:** {channel_name}\n**Type:** {captcha_type}",
-            color=0xFF0000,
+            title=render(tpl.get("title", "CAPTCHA DETECTED"), values),
+            description=render(tpl.get("description", ""), values),
+            color=tpl.get("color", 0xFF0000),
             image=screenshot_url,
-            footer="Solve this captcha immediately!"
+            footer=tpl.get("footer", "Solve this captcha immediately!")
         )
 
-        content = f"<@{user_id_to_ping}> **CAPTCHA ALERT!**" if user_id_to_ping else None
+        content = None
+        if user_id_to_ping:
+            content = render(tpl.get("content", "<@{user_id_to_ping}>"), {"user_id_to_ping": user_id_to_ping})
 
         await self.send(content=content, embeds=[embed])
 
@@ -121,15 +132,20 @@ class DiscordWebhook:
         user_id_to_ping: str = None
     ):
 
+        tpl = get_template("ban")
+        values = {"account_name": account_name, "reason": reason}
+
         embed = self.create_embed(
-            title="⛔ ACCOUNT BANNED",
-            description=f"**Account:** {account_name}\n**Reason:** {reason}\n\n**Action Required:** Check your account immediately!",
-            color=0xFF0000,
-            thumbnail="https://cdn.discordapp.com/emojis/ban_emoji.png",
-            footer="Account action detected by Mizu OwO Bot"
+            title=render(tpl.get("title", "ACCOUNT BANNED"), values),
+            description=render(tpl.get("description", ""), values),
+            color=tpl.get("color", 0xFF0000),
+            thumbnail=tpl.get("thumbnail"),
+            footer=tpl.get("footer", "Account action detected by Mizu OwO Bot")
         )
 
-        content = f"<@{user_id_to_ping}> **⚠️ URGENT: ACCOUNT BANNED!**" if user_id_to_ping else None
+        content = None
+        if user_id_to_ping:
+            content = render(tpl.get("content", "<@{user_id_to_ping}>"), {"user_id_to_ping": user_id_to_ping})
 
         await self.send(content=content, embeds=[embed])
 
@@ -141,26 +157,25 @@ class DiscordWebhook:
         animal_emoji: str = None
     ):
 
-        colors = {
-            "mythical": 0xFF00FF,
-            "fabled": 0xFFD700,
-            "legendary": 0xFFA500
-        }
+        tpl = get_template("rare_catch")
+        rarity_colors = tpl.get("rarityColors", {})
+        rarity_emojis = tpl.get("rarityEmojis", {})
+        emoji = rarity_emojis.get(rarity.lower(), tpl.get("defaultEmoji", "🎉"))
+        color = rarity_colors.get(rarity.lower(), tpl.get("defaultColor", 0xFFD43B))
 
-        emojis = {
-            "mythical": "✨",
-            "fabled": "🌟",
-            "legendary": "⭐"
+        values = {
+            "emoji": emoji,
+            "rarity_upper": rarity.upper(),
+            "account_name": account_name,
+            "animal_emoji": animal_emoji or "",
+            "animal_name": animal_name,
         }
-
-        emoji = emojis.get(rarity.lower(), "🎉")
-        color = colors.get(rarity.lower(), 0xFFD43B)
 
         embed = self.create_embed(
-            title=f"{emoji} {rarity.upper()} CATCH!",
-            description=f"**Account:** {account_name}\n**Animal:** {animal_emoji or ''} {animal_name}\n\nCongratulations on this rare catch!",
+            title=render(tpl.get("title", "{emoji} {rarity_upper} CATCH!"), values),
+            description=render(tpl.get("description", ""), values),
             color=color,
-            footer=f"Rare animal caught by Mizu OwO Bot"
+            footer=tpl.get("footer", "Rare animal caught by Mizu OwO Bot")
         )
 
         await self.send(embeds=[embed])
@@ -228,12 +243,18 @@ class DiscordWebhook:
                 "inline": True
             })
 
+        tpl = get_template("daily_summary")
+        values = {
+            "account_name": account_name,
+            "date": datetime.now().strftime('%Y-%m-%d'),
+        }
+
         embed = self.create_embed(
-            title="📈 Daily Summary Report",
-            description=f"**Account:** {account_name}\n**Date:** {datetime.now().strftime('%Y-%m-%d')}",
-            color=0x00D7AF,
+            title=render(tpl.get("title", "Daily Summary Report"), values),
+            description=render(tpl.get("description", ""), values),
+            color=tpl.get("color", 0x00D7AF),
             fields=fields,
-            footer="Generated by Mizu OwO Bot"
+            footer=tpl.get("footer", "Generated by Mizu OwO Bot")
         )
 
         await self.send(embeds=[embed])
@@ -245,11 +266,18 @@ class DiscordWebhook:
         message: str
     ):
 
+        tpl = get_template("warning")
+        values = {
+            "account_name": account_name,
+            "warning_type": warning_type,
+            "message": message,
+        }
+
         embed = self.create_embed(
-            title=f"⚠️ Warning: {warning_type}",
-            description=f"**Account:** {account_name}\n\n{message}",
-            color=0xFF9800,
-            footer="Warning detected by Mizu OwO Bot"
+            title=render(tpl.get("title", "Warning: {warning_type}"), values),
+            description=render(tpl.get("description", ""), values),
+            color=tpl.get("color", 0xFF9800),
+            footer=tpl.get("footer", "Warning detected by Mizu OwO Bot")
         )
 
         await self.send(embeds=[embed])
@@ -262,16 +290,22 @@ class DiscordWebhook:
         reward: str = None
     ):
 
-        description = f"**Account:** {account_name}\n**Quest:** {quest_name}\n**Progress:** {progress}"
+        tpl = get_template("quest_completed")
+        values = {
+            "account_name": account_name,
+            "quest_name": quest_name,
+            "progress": progress,
+        }
 
+        description = render(tpl.get("description", ""), values)
         if reward:
             description += f"\n**Reward:** {reward}"
 
         embed = self.create_embed(
-            title="🎉 Quest Completed!",
+            title=render(tpl.get("title", "Quest Completed!"), values),
             description=description,
-            color=0x00FF00,
-            footer="Quest tracked by Mizu OwO Bot"
+            color=tpl.get("color", 0x00FF00),
+            footer=tpl.get("footer", "Quest tracked by Mizu OwO Bot")
         )
 
         await self.send(embeds=[embed])
@@ -284,16 +318,22 @@ class DiscordWebhook:
         traceback: str = None
     ):
 
-        description = f"**Account:** {account_name}\n**Error Type:** {error_type}\n**Message:** {error_message}"
+        tpl = get_template("error")
+        values = {
+            "account_name": account_name,
+            "error_type": error_type,
+            "error_message": error_message,
+        }
 
+        description = render(tpl.get("description", ""), values)
         if traceback:
             description += f"\n\n```\n{traceback[:1000]}\n```"
 
         embed = self.create_embed(
-            title="❌ Error Occurred",
+            title=render(tpl.get("title", "Error Occurred"), values),
             description=description,
-            color=0xFF0000,
-            footer="Error logged by Mizu OwO Bot"
+            color=tpl.get("color", 0xFF0000),
+            footer=tpl.get("footer", "Error logged by Mizu OwO Bot")
         )
 
         await self.send(embeds=[embed])
@@ -306,11 +346,14 @@ class DiscordWebhook:
         color: int = 0x00D7AF
     ):
 
+        tpl = get_template("status_update")
+        values = {"account_name": account_name, "status": status, "message": message}
+
         embed = self.create_embed(
-            title=f"ℹ️ Status Update: {status}",
-            description=f"**Account:** {account_name}\n\n{message}",
+            title=render(tpl.get("title", "Status Update: {status}"), values),
+            description=render(tpl.get("description", "**Account:** {account_name}\n\n{message}"), values),
             color=color,
-            footer="Status update from Mizu OwO Bot"
+            footer=tpl.get("footer", "Status update from Mizu OwO Bot")
         )
 
         await self.send(embeds=[embed])
@@ -322,14 +365,11 @@ class DiscordWebhook:
         gem_counts: Dict[str, int] = None
     ):
 
-        if gems_available:
-            title = "✅ Gems Available"
-            description = f"**Account:** {account_name}\n\nGems are now available! Hunt resumed."
-            color = 0x00FF00
-        else:
-            title = "⚠️ No Gems Available"
-            description = f"**Account:** {account_name}\n\nRan out of gems! Hunt paused."
-            color = 0xFF9800
+        tpl = get_template("gems_available" if gems_available else "gems_unavailable")
+        values = {"account_name": account_name}
+        title = render(tpl.get("title", "Gems Available" if gems_available else "No Gems Available"), values)
+        description = render(tpl.get("description", "**Account:** {account_name}"), values)
+        color = tpl.get("color", 0x00FF00 if gems_available else 0xFF9800)
 
         if gem_counts:
             gem_text = "\n".join([f"• {tier.title()}: {count}" for tier, count in gem_counts.items() if count > 0])
@@ -340,7 +380,7 @@ class DiscordWebhook:
             title=title,
             description=description,
             color=color,
-            footer="Gem status tracked by Mizu OwO Bot"
+            footer=tpl.get("footer", "Gem status tracked by Mizu OwO Bot")
         )
 
         await self.send(embeds=[embed])

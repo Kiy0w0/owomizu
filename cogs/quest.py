@@ -6,6 +6,7 @@ from discord.ext import commands
 from discord.ext.commands import ExtensionNotLoaded
 
 from utils.quest_helper.quest_types import QUEST_IDS
+from utils.danger import is_allowed
 
 _RESPONSE_WINDOW = 12.0
 _TITLE_RE = re.compile(r"\*\*\d+\.\s(.+?)\*\*")
@@ -57,7 +58,12 @@ class Quest(commands.Cog):
         return self.bot.settings_dict.get("questTracker", {})
 
     async def cog_load(self):
-        if not self._config().get("enabled", False):
+        if not self._config().get("enabled", False) or not is_allowed("allowAutoQuest"):
+            if self._config().get("enabled", False) and not is_allowed("allowAutoQuest"):
+                await self.bot.log(
+                    "Quest Automation is experimental and gated. Set allowAutoQuest to true in config/danger.json to enable.",
+                    "#ff9800",
+                )
             try:
                 asyncio.create_task(self.bot.unload_cog("cogs.quest"))
             except ExtensionNotLoaded:
