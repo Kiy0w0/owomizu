@@ -103,7 +103,7 @@ class ChannelSwitcher(commands.Cog):
                     await self.bot.log("Channel Switcher is gated. Set allowChannelSwitcher to true in config/danger.json to enable.", "#ff9800")
                 else:
                     await self.bot.log("ℹ️ Channel Switcher is disabled in settings", "#9dc3f5")
-                asyncio.create_task(self.bot.unload_cog("cogs.channelSwitcher"))
+                asyncio.create_task(self.bot.unload_cog("cogs.channelswitcher"))
             except ExtensionNotLoaded:
                 pass
         else:
