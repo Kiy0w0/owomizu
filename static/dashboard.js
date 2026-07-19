@@ -171,6 +171,11 @@ class MizuDashboard {
         document.getElementById('slash-commands-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('useSlashCommands', e.target.checked));
         document.getElementById('channel-switcher-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('channelSwitcher', e.target.checked));
         document.getElementById('stop-hunt-no-gems-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('stopHuntingWhenNoGems', e.target.checked));
+        document.getElementById('army-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('army', e.target.checked));
+        document.getElementById('mail-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('mail', e.target.checked));
+        document.getElementById('pup-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('pup', e.target.checked));
+        document.getElementById('piku-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('piku', e.target.checked));
+        document.getElementById('huntbot-toggle')?.addEventListener('change', (e) => this.toggleQuickSetting('autoHuntBot', e.target.checked));
         
         
         document.getElementById('save-security')?.addEventListener('click', () => this.saveSecuritySettings());
@@ -759,15 +764,16 @@ class MizuDashboard {
 
     
     async toggleQuickSetting(command, enabled) {
+        const TOGGLE_ID_MAP = { 'autoHuntBot': 'huntbot-toggle' };
+        const toggleId = TOGGLE_ID_MAP[command] || `${command}-toggle`;
         try {
-            
-            const toggle = document.getElementById(`${command}-toggle`);
+
+            const toggle = document.getElementById(toggleId);
             const toggleItem = toggle?.closest('.toggle-item');
-            
+
             if (toggle) {
                 toggle.disabled = true;
             }
-            
             
             if (toggleItem) {
                 toggleItem.classList.add('loading');
@@ -776,10 +782,15 @@ class MizuDashboard {
             
             const commandNames = {
                 'hunt': 'Hunt',
-                'battle': 'Battle', 
+                'battle': 'Battle',
                 'daily': 'Daily',
                 'owo': 'OwO',
-                'useSlashCommands': 'Slash Commands'
+                'useSlashCommands': 'Slash Commands',
+                'army': 'Army',
+                'mail': 'Mail',
+                'pup': 'Pup',
+                'piku': 'Piku',
+                'autoHuntBot': 'Huntbot'
             };
             
             const commandName = commandNames[command] || command.toUpperCase();
@@ -816,21 +827,21 @@ class MizuDashboard {
         } catch (error) {
             console.error('Error toggling quick setting:', error);
             this.showNotification('Failed to update setting', 'error');
-            
-            
-            const toggle = document.getElementById(`${command}-toggle`);
+
+
+            const toggle = document.getElementById(toggleId);
             if (toggle) {
                 toggle.checked = !enabled;
             }
         } finally {
-            
-            const toggle = document.getElementById(`${command}-toggle`);
+
+            const toggle = document.getElementById(toggleId);
             const toggleItem = toggle?.closest('.toggle-item');
-            
+
             if (toggle) {
                 toggle.disabled = false;
             }
-            
+
             if (toggleItem) {
                 toggleItem.classList.remove('loading');
             }
@@ -861,6 +872,18 @@ class MizuDashboard {
                 if (slashCommandsToggle) slashCommandsToggle.checked = settings.useSlashCommands;
                 if (channelSwitcherToggle) channelSwitcherToggle.checked = settings.channelSwitcher;
                 if (stopHuntNoGemsToggle) stopHuntNoGemsToggle.checked = settings.stopHuntingWhenNoGems;
+
+                const armyToggle = document.getElementById('army-toggle');
+                const mailToggle = document.getElementById('mail-toggle');
+                const pupToggle = document.getElementById('pup-toggle');
+                const pikuToggle = document.getElementById('piku-toggle');
+                const huntbotToggle = document.getElementById('huntbot-toggle');
+
+                if (armyToggle) armyToggle.checked = settings.army;
+                if (mailToggle) mailToggle.checked = settings.mail;
+                if (pupToggle) pupToggle.checked = settings.pup;
+                if (pikuToggle) pikuToggle.checked = settings.piku;
+                if (huntbotToggle) huntbotToggle.checked = settings.huntbot;
             }
         } catch (error) {
             console.error('Failed to load quick settings:', error);

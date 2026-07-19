@@ -1,0 +1,154 @@
+
+<section id="gambling" class="content-section">
+    <div class="section-header">
+        <h1 class="section-title">
+            <i class="fas fa-dice"></i>
+            Gambling Settings
+        </h1>
+        <div class="section-actions">
+            <button class="btn btn-success" id="save-gambling">
+                <i class="fas fa-save"></i>
+                Save Settings
+            </button>
+            <button class="btn btn-outline" id="reset-gambling">
+                <i class="fas fa-undo"></i>
+                Reset
+            </button>
+        </div>
+    </div>
+
+    <div class="security-container">
+        <div class="security-card">
+            <div class="security-header">
+                <h3><i class="fas fa-wallet"></i> Bankroll &amp; Goal</h3>
+                <p>Set your gambling budget and profit goal</p>
+            </div>
+            <div class="security-content">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="gambling-allotted-amount">Allotted Amount</label>
+                        <input type="number" id="gambling-allotted-amount" class="form-input" min="0" value="30000">
+                        <small class="form-hint">Total cowoncy reserved for gambling</small>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">
+                            <input type="checkbox" id="gambling-goal-system-enabled">
+                            Enable Profit Goal System
+                        </label>
+                        <small class="form-hint">Stop gambling once the goal amount is reached</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="gambling-goal-amount">Goal Amount</label>
+                        <input type="number" id="gambling-goal-amount" class="form-input" min="0" value="300">
+                        <small class="form-hint">Target profit before stopping</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="security-card">
+            <div class="security-header">
+                <h3><i class="fas fa-coins"></i> Coinflip</h3>
+                <p>Martingale-style auto coinflip betting</p>
+            </div>
+            <div class="security-content">
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="coinflip-enabled">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div class="toggle-info">
+                        <span class="toggle-label">Enable Coinflip</span>
+                        <small class="toggle-description">Auto-run coinflip with loss multiplier</small>
+                    </div>
+                </div>
+
+                <div id="coinflip-settings-body" style="margin-top: var(--spacing-md);">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coinflip-start-value">Start Value</label>
+                            <input type="number" id="coinflip-start-value" class="form-input" min="50" value="200">
+                            <small class="form-hint">Initial bet (minimum 50)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="coinflip-multiplier">Multiplier On Lose</label>
+                            <input type="number" id="coinflip-multiplier" class="form-input" min="1" step="0.1" value="2">
+                            <small class="form-hint">Bet multiplied by this on each loss</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="coinflip-cooldown-min">Cooldown Min (s)</label>
+                            <input type="number" id="coinflip-cooldown-min" class="form-input" min="1" value="16">
+                        </div>
+                        <div class="form-group">
+                            <label for="coinflip-cooldown-max">Cooldown Max (s)</label>
+                            <input type="number" id="coinflip-cooldown-max" class="form-input" min="1" value="18">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-section-label">Sides to Bet</label>
+                        <div class="checkbox-grid">
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coinflip-heads">
+                                <span class="checkmark"></span>
+                                Heads (h)
+                            </label>
+                            <label class="checkbox-item">
+                                <input type="checkbox" id="coinflip-tails" checked>
+                                <span class="checkmark"></span>
+                                Tails (t)
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="security-card">
+            <div class="security-header">
+                <h3><i class="fas fa-slot-machine"></i> Slots</h3>
+                <p>Martingale-style auto slots betting</p>
+            </div>
+            <div class="security-content">
+                <div class="toggle-item">
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="slots-enabled">
+                        <span class="toggle-slider"></span>
+                    </label>
+                    <div class="toggle-info">
+                        <span class="toggle-label">Enable Slots</span>
+                        <small class="toggle-description">Auto-run slots with loss multiplier</small>
+                    </div>
+                </div>
+
+                <div id="slots-settings-body" style="margin-top: var(--spacing-md);">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="slots-start-value">Start Value</label>
+                            <input type="number" id="slots-start-value" class="form-input" min="50" value="200">
+                            <small class="form-hint">Initial bet (minimum 50)</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="slots-multiplier">Multiplier On Lose</label>
+                            <input type="number" id="slots-multiplier" class="form-input" min="1" step="0.1" value="2">
+                            <small class="form-hint">Bet multiplied by this on each loss</small>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="slots-cooldown-min">Cooldown Min (s)</label>
+                            <input type="number" id="slots-cooldown-min" class="form-input" min="1" value="16">
+                        </div>
+                        <div class="form-group">
+                            <label for="slots-cooldown-max">Cooldown Max (s)</label>
+                            <input type="number" id="slots-cooldown-max" class="form-input" min="1" value="18">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

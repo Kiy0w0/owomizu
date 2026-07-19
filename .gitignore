@@ -124,7 +124,6 @@ logs.txt
 
 # Tokens file
 **/tokens.txt
-update.md
 
 # External Projects
 owofarmbot_stable/
@@ -133,7 +132,6 @@ owofarmbot_stable
 betaver/
 beta/
 mizuowoapi/
-captcha_solver/
 OWOMIZU-Captcha-Solver/
 svetlana/
 
@@ -141,3 +139,8 @@ betasense/
 
 # Tests
 tests/
+# Cloudflare Wrangler local cache/tmp (never commit, may contain account info)
+relay/.wrangler/
+
+# Captcha model weights (large binary, download separately)
+captcha_solver/*.onnx

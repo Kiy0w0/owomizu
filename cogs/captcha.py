@@ -525,6 +525,15 @@ class Captcha(commands.Cog):
                         img_data = await self._download_image(img_url)
 
                         if img_data:
+                            try:
+                                import io as _io
+                                from PIL import Image as _Image
+                                _Image.open(_io.BytesIO(img_data)).load()
+                            except Exception:
+                                await self.bot.log("🧩 Auto-Solver: Downloaded image is corrupt, skipping solve", "#c25560")
+                                img_data = None
+
+                        if img_data:
                             tmp_path = os.path.join(tempfile.gettempdir(), f"mizu_captcha_{self.bot.user.id}.png")
                             with open(tmp_path, "wb") as f:
                                 f.write(img_data)

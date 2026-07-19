@@ -13,6 +13,9 @@ from dashboard.auth import enforce_auth
 
 bp = Blueprint('dashboard', __name__)
 
+SETTINGS_PATH = "config/settings.json"
+GLOBAL_SETTINGS_PATH = "config/global_settings.json"
+
 
 @bp.before_request
 def require_authentication():
@@ -31,14 +34,14 @@ async def get_from_db(command):
 
 def load_global_settings():
     try:
-        with open("config/global_settings.json", "r") as f:
+        with open(GLOBAL_SETTINGS_PATH, "r") as f:
             return json.load(f)
     except:
         return {}
 
 def load_settings():
     try:
-        with open("config/settings.json", "r") as f:
+        with open(SETTINGS_PATH, "r") as f:
             return json.load(f)
     except:
         return {}
@@ -53,7 +56,7 @@ def merge_dicts(main, small):
 def get_weekday():
     return str(datetime.now().weekday())
 
-version = "1.6.0"
+version = "1.8.0"
 
 @bp.route("/")
 def home():
@@ -476,7 +479,7 @@ def update_settings():
         current_settings = load_settings() 
         merge_dicts(current_settings, new_settings)
 
-        with open("config/settings.json", "w") as config_file:
+        with open(SETTINGS_PATH, "w") as config_file:
             json.dump(current_settings, config_file, indent=4)
 
         state.config_updated = True
@@ -540,7 +543,7 @@ def toggle_quick_setting():
         command = data.get('command')
         enabled = data.get('enabled')
 
-        if command not in ['hunt', 'battle', 'daily', 'owo', 'channelSwitcher', 'useSlashCommands', 'stopHuntingWhenNoGems']:
+        if command not in ['hunt', 'battle', 'daily', 'owo', 'channelSwitcher', 'useSlashCommands', 'stopHuntingWhenNoGems', 'army', 'mail', 'pup', 'piku', 'autoHuntBot']:
             return jsonify({"status": "error", "message": "Invalid command"}), 400
 
         settings = load_settings()
@@ -556,12 +559,15 @@ def toggle_quick_setting():
         elif command == 'stopHuntingWhenNoGems':
             settings['stopHuntingWhenNoGems'] = enabled
 
+        elif command == 'autoHuntBot':
+            settings.setdefault('commands', {}).setdefault('autoHuntBot', {})['enabled'] = enabled
+
         else:
             if command not in settings['commands']:
                 settings['commands'][command] = {}
             settings['commands'][command]['enabled'] = enabled
 
-        with open("config/settings.json", "w") as f:
+        with open(SETTINGS_PATH, "w") as f:
             json.dump(settings, f, indent=4)
 
         state.config_updated = True
@@ -574,11 +580,63 @@ def toggle_quick_setting():
         print(f"Error toggling setting: {e}")
         return jsonify({"status": "error", "message": f"Failed to toggle {command}"}), 500
 
+_AUTOENHANCE_DEFAULTS = {
+    "enabled": False,
+    "autoUseGems": {
+        "enabled": False,
+        "cooldownMinutes": 15,
+        "useLowestFirst": False,
+        "tiers": {
+            "common": True, "uncommon": True, "rare": True,
+            "epic": True, "mythical": False, "legendary": False, "fabled": False
+        },
+        "gemTypes": {
+            "huntGem": True, "empoweredGem": True, "luckyGem": True, "specialGem": False
+        }
+    },
+    "autoInvestEssence": {
+        "enabled": False,
+        "cooldownMinutes": 30,
+        "minEssenceRequired": 100,
+        "maxInvestmentPerTime": 50,
+        "maxEfficiencyLevel": 50,
+        "maxDurationLevel": 50
+    }
+}
+
+
+def _merge_autoenhance_defaults(stored):
+    stored = stored if isinstance(stored, dict) else {}
+    merged = {"enabled": stored.get("enabled", _AUTOENHANCE_DEFAULTS["enabled"])}
+
+    aug_s = stored.get("autoUseGems") or {}
+    aug_d = _AUTOENHANCE_DEFAULTS["autoUseGems"]
+    merged["autoUseGems"] = {
+        "enabled": aug_s.get("enabled", aug_d["enabled"]),
+        "cooldownMinutes": aug_s.get("cooldownMinutes", aug_d["cooldownMinutes"]),
+        "useLowestFirst": aug_s.get("useLowestFirst", aug_d["useLowestFirst"]),
+        "tiers": {k: (aug_s.get("tiers") or {}).get(k, v) for k, v in aug_d["tiers"].items()},
+        "gemTypes": {k: (aug_s.get("gemTypes") or {}).get(k, v) for k, v in aug_d["gemTypes"].items()}
+    }
+
+    aie_s = stored.get("autoInvestEssence") or {}
+    aie_d = _AUTOENHANCE_DEFAULTS["autoInvestEssence"]
+    merged["autoInvestEssence"] = {
+        "enabled": aie_s.get("enabled", aie_d["enabled"]),
+        "cooldownMinutes": aie_s.get("cooldownMinutes", aie_d["cooldownMinutes"]),
+        "minEssenceRequired": aie_s.get("minEssenceRequired", aie_d["minEssenceRequired"]),
+        "maxInvestmentPerTime": aie_s.get("maxInvestmentPerTime", aie_d["maxInvestmentPerTime"]),
+        "maxEfficiencyLevel": aie_s.get("maxEfficiencyLevel", aie_d["maxEfficiencyLevel"]),
+        "maxDurationLevel": aie_s.get("maxDurationLevel", aie_d["maxDurationLevel"])
+    }
+    return merged
+
+
 @bp.route('/api/dashboard/autoenhance-settings', methods=['GET'])
 def get_autoenhance_settings():
     try:
         settings = load_settings()
-        return jsonify(settings.get("autoEnhance", {}))
+        return jsonify(_merge_autoenhance_defaults(settings.get("autoEnhance")))
     except Exception as e:
         print(f"Error fetching AutoEnhance settings: {e}")
         return jsonify({"status": "error", "message": "Failed to fetch AutoEnhance settings"}), 500
@@ -591,7 +649,7 @@ def save_autoenhance_settings():
 
         settings["autoEnhance"] = new_settings
 
-        with open("config/settings.json", "w") as f:
+        with open(SETTINGS_PATH, "w") as f:
             json.dump(settings, f, indent=4)
 
         state.config_updated = True
@@ -672,7 +730,7 @@ def get_quest_tracker():
 def get_quest_tracker_settings():
 
     try:
-        settings_path = "config/settings.json"
+        settings_path = SETTINGS_PATH
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
@@ -728,7 +786,7 @@ def save_quest_tracker_settings():
     try:
         data = request.get_json()
 
-        settings_path = "config/settings.json"
+        settings_path = SETTINGS_PATH
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
@@ -773,33 +831,39 @@ def save_quest_tracker_settings():
 def get_quick_settings():
 
     try:
-        settings_path = "config/settings.json"
+        settings_path = SETTINGS_PATH
 
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
 
+            cmds = settings.get("commands", {})
             return jsonify({
-                "hunt": settings.get("commands", {}).get("hunt", {}).get("enabled", False),
-                "battle": settings.get("commands", {}).get("battle", {}).get("enabled", False), 
+                "hunt": cmds.get("hunt", {}).get("enabled", False),
+                "battle": cmds.get("battle", {}).get("enabled", False),
                 "daily": settings.get("autoDaily", False),
-                "owo": settings.get("commands", {}).get("owo", {}).get("enabled", False),
+                "owo": cmds.get("owo", {}).get("enabled", False),
                 "useSlashCommands": settings.get("useSlashCommands", False),
                 "channelSwitcher": settings.get("channelSwitcher", {}).get("enabled", False),
-                "stopHuntingWhenNoGems": settings.get("stopHuntingWhenNoGems", False)
+                "stopHuntingWhenNoGems": settings.get("stopHuntingWhenNoGems", False),
+                "army": cmds.get("army", {}).get("enabled", False),
+                "mail": cmds.get("mail", {}).get("enabled", False),
+                "pup": cmds.get("pup", {}).get("enabled", False),
+                "piku": cmds.get("piku", {}).get("enabled", False),
+                "huntbot": cmds.get("autoHuntBot", {}).get("enabled", False)
             })
         else:
-            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False})
+            return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False, "army": False, "mail": False, "pup": False, "piku": False, "huntbot": False})
 
     except Exception as e:
         print(f"Error getting quick settings: {e}")
-        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False})
+        return jsonify({"hunt": False, "battle": False, "daily": False, "owo": False, "useSlashCommands": False, "channelSwitcher": False, "stopHuntingWhenNoGems": False, "army": False, "mail": False, "pup": False, "piku": False, "huntbot": False})
 
 @bp.route('/api/dashboard/security-settings', methods=['GET'])
 def get_security_settings():
 
     try:
-        settings_path = "config/settings.json"
+        settings_path = SETTINGS_PATH
 
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
@@ -848,7 +912,7 @@ def save_security_settings():
     try:
         data = request.get_json()
 
-        settings_path = "config/settings.json"
+        settings_path = SETTINGS_PATH
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
@@ -903,7 +967,7 @@ def save_security_settings():
 def get_gambling_settings():
 
     try:
-        settings_path = "config/settings.json"
+        settings_path = SETTINGS_PATH
 
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
@@ -963,7 +1027,7 @@ def save_gambling_settings():
     try:
         data = request.get_json()
 
-        settings_path = "config/settings.json"
+        settings_path = SETTINGS_PATH
         if os.path.exists(settings_path):
             with open(settings_path, 'r') as f:
                 settings = json.load(f)
@@ -1124,7 +1188,7 @@ def vps_control():
             else:
                 return jsonify({"status": "error", "message": f"Unknown command: {command}"}), 400
 
-            with open("config/settings.json", "w") as f:
+            with open(SETTINGS_PATH, "w") as f:
                 json.dump(settings, f, indent=4)
             state.config_updated = True
 

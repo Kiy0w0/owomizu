@@ -18,7 +18,7 @@
 
 ---
 
-## Step 1 — Install Docker
+## Step 1: Install Docker
 
 ```bash
 sudo apt update && sudo apt install curl git -y
@@ -40,7 +40,7 @@ newgrp docker
 
 ---
 
-## Step 2 — Clone the Repository
+## Step 2: Clone the Repository
 
 ```bash
 git clone https://github.com/kiy0w0/owomizu.git
@@ -49,24 +49,31 @@ cd owomizu
 
 ---
 
-## Step 3 — Add Your Tokens
+## Step 3: Add Your Tokens
 
-Create `tokens.txt` in the owomizu folder. One account per line:
+Create `.env` in the owomizu folder:
 
-```
-YOUR_DISCORD_TOKEN CHANNEL_ID
+```env
+TOKENS="YOUR_DISCORD_TOKEN CHANNEL_ID"
 ```
 
 Example:
-```
-MTIxMTMyMjcwNDA4NzYxMzU1MQ.G8GlcG.example 1234567890123456789
+```env
+TOKENS="MTIxMTMyMjcwNDA4NzYxMzU1MQ.G8GlcG.example 1234567890123456789"
 ```
 
-How to get your token and channel ID — see [windows.md](windows.md#setting-up-your-token) for the full steps (same process).
+For multiple accounts, separate each with a semicolon:
+```env
+TOKENS="TOKEN1 CHANNEL_ID1;TOKEN2 CHANNEL_ID2"
+```
+
+> **Note:** The old `tokens.txt` method still works but is deprecated. Use `.env` instead.
+
+How to get your token and channel ID, see [windows.md](windows.md#setting-up-your-token) for the full steps (same process).
 
 ---
 
-## Step 4 — Start the Bot
+## Step 4: Start the Bot
 
 ```bash
 docker compose up -d
@@ -78,7 +85,7 @@ Check if it's running:
 ```bash
 docker compose logs -f
 ```
-Press `Ctrl+C` to stop watching logs — the bot keeps running.
+Press `Ctrl+C` to stop watching logs. The bot keeps running.
 
 ---
 
@@ -136,8 +143,8 @@ sudo usermod -aG docker $USER
 newgrp docker
 ```
 
-**"tokens.txt not found" error:**
-Make sure `tokens.txt` is in the same directory as `docker-compose.yml`.
+**".env not found" or "no tokens" error:**
+Make sure `.env` is in the same directory as `docker-compose.yml`.
 
 **Port 1200 already in use:**
 Edit `docker-compose.yml` and change the external port:
@@ -150,7 +157,7 @@ ports:
 ```bash
 docker compose logs --tail=50
 ```
-Read the output — it'll tell you what's wrong. Usually it's a bad token or missing config.
+Read the output. It'll tell you what's wrong. Usually it's a bad token or missing config.
 
 **Out of disk space:**
 ```bash
